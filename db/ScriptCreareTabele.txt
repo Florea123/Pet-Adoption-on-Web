@@ -1,0 +1,134 @@
+CREATE OR REPLACE TYPE feeding_time_array AS VARRAY(10) OF TIMESTAMP;
+/
+
+CREATE TABLE Users (
+    userID NUMBER PRIMARY KEY,
+    firstName VARCHAR2(100),
+    lastName VARCHAR2(100),
+    email VARCHAR2(255) UNIQUE,
+    password VARCHAR2(255),
+    phone VARCHAR2(20)
+);
+
+CREATE TABLE Address (
+    addressID NUMBER PRIMARY KEY,
+    userID NUMBER UNIQUE,
+    Street VARCHAR2(255),
+    City VARCHAR2(100),
+    State VARCHAR2(100),
+    ZipCode NUMBER,
+    Country VARCHAR2(100),
+    CONSTRAINT fk_address_user FOREIGN KEY (userID) REFERENCES Users(userID)
+);
+
+CREATE TABLE Animal (
+    animalID NUMBER PRIMARY KEY,
+    userID NUMBER,
+    name VARCHAR2(100),
+    breed VARCHAR2(100),
+    species VARCHAR2(100),
+    age NUMBER,
+    gender VARCHAR2(10) CHECK (gender IN ('male', 'female')),
+    CONSTRAINT fk_animal_user FOREIGN KEY (userID) REFERENCES Users(userID)
+);
+
+CREATE TABLE MedicalHistory (
+    id NUMBER PRIMARY KEY,
+    animal_id NUMBER,
+    vetNumber VARCHAR2(50),
+    recordDate DATE,
+    description CLOB,
+    first_aid_noted CLOB,
+    CONSTRAINT fk_medical_animal FOREIGN KEY (animal_id) REFERENCES Animal(animalID)
+);
+
+CREATE TABLE FeedingSchedule (
+    id NUMBER PRIMARY KEY,
+    animal_id NUMBER UNIQUE,
+    feeding_time feeding_time_array,
+    food_type VARCHAR2(100),
+    notes CLOB,
+    CONSTRAINT fk_feeding_animal FOREIGN KEY (animal_id) REFERENCES Animal(animalID)
+);
+
+CREATE TABLE MultiMedia (
+    id NUMBER PRIMARY KEY,
+    animal_id NUMBER,
+    media VARCHAR2(10) CHECK (media IN ('photo', 'video', 'audio')),
+    url VARCHAR2(1000),
+    description CLOB,
+    upload_date DATE,
+    CONSTRAINT fk_multimedia_animal FOREIGN KEY (animal_id) REFERENCES Animal(animalID)
+);
+
+CREATE TABLE Relations (
+    id NUMBER PRIMARY KEY,
+    animalId NUMBER UNIQUE,
+    friendWith CLOB,
+    CONSTRAINT fk_relation_animal FOREIGN KEY (animalId) REFERENCES Animal(animalID)
+);
+
+
+CREATE SEQUENCE seq_users START WITH 1 INCREMENT BY 1;
+CREATE SEQUENCE seq_address START WITH 1 INCREMENT BY 1;
+CREATE SEQUENCE seq_animal START WITH 1 INCREMENT BY 1;
+CREATE SEQUENCE seq_medical START WITH 1 INCREMENT BY 1;
+CREATE SEQUENCE seq_feeding START WITH 1 INCREMENT BY 1;
+CREATE SEQUENCE seq_multimedia START WITH 1 INCREMENT BY 1;
+CREATE SEQUENCE seq_relations START WITH 1 INCREMENT BY 1;
+
+CREATE OR REPLACE TRIGGER trg_users
+BEFORE INSERT ON Users
+FOR EACH ROW
+BEGIN
+    :NEW.userID := seq_users.NEXTVAL;
+END;
+/
+
+CREATE OR REPLACE TRIGGER trg_address
+BEFORE INSERT ON Address
+FOR EACH ROW
+BEGIN
+    :NEW.addressID := seq_address.NEXTVAL;
+END;
+/
+
+CREATE OR REPLACE TRIGGER trg_animal
+BEFORE INSERT ON Animal
+FOR EACH ROW
+BEGIN
+    :NEW.animalID := seq_animal.NEXTVAL;
+END;
+/
+
+CREATE OR REPLACE TRIGGER trg_medical
+BEFORE INSERT ON MedicalHistory
+FOR EACH ROW
+BEGIN
+    :NEW.id := seq_medical.NEXTVAL;
+END;
+/
+
+CREATE OR REPLACE TRIGGER trg_feeding
+BEFORE INSERT ON FeedingSchedule
+FOR EACH ROW
+BEGIN
+    :NEW.id := seq_feeding.NEXTVAL;
+END;
+/
+
+CREATE OR REPLACE TRIGGER trg_multimedia
+BEFORE INSERT ON MultiMedia
+FOR EACH ROW
+BEGIN
+    :NEW.id := seq_multimedia.NEXTVAL;
+END;
+/
+
+CREATE OR REPLACE TRIGGER trg_relations
+BEFORE INSERT ON Relations
+FOR EACH ROW
+BEGIN
+    :NEW.id := seq_relations.NEXTVAL;
+END;
+/

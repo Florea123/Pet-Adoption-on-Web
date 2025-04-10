@@ -1,0 +1,70 @@
+BEGIN
+    -- Inserare Users
+    INSERT INTO Users (firstName, lastName, email, password, phone)
+    VALUES ('Andrei', 'Popescu', 'andrei.popescu@example.com', 'hashed_password_123', '0755123456');
+    
+    INSERT INTO Users (firstName, lastName, email, password, phone)
+    VALUES ('Maria', 'Ionescu', 'maria.ionescu@example.com', 'hashed_password_456', '0755987654');
+
+    -- Inserare Address
+    INSERT INTO Address (userID, Street, City, State, ZipCode, Country)
+    VALUES (1, 'Str. Exemplu 12', 'Bucuresti', 'Ilfov', 123456, 'Romania');
+    
+    INSERT INTO Address (userID, Street, City, State, ZipCode, Country)
+    VALUES (2, 'Str. Lunga 5', 'Cluj-Napoca', 'Cluj', 234567, 'Romania');
+
+    -- Inserare Animal
+    INSERT INTO Animal (userID, name, breed, species, age, gender)
+    VALUES (1, 'Rex', 'Ciobănesc', 'Câine', 5, 'male');
+    
+    INSERT INTO Animal (userID, name, breed, species, age, gender)
+    VALUES (2, 'Luna', 'Pisică', 'Pisică', 3, 'female');
+
+    -- Inserare MedicalHistory
+    INSERT INTO MedicalHistory (animal_id, vetNumber, recordDate, description, first_aid_noted)
+    VALUES (1, 'VET001', SYSDATE, 'Tratament pentru infecție respiratorie', 'Da');
+    
+    INSERT INTO MedicalHistory (animal_id, vetNumber, recordDate, description, first_aid_noted)
+    VALUES (2, 'VET002', SYSDATE, 'Vaccinare antirabică', 'Nu');
+
+    -- Inserare FeedingSchedule
+    INSERT INTO FeedingSchedule (animal_id, feeding_time, food_type, notes)
+    VALUES (
+        1, 
+        feeding_time_array(
+            TO_TIMESTAMP('07:00:00', 'HH24:MI:SS'),
+            TO_TIMESTAMP('18:00:00', 'HH24:MI:SS')
+        ),
+        'Granule',
+        'Dimineața și seara'
+    );
+    
+    INSERT INTO FeedingSchedule (animal_id, feeding_time, food_type, notes)
+    VALUES (
+        2, 
+        feeding_time_array(
+            TO_TIMESTAMP('08:00:00', 'HH24:MI:SS'),
+            TO_TIMESTAMP('20:00:00', 'HH24:MI:SS')
+        ),
+        'Lichide',
+        'Se hrănește cu lapte'
+    );
+
+    -- Inserare MultiMedia
+    INSERT INTO MultiMedia (animal_id, media, url, description, upload_date)
+    VALUES (1, 'photo', 'http://exemplu.com/foto_rex.jpg', 'Fotografie cu Rex', SYSDATE);
+    
+    INSERT INTO MultiMedia (animal_id, media, url, description, upload_date)
+    VALUES (2, 'video', 'http://exemplu.com/video_luna.mp4', 'Video cu Luna jucându-se', SYSDATE);
+
+    -- Inserare Relations
+    INSERT INTO Relations (animalId, friendWith)
+    VALUES (1, 'Luna');
+    
+    INSERT INTO Relations (animalId, friendWith)
+    VALUES (2, 'Rex');
+
+    -- Commit pentru a salva datele
+    COMMIT;
+END;
+/

@@ -1,0 +1,131 @@
+Table User: 
+-userID PK
+-firstName string
+-lastName string
+-email
+-password string_hash
+-phone
+
+Table Adress:
+-adress.ID PK
+-userID FK
+-Street string
+-City string
+-State string 
+-ZipCode int 
+-Country string
+
+Table Animal:
+-animalID PK
+-userID FK
+-name string
+-breed string
+-species string
+-age int
+-gender Enum [male,famale]
+
+Table MedicalHistory:
+-id PK
+-animal_id FK->Animals
+-vetNumber string
+-recordDate DATE
+-description string
+-first_aid_noted string
+
+Table FeedingSchedule:
+-id PK
+-animal_id FK-> Animals
+-feeding_time[] TIME(ori adaugam mai multe linii)
+-food_type string
+-notes string
+
+Table MultiMedia:
+-id PK
+-animal_id FK -> Animals
+-media ENUM[photo,video,audio]
+-url PATH
+-description string
+-upload_date DATE
+
+Table Relations:
+-id PK
+-animalId FK -> Animals
+-friendWith[] string
+
+@startuml
+entity User {
+  * userID : int <<PK>>
+  --
+  firstName : string
+  lastName : string
+  email : string
+  password : string_hash
+  phone : string
+}
+
+entity Address {
+  * addressID : int <<PK>>
+  --
+  userID : int <<FK>>
+  Street : string
+  City : string
+  State : string
+  ZipCode : int
+  Country : string
+}
+
+entity Animal {
+  * animalID : int <<PK>>
+  --
+  userID : int <<FK>>
+  name : string
+  breed : string
+  species : string
+  age : int
+  gender : Enum [male, female]
+}
+
+entity MedicalHistory {
+  * id : int <<PK>>
+  --
+  animal_id : int <<FK>>
+  vetNumber : string
+  recordDate : DATE
+  description : string
+  first_aid_noted : string
+}
+
+entity FeedingSchedule {
+  * id : int <<PK>>
+  --
+  animal_id : int <<FK>>
+  feeding_time : TIME[]
+  food_type : string
+  notes : string
+}
+
+entity MultiMedia {
+  * id : int <<PK>>
+  --
+  animal_id : int <<FK>>
+  media : Enum [photo, video, audio]
+  url : PATH
+  description : string
+  upload_date : DATE
+}
+
+entity Relations {
+  * id : int <<PK>>
+  --
+  animalId : int <<FK>>
+  friendWith : string[]
+}
+
+' Relații cu multiplicitate specifică
+User "1" --> "1" Address : has
+User "1" --> "0..*" Animal : owns
+Animal "1" --> "0..*" MedicalHistory : has
+Animal "1" --> "0..1" FeedingSchedule : has
+Animal "1" --> "0..*" MultiMedia : has
+Animal "1" --> "0..1" Relations : has
+@enduml
