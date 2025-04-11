@@ -1,4 +1,5 @@
 const { getConnection } = require('../db');
+const oracledb = require('oracledb'); 
 
 class MultiMedia {
   static async create(animal_id, media, url, description, upload_date) {
@@ -21,7 +22,8 @@ class MultiMedia {
     try {
       const result = await connection.execute(
         `SELECT * FROM MultiMedia WHERE animal_id = :animal_id`,
-        { animal_id }
+        { animal_id },
+        { outFormat: oracledb.OUT_FORMAT_OBJECT } 
       );
       return result.rows;
     } finally {

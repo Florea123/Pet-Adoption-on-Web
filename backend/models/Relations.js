@@ -1,4 +1,5 @@
 const { getConnection } = require('../db');
+const oracledb = require('oracledb'); 
 
 class Relations {
   static async create(animalId, friendWith) {
@@ -21,7 +22,8 @@ class Relations {
     try {
       const result = await connection.execute(
         `SELECT * FROM Relations WHERE animalId = :animalId`,
-        { animalId }
+        { animalId },
+        { outFormat: oracledb.OUT_FORMAT_OBJECT }
       );
       return result.rows;
     } finally {

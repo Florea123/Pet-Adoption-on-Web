@@ -1,4 +1,5 @@
 const { getConnection } = require('../db');
+const oracledb = require('oracledb'); 
 
 class User {
   static async create(firstName, lastName, email, password, phone) {
@@ -21,9 +22,10 @@ class User {
     try {
       const result = await connection.execute(
         `SELECT * FROM Users WHERE userID = :userID`,
-        { userID }
+        { userID },
+        { outFormat: oracledb.OUT_FORMAT_OBJECT } 
       );
-      return result.rows;
+      return result.rows[0]; 
     } finally {
       await connection.close();
     }

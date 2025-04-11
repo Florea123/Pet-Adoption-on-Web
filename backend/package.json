@@ -12,6 +12,7 @@
   "type": "commonjs",
   "description": "",
   "dependencies": {
+    "dotenv": "^16.5.0",
     "oracledb": "^6.8.0"
   }
 }

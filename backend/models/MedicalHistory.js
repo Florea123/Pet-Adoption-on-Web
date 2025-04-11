@@ -1,4 +1,5 @@
 const { getConnection } = require('../db');
+const oracledb = require('oracledb'); 
 
 class MedicalHistory {
   static async create(animal_id, vetNumber, recordDate, description, firstAidNoted) {
@@ -21,7 +22,8 @@ class MedicalHistory {
     try {
       const result = await connection.execute(
         `SELECT * FROM MedicalHistory WHERE animal_id = :animal_id`,
-        { animal_id }
+        { animal_id },
+        { outFormat: oracledb.OUT_FORMAT_OBJECT } 
       );
       return result.rows;
     } finally {

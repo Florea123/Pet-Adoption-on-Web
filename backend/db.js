@@ -1,11 +1,11 @@
 const oracledb = require('oracledb');
+require('dotenv').config();
 
 const dbConfig = {
-  user: 'student_app',
-  password: 'password123',
-  connectString: 'localhost:1521/XE',
+  user: process.env.USER_DATABASE, 
+  password: process.env.PASSWORD_DATABASE, 
+  connectString: `localhost:1521/${process.env.SERVICE_NAME}`,
 };
-
 async function getConnection() {
   try {
     return await oracledb.getConnection(dbConfig);
