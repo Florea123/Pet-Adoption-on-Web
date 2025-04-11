@@ -30,6 +30,21 @@ class User {
       await connection.close();
     }
   }
+
+  static async findByEmail(email) {
+    const connection = await getConnection();
+    try {
+      const result = await connection.execute(
+        `SELECT * FROM Users WHERE email = :email`,
+        { email },
+        { outFormat: oracledb.OUT_FORMAT_OBJECT } 
+      );
+      return result.rows[0]; 
+    } finally {
+      await connection.close();
+    }
+  }
+  
 }
 
 module.exports = User;
