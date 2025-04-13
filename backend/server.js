@@ -1,7 +1,7 @@
 const http = require('http');
 const { getUserByEmailAndPassword, insertUser } = require('./routes/UserRoute');
 const { authenticate } = require('./middleware/auth');
-const { getAllAnimals, getAnimalDetailsById } = require('./routes/AnimalRoute');
+const { getAllAnimals, getAnimalDetailsById,findBySpecies } = require('./routes/AnimalRoute');
 
 const port = 3000;
 
@@ -34,13 +34,36 @@ const server = http.createServer(async (req, res) => {
     });
   }
 
-  if(req.method === 'GET' && req.url.startsWith('/animals')) {
-    await getAllAnimals(req, res);
+  if (req.method === 'POST' && req.url.startsWith('/users/signup')) {
+    let body = '';
+    req.on('data', chunk => {
+      body += chunk.toString();
+    });
 
+    req.on('end', async () => {
+      try {
+        req.body = JSON.parse(body); 
+
+        await insertUser(req, res); 
+      } catch (err) {
+        console.error('Invalid JSON:', err);
+        res.writeHead(400, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({ error: 'Invalid JSON' })); 
+      }
+    });
+  }
+
+
+  if(req.method === 'GET' && req.url.startsWith('/animals/all')) {
+    await getAllAnimals(req, res);
   } 
 
   if (req.method === 'POST' && req.url.startsWith('/animals/details')) {
     await getAnimalDetailsById(req, res);
+  }
+
+  if (req.method === 'GET' && req.url.startsWith('/animals/species')) {
+    await findBySpecies(req, res);
   }
 
 });

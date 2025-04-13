@@ -77,4 +77,37 @@ async function getAnimalDetailsById(req, res) {
   }
 }
 
-module.exports = { getAllAnimals, getAnimalDetailsById };
+async function findBySpecies(req, res) {
+  try {
+    let body = '';
+    req.on('data', (chunk) => {
+      body += chunk.toString();
+    });
+
+    req.on('end', async () => {
+      const { species } = JSON.parse(body);
+
+      if (!species) {
+        res.writeHead(400, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({ error: 'Species is required' }));
+        return;
+      }
+      console.log('Species:', species);
+      const animals = await Animal.findBySpecies(species);
+      if (!animals) {
+        res.writeHead(404, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({ error: 'No animals found for this species' }));
+        return;
+      }
+
+      res.writeHead(200, { 'Content-Type': 'application/json' });
+      res.end(JSON.stringify(animals));
+    });
+  } catch (err) {
+    console.error('Error fetching animals by species:', err);
+    res.writeHead(500, { 'Content-Type': 'application/json' });
+    res.end(JSON.stringify({ error: 'Internal Server Error' }));
+  }
+}
+
+module.exports = { getAllAnimals, getAnimalDetailsById, findBySpecies };

@@ -1,6 +1,7 @@
 const url = require('url');
 const User = require('../models/User');
 const { generateToken } = require('../middleware/auth');
+const Address = require('../models/Address');
 
 // Function to authenticate a user by email
 async function getUserByEmailAndPassword(req, res) {
@@ -32,24 +33,41 @@ async function getUserByEmailAndPassword(req, res) {
 }
 // Function to insert a new user
 async function insertUser(req, res) {
-  const queryObject = url.parse(req.url, true).query;
-
-  const { firstName, lastName, email, password, phone } = queryObject;
-
-  if (!firstName || !lastName || !email || !password || !phone) {
-    res.writeHead(400, { 'Content-Type': 'application/json' });
-    res.end(JSON.stringify({ error: 'Missing required fields' }));
-    return;
-  }
-
   try {
-    // Insert the user into the database
-    const result = await User.create(firstName, lastName, email, password, phone);
+    // The body has already been parsed in server.js
+    const { firstName, lastName, email, password, phone, address } = req.body;
+    console.log('Received data:', { firstName, lastName, email, password, phone, address });
 
+    // Validate required fields
+    if (!firstName || !lastName || !email || !password || !phone || !address) {
+      res.writeHead(400, { 'Content-Type': 'application/json' });
+      res.end(JSON.stringify({ error: 'Missing required fields' }));
+      return;
+    }
+
+    // Insert the user into the database
+    await User.create(firstName, lastName, email, password, phone);
+    console.log('User created successfully');
+
+    // Retrieve the userID of the newly inserted user
+    const user = await User.findByEmail(email);
+    if (!user) {
+      throw new Error('User not found after insertion');
+    }
+
+    const userID = user.USERID;
+    console.log('User ID:', userID);
+
+    // Insert the address into the database
+    const { street, city, state, zipCode, country } = address;
+    await Address.create(userID, street, city, state, zipCode, country);
+    console.log('Address created successfully');
+
+    // Respond with success
     res.writeHead(201, { 'Content-Type': 'application/json' });
-    res.end(JSON.stringify({ message: 'User created successfully', result }));
+    res.end(JSON.stringify({ message: 'User and address created successfully' }));
   } catch (err) {
-    console.error('Error inserting user:', err);
+    console.error('Error processing request:', err);
     res.writeHead(500, { 'Content-Type': 'application/json' });
     res.end(JSON.stringify({ error: 'Internal Server Error' }));
   }

@@ -44,6 +44,35 @@ class Animal {
       await connection.close();
     }
   }
+
+  static async findByUserId(userID) {
+    const connection = await getConnection();
+    try {
+      const result = await connection.execute(
+        `SELECT * FROM Animal WHERE userID = :userID`,
+        { userID },
+        { outFormat: oracledb.OUT_FORMAT_OBJECT }
+      );
+      return result.rows;
+    } finally {
+      await connection.close();
+    }
+  }
+
+  static async findBySpecies(species) {
+    const connection = await getConnection();
+    try {
+      const result = await connection.execute(
+        `SELECT * FROM Animal WHERE species = :species`,
+        { species },
+        { outFormat: oracledb.OUT_FORMAT_OBJECT }
+      );
+      return result.rows;
+    } finally {
+      await connection.close();
+    }
+  }
+  
 }
 
 module.exports = Animal;
