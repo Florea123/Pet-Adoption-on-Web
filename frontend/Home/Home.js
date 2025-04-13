@@ -2,7 +2,7 @@ const API_URL = 'http://localhost:3000';
 
 async function fetchAnimals() {
   try {
-    const response = await fetch(`${API_URL}/animals`);
+    const response = await fetch(`${API_URL}/animals/all`);
     if (!response.ok) {
       throw new Error('Failed to fetch animals');
     }
