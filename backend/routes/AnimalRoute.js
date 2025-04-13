@@ -94,14 +94,22 @@ async function findBySpecies(req, res) {
       }
       console.log('Species:', species);
       const animals = await Animal.findBySpecies(species);
-      if (!animals) {
+      if (!animals || animals.length === 0) {
         res.writeHead(404, { 'Content-Type': 'application/json' });
         res.end(JSON.stringify({ error: 'No animals found for this species' }));
         return;
       }
 
+      // Add multimedia to each animal, just like in getAllAnimals
+      const animalsWithMedia = await Promise.all(
+        animals.map(async (animal) => {
+          const multimedia = await MultiMedia.findByAnimalIdOnePhoto(animal.ANIMALID);
+          return { ...animal, multimedia };
+        })
+      );
+
       res.writeHead(200, { 'Content-Type': 'application/json' });
-      res.end(JSON.stringify(animals));
+      res.end(JSON.stringify(animalsWithMedia));
     });
   } catch (err) {
     console.error('Error fetching animals by species:', err);
@@ -109,5 +117,4 @@ async function findBySpecies(req, res) {
     res.end(JSON.stringify({ error: 'Internal Server Error' }));
   }
 }
-
 module.exports = { getAllAnimals, getAnimalDetailsById, findBySpecies };
