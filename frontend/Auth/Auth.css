@@ -90,3 +90,20 @@ body {
   .footer-text a:hover {
     text-decoration: underline;
   }
+
+  /* Two-column grid layout for the form */
+.form-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 2rem;
+  padding: 2rem; 
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+}
+
+.form-group.full-width {
+  grid-column: span 2;
+}

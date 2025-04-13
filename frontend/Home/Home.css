@@ -1,58 +1,121 @@
 body {
-    font-family: 'Arial', sans-serif;
-    margin: 0;
-    padding: 0;
-    background-color: #f9fafb;
-  }
-  
-  header {
-    background-color: #3b82f6;
-    color: white;
-    padding: 1rem;
-    text-align: center;
-  }
-  
-  .cards-container {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-    gap: 1rem;
-    padding: 2rem;
-  }
-  
-  .card {
-    background: white;
-    border-radius: 8px;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-    overflow: hidden;
-    transition: transform 0.3s ease;
-  }
-  
-  .card:hover {
-    transform: translateY(-5px);
-  }
-  
-  .card img {
-    width: 100%;
-    height: 200px;
-    object-fit: cover;
-  }
-  
-  .card-content {
-    padding: 1rem;
-  }
-  
-  .card-content h2 {
-    font-size: 1.2rem;
-    margin: 0;
-    color: #333;
-  }
-  
-  .card-content p {
-    margin: 0.5rem 0;
-    color: #555;
-  }
+  font-family: 'Arial', sans-serif;
+  margin: 0;
+  padding: 0;
+  background-color: #f9fafb;
+}
 
-  /* Popup styles */
+/* App layout */
+.app-container {
+  display: flex;
+  min-height: 100vh;
+}
+
+
+/* Sidebar styles */
+.sidebar {
+  width: 250px;
+  background-color: white;
+  box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
+  padding: 20px;
+  position: fixed;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  display: flex;
+  flex-direction: column;
+  z-index: 1000;
+  overflow-y: auto;
+}
+
+.sidebar-header h1 {
+  color: #3b82f6;
+  font-size: 1.5rem;
+  margin-bottom: 30px;
+}
+
+.filter-section {
+  flex: 1;
+  overflow-y: auto;
+  margin-bottom: 20px;
+}
+.filter-options {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.filter-option {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.filter-option input[type="checkbox"] {
+  cursor: pointer;
+}
+
+.filter-option label {
+  cursor: pointer;
+  font-size: 1rem;
+  color: #555;
+}
+
+/* Main content area */
+.main-content {
+  margin-left: 290px; /* 250px sidebar width + 40px padding */
+  flex: 1;
+  padding: 30px;
+}
+
+/* Cards container */
+.cards-container {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  gap: 20px;
+}
+
+.card {
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+  transition: transform 0.3s ease;
+}
+
+.card:hover {
+  transform: translateY(-5px);
+}
+
+.card img {
+  width: 100%;
+  height: 200px;
+  object-fit: cover;
+}
+
+.card-content {
+  padding: 1rem;
+}
+
+.card-content h2 {
+  font-size: 1.2rem;
+  margin: 0;
+  color: #333;
+}
+
+.card-content p {
+  margin: 0.5rem 0;
+  color: #555;
+}
+
+/* Loading indicator */
+.loader {
+  text-align: center;
+  color: #888;
+  padding: 20px;
+}
+
+/* Popup styles */
 .popup {
   position: fixed;
   top: 0;
@@ -91,4 +154,61 @@ body {
   max-width: 100%;
   height: auto;
   margin: 0.5rem 0;
+}
+
+
+.user-section {
+  margin-top: auto;
+  border-top: 1px solid #e5e7eb;
+  padding-top: 20px;
+  background-color: white;
+}
+
+
+.user-info-container {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.user-profile {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+}
+
+.profile-circle {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+  color: white;
+}
+
+/* Profile info container */
+.profile-info {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+/* Adjust disconnect button to appear inline */
+.disconnect-btn {
+  margin: 0;
+  padding: 8px 12px;
+  background-color: #ef4444;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-weight: bold;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  max-width: 40px;
+  height: 40px;
 }
