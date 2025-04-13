@@ -6,12 +6,24 @@ BEGIN
     INSERT INTO Users (firstName, lastName, email, password, phone)
     VALUES ('Maria', 'Ionescu', 'maria.ionescu@example.com', 'hashed_password_456', '0755987654');
 
+    INSERT INTO Users (firstName, lastName, email, password, phone)
+    VALUES ('George', 'Vasilescu', 'george.vasilescu@example.com', 'hashed_password_789', '0755123789');
+
+    INSERT INTO Users (firstName, lastName, email, password, phone)
+    VALUES ('Ana', 'Marinescu', 'ana.marinescu@example.com', 'hashed_password_101', '0755987123');
+
     -- Inserare Address
     INSERT INTO Address (userID, Street, City, State, ZipCode, Country)
     VALUES (1, 'Str. Exemplu 12', 'Bucuresti', 'Ilfov', 123456, 'Romania');
     
     INSERT INTO Address (userID, Street, City, State, ZipCode, Country)
     VALUES (2, 'Str. Lunga 5', 'Cluj-Napoca', 'Cluj', 234567, 'Romania');
+
+    INSERT INTO Address (userID, Street, City, State, ZipCode, Country)
+    VALUES (3, 'Str. Verde 10', 'Timisoara', 'Timis', 345678, 'Romania');
+
+    INSERT INTO Address (userID, Street, City, State, ZipCode, Country)
+    VALUES (4, 'Str. Alba 7', 'Iasi', 'Iasi', 456789, 'Romania');
 
     -- Inserare Animal
     INSERT INTO Animal (userID, name, breed, species, age, gender)
@@ -20,12 +32,24 @@ BEGIN
     INSERT INTO Animal (userID, name, breed, species, age, gender)
     VALUES (2, 'Luna', 'Pisică', 'Pisică', 3, 'female');
 
+    INSERT INTO Animal (userID, name, breed, species, age, gender)
+    VALUES (3, 'Max', 'Golden Retriever', 'Câine', 2, 'male');
+
+    INSERT INTO Animal (userID, name, breed, species, age, gender)
+    VALUES (4, 'Bella', 'Siameză', 'Pisică', 4, 'female');
+
     -- Inserare MedicalHistory
     INSERT INTO MedicalHistory (animal_id, vetNumber, recordDate, description, first_aid_noted)
     VALUES (1, 'VET001', SYSDATE, 'Tratament pentru infecție respiratorie', 'Da');
     
     INSERT INTO MedicalHistory (animal_id, vetNumber, recordDate, description, first_aid_noted)
     VALUES (2, 'VET002', SYSDATE, 'Vaccinare antirabică', 'Nu');
+
+    INSERT INTO MedicalHistory (animal_id, vetNumber, recordDate, description, first_aid_noted)
+    VALUES (3, 'VET003', SYSDATE, 'Tratament pentru alergii', 'Da');
+
+    INSERT INTO MedicalHistory (animal_id, vetNumber, recordDate, description, first_aid_noted)
+    VALUES (4, 'VET004', SYSDATE, 'Sterilizare', 'Nu');
 
     -- Inserare FeedingSchedule
     INSERT INTO FeedingSchedule (animal_id, feeding_time, food_type, notes)
@@ -50,6 +74,28 @@ BEGIN
         'Se hrănește cu lapte'
     );
 
+    INSERT INTO FeedingSchedule (animal_id, feeding_time, food_type, notes)
+    VALUES (
+        3, 
+        feeding_time_array(
+            TO_TIMESTAMP('06:30:00', 'HH24:MI:SS'),
+            TO_TIMESTAMP('19:00:00', 'HH24:MI:SS')
+        ),
+        'Hrană uscată',
+        'Dimineața și seara'
+    );
+
+    INSERT INTO FeedingSchedule (animal_id, feeding_time, food_type, notes)
+    VALUES (
+        4, 
+        feeding_time_array(
+            TO_TIMESTAMP('09:00:00', 'HH24:MI:SS'),
+            TO_TIMESTAMP('21:00:00', 'HH24:MI:SS')
+        ),
+        'Conserve',
+        'Hrănire de două ori pe zi'
+    );
+
     -- Inserare MultiMedia
     INSERT INTO MultiMedia (animal_id, media, url, description, upload_date)
     VALUES (1, 'photo', 'http://exemplu.com/foto_rex.jpg', 'Fotografie cu Rex', SYSDATE);
@@ -57,12 +103,24 @@ BEGIN
     INSERT INTO MultiMedia (animal_id, media, url, description, upload_date)
     VALUES (2, 'video', 'http://exemplu.com/video_luna.mp4', 'Video cu Luna jucându-se', SYSDATE);
 
+    INSERT INTO MultiMedia (animal_id, media, url, description, upload_date)
+    VALUES (3, 'photo', 'http://exemplu.com/foto_max.jpg', 'Fotografie cu Max', SYSDATE);
+
+    INSERT INTO MultiMedia (animal_id, media, url, description, upload_date)
+    VALUES (4, 'video', 'http://exemplu.com/video_bella.mp4', 'Video cu Bella dormind', SYSDATE);
+
     -- Inserare Relations
     INSERT INTO Relations (animalId, friendWith)
     VALUES (1, 'Luna');
     
     INSERT INTO Relations (animalId, friendWith)
     VALUES (2, 'Rex');
+
+    INSERT INTO Relations (animalId, friendWith)
+    VALUES (3, 'Bella');
+
+    INSERT INTO Relations (animalId, friendWith)
+    VALUES (4, 'Max');
 
     -- Commit pentru a salva datele
     COMMIT;

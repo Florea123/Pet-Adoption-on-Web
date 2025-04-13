@@ -31,13 +31,13 @@ class User {
     }
   }
 
-  static async findByEmail(email) {
+  static async findByEmailAndPassword(email, password) {
     const connection = await getConnection();
     try {
       const result = await connection.execute(
-        `SELECT * FROM Users WHERE email = :email`,
-        { email },
-        { outFormat: oracledb.OUT_FORMAT_OBJECT } 
+        `SELECT * FROM Users WHERE email = :email AND password = :password`,
+        { email, password },
+        { outFormat: oracledb.OUT_FORMAT_OBJECT }
       );
       return result.rows[0]; 
     } finally {

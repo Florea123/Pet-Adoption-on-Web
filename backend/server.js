@@ -1,23 +1,48 @@
 const http = require('http');
-const { getUserByEmail, insertUser } = require('./routes/UserRoute');
+const { getUserByEmailAndPassword, insertUser } = require('./routes/UserRoute');
 const { authenticate } = require('./middleware/auth');
+const { getAllAnimals, getAnimalDetailsById } = require('./routes/AnimalRoute');
 
 const port = 3000;
 
 const server = http.createServer(async (req, res) => {
-  if (req.url.startsWith('/users') && req.method === 'GET') {
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
 
-    // Authenticate the request using JWT
-    await getUserByEmail(req, res); 
-
-  } else if (req.url.startsWith('/users') && req.method === 'POST') {
-
-    await insertUser(req, res);
-    
-  } else {
-    res.writeHead(404, { 'Content-Type': 'text/plain' });
-    res.end('Not Found');
+  if (req.method === 'OPTIONS') {
+    res.writeHead(204);
+    res.end();
+    return;
   }
+
+  if (req.method === 'POST' && req.url.startsWith('/users/login')) {
+    let body = '';
+    req.on('data', chunk => {
+      body += chunk.toString();
+    });
+
+    req.on('end', async () => {
+      try {
+        req.body = JSON.parse(body); // Parse JSON body
+        await getUserByEmailAndPassword(req, res); // Pass the parsed body to the handler
+      } catch (err) {
+        console.error('Invalid JSON:', err);
+        res.writeHead(400, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({ error: 'Invalid JSON' })); // Ensure JSON response
+      }
+    });
+  }
+
+  if(req.method === 'GET' && req.url.startsWith('/animals')) {
+    await getAllAnimals(req, res);
+
+  } 
+
+  if (req.method === 'POST' && req.url.startsWith('/animals/details')) {
+    await getAnimalDetailsById(req, res);
+  }
+
 });
 
 server.listen(port, () => {

@@ -17,15 +17,29 @@ class Animal {
     }
   }
 
+  static async getAll() {
+    const connection = await getConnection();
+    try {
+      const result = await connection.execute(
+        `SELECT * FROM Animal`,
+        {},
+        { outFormat: oracledb.OUT_FORMAT_OBJECT }
+      );
+      return result.rows;
+    } finally {
+      await connection.close();
+    }
+  }
+
   static async findById(animalID) {
     const connection = await getConnection();
     try {
       const result = await connection.execute(
         `SELECT * FROM Animal WHERE animalID = :animalID`,
         { animalID },
-        { outFormat: oracledb.OUT_FORMAT_OBJECT } 
+        { outFormat: oracledb.OUT_FORMAT_OBJECT }
       );
-      return result.rows;
+      return result.rows[0];
     } finally {
       await connection.close();
     }

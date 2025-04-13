@@ -3,37 +3,33 @@ const User = require('../models/User');
 const { generateToken } = require('../middleware/auth');
 
 // Function to authenticate a user by email
-async function getUserByEmail(req, res) {
-  const queryObject = url.parse(req.url, true).query;
-  const email = queryObject.email;
+async function getUserByEmailAndPassword(req, res) {
+  const { email } = req.body;
+  const { password } = req.body;
 
-  if (!email) {
+  if (!email || !password) {
     res.writeHead(400, { 'Content-Type': 'application/json' });
-    res.end(JSON.stringify({ error: 'Missing email parameter' }));
+    res.end(JSON.stringify({ error: 'Missing email or password' })); 
     return;
   }
 
   try {
-    // Fetch the user by email
-    const user = await User.findByEmail(email);
+    const user = await User.findByEmailAndPassword(email, password);
     if (!user) {
       res.writeHead(404, { 'Content-Type': 'application/json' });
-      res.end(JSON.stringify({ error: 'User not found' }));
+      res.end(JSON.stringify({ error: 'Email or password wrong' })); 
       return;
     }
 
-    // Generate a JWT token for the authenticated user
     const token = generateToken(user);
-
     res.writeHead(200, { 'Content-Type': 'application/json' });
-    res.end(JSON.stringify({ message: 'Authentication successful', token }));
+    res.end(JSON.stringify({ message: 'Authentication successful', token })); 
   } catch (err) {
     console.error('Error authenticating user:', err);
     res.writeHead(500, { 'Content-Type': 'application/json' });
-    res.end(JSON.stringify({ error: 'Internal Server Error' }));
+    res.end(JSON.stringify({ error: 'Internal Server Error' })); 
   }
 }
-
 // Function to insert a new user
 async function insertUser(req, res) {
   const queryObject = url.parse(req.url, true).query;
@@ -59,4 +55,4 @@ async function insertUser(req, res) {
   }
 }
 
-module.exports = { getUserByEmail, insertUser };
+module.exports = { getUserByEmailAndPassword, insertUser };

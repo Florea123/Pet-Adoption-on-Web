@@ -23,7 +23,7 @@ class FeedingSchedule {
       const result = await connection.execute(
         `SELECT * FROM FeedingSchedule WHERE animal_id = :animal_id`,
         { animal_id },
-        { outFormat: oracledb.OUT_FORMAT_OBJECT } 
+        { outFormat: oracledb.OUT_FORMAT_OBJECT }
       );
       return result.rows;
     } finally {

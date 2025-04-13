@@ -1,5 +1,19 @@
-CREATE OR REPLACE TYPE feeding_time_array AS VARRAY(10) OF TIMESTAMP;
-/
+-- Dropping all tables and sequences
+DROP TABLE Relations CASCADE CONSTRAINTS;
+DROP TABLE MultiMedia CASCADE CONSTRAINTS;
+DROP TABLE FeedingSchedule CASCADE CONSTRAINTS;
+DROP TABLE MedicalHistory CASCADE CONSTRAINTS;
+DROP TABLE Animal CASCADE CONSTRAINTS;
+DROP TABLE Address CASCADE CONSTRAINTS;
+DROP TABLE Users CASCADE CONSTRAINTS;
+
+DROP SEQUENCE seq_users;
+DROP SEQUENCE seq_address;
+DROP SEQUENCE seq_animal;
+DROP SEQUENCE seq_medical;
+DROP SEQUENCE seq_feeding;
+DROP SEQUENCE seq_multimedia;
+DROP SEQUENCE seq_relations;
 
 CREATE TABLE Users (
     userID NUMBER PRIMARY KEY,
@@ -37,8 +51,8 @@ CREATE TABLE MedicalHistory (
     animal_id NUMBER,
     vetNumber VARCHAR2(50),
     recordDate DATE,
-    description CLOB,
-    first_aid_noted CLOB,
+    description VARCHAR2(4000),
+    first_aid_noted VARCHAR2(4000),
     CONSTRAINT fk_medical_animal FOREIGN KEY (animal_id) REFERENCES Animal(animalID)
 );
 
@@ -47,7 +61,7 @@ CREATE TABLE FeedingSchedule (
     animal_id NUMBER UNIQUE,
     feeding_time feeding_time_array,
     food_type VARCHAR2(100),
-    notes CLOB,
+    notes VARCHAR2(4000),
     CONSTRAINT fk_feeding_animal FOREIGN KEY (animal_id) REFERENCES Animal(animalID)
 );
 
@@ -56,7 +70,7 @@ CREATE TABLE MultiMedia (
     animal_id NUMBER,
     media VARCHAR2(10) CHECK (media IN ('photo', 'video', 'audio')),
     url VARCHAR2(1000),
-    description CLOB,
+    description VARCHAR2(4000),
     upload_date DATE,
     CONSTRAINT fk_multimedia_animal FOREIGN KEY (animal_id) REFERENCES Animal(animalID)
 );
@@ -64,11 +78,11 @@ CREATE TABLE MultiMedia (
 CREATE TABLE Relations (
     id NUMBER PRIMARY KEY,
     animalId NUMBER UNIQUE,
-    friendWith CLOB,
+    friendWith VARCHAR2(4000),
     CONSTRAINT fk_relation_animal FOREIGN KEY (animalId) REFERENCES Animal(animalID)
 );
 
-
+-- Recreating sequences
 CREATE SEQUENCE seq_users START WITH 1 INCREMENT BY 1;
 CREATE SEQUENCE seq_address START WITH 1 INCREMENT BY 1;
 CREATE SEQUENCE seq_animal START WITH 1 INCREMENT BY 1;
@@ -77,6 +91,7 @@ CREATE SEQUENCE seq_feeding START WITH 1 INCREMENT BY 1;
 CREATE SEQUENCE seq_multimedia START WITH 1 INCREMENT BY 1;
 CREATE SEQUENCE seq_relations START WITH 1 INCREMENT BY 1;
 
+-- Recreating triggers
 CREATE OR REPLACE TRIGGER trg_users
 BEFORE INSERT ON Users
 FOR EACH ROW
