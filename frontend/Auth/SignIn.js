@@ -43,3 +43,26 @@ document
       alert("An error occurred. Please try again.");
     }
   });
+
+const imageFolder = './images/';
+const imageFiles = ['Imagine1.webp', 'Imagine2.jpg', 'Imagine3.webp','Imagine4.jpg']; // Numele fișierelor din folder
+const imageSlider = document.getElementById('imageSlider');
+
+imageFiles.forEach((fileName, index) => {
+  const img = document.createElement('img');
+  img.src = `${imageFolder}${fileName}`;
+  img.alt = `Image ${index + 1}`;
+  img.onerror = () => console.error(`Image not found: ${img.src}`);
+  if (index === 0) img.classList.add('active'); // Prima imagine este activă
+  imageSlider.appendChild(img);
+});
+
+// Script pentru schimbarea imaginilor
+const images = document.querySelectorAll('.photo-section img');
+let currentIndex = 0;
+
+setInterval(() => {
+  images[currentIndex].classList.remove('active');
+  currentIndex = (currentIndex + 1) % images.length;
+  images[currentIndex].classList.add('active');
+}, 15000); // Interval de 15 secunde

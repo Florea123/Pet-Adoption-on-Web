@@ -1,27 +1,46 @@
+body, html {
+  height: 100%;
+  font-family: Arial, sans-serif;
+  background: linear-gradient(to bottom right, #fffaf3, #ffe5c4); /* Gradient cald */
+  background-image: url('https://www.transparenttextures.com/patterns/paw-print.png'); /* Pattern cu lăbuțe */
+  background-size: 200px 200px; /* Dimensiunea patternului */
+  background-blend-mode: overlay; /* Combină patternul cu gradientul */
+  margin: 0;
+  padding: 0;
+}
+
 body {
-    font-family: 'Arial', sans-serif;
-    background-color: #f9fafb;
-    margin: 0;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    height: 100vh;
-  }
+  font-family: 'Arial', sans-serif;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+}
   
   .container {
     display: flex;
-    justify-content: center;
-    align-items: center;
+    height: 100vh;
     width: 100%;
-    max-width: 400px;
+    align-items: center;
+    justify-content: center;
   }
   
   .card {
-    background: #ffffff;
-    border-radius: 8px;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-    padding: 2rem;
     width: 100%;
+    max-width: 350px;
+    padding: 20px;
+    background: linear-gradient(to bottom right, #ffffff, #ffe9cc); /* Gradient cald */
+    backdrop-filter: blur(10px); /* Efect de blur */
+    border-radius: 20px; /* Colțuri rotunjite */
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1); /* Umbra subtilă */
+  }
+
+  .card h1 {
+    font-size: 24px; /* Dimensiunea textului */
+    font-weight: 600; /* Grosime mai mare */
+    color: #333; /* Culoare mai prietenoasă */
+    margin-bottom: 20px;
+    text-align: center;
   }
   
   .title {
@@ -33,7 +52,19 @@ body {
   }
   
   .form-group {
-    margin-bottom: 1rem;
+    margin-bottom: 15px;
+  }
+  
+  .form-group label {
+    display: block;
+    margin-bottom: 5px;
+  }
+  
+  .form-group input {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
   }
   
   label {
@@ -60,35 +91,36 @@ body {
   
   .btn {
     width: 100%;
-    padding: 0.75rem;
-    background-color: #3b82f6;
-    color: #ffffff;
+    padding: 10px;
+    background-color: #fca311; /* Culoare caldă */
+    color: white;
     border: none;
-    border-radius: 4px;
-    font-size: 1rem;
-    font-weight: bold;
+    border-radius: 10px; /* Colțuri rotunjite */
     cursor: pointer;
-    transition: background-color 0.3s ease;
+    font-size: 16px;
+    font-weight: 600;
+    transition: all 0.3s ease; /* Tranziție lină */
   }
   
   .btn:hover {
-    background-color: #2563eb;
+    background-color: #fb8500; /* Culoare mai intensă la hover */
+    transform: scale(1.02); /* Efect de mărire ușoară */
   }
   
   .footer-text {
-    margin-top: 1rem;
+    margin-top: 15px;
     text-align: center;
-    font-size: 0.9rem;
-    color: #555555;
   }
   
   .footer-text a {
-    color: #3b82f6;
-    text-decoration: none;
+    color: #fca311; /* Culoare caldă */
+    font-weight: 500; /* Grosime mai mare */
+    text-decoration: underline; /* Subliniază textul */
+    transition: color 0.3s ease; /* Tranziție lină */
   }
   
   .footer-text a:hover {
-    text-decoration: underline;
+    color: #fb8500; /* Culoare mai intensă la hover */
   }
 
   /* Two-column grid layout for the form */

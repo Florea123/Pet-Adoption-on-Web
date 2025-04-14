@@ -2,29 +2,35 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Sign In</title>
-  <link rel="stylesheet" href="Auth.css">
+  <title>Sign In Page</title>
+  <link rel="stylesheet" href="SignIn.css">
 </head>
 <body>
   <div class="container">
-    <div class="card">
-      <h1 class="title">Sign In</h1>
-      <form id="signInForm">
-        <div class="form-group">
-          <label for="email">Email</label>
-          <input type="email" id="email" name="email" placeholder="Enter your email" required>
-        </div>
-        <div class="form-group">
-          <label for="password">Password</label>
-          <input type="password" id="password" name="password" placeholder="Enter your password" required>
-        </div>
-        <button type="submit" class="btn">Sign In</button>
-      </form>
-      <p class="footer-text">Don't have an account? <a href="SignUp.html">Sign Up</a></p>
+    <!-- Slider de imagini -->
+    <div class="photo-section" id="imageSlider">
+      <div class="welcome-text">Adoptă. Iubește. Schimbă o viață.</div>
+    </div>
+
+    <!-- Formul de sign-in -->
+    <div class="signin-section">
+      <div class="card">
+        <h1>Sign In</h1>
+        <form id="signInForm">
+          <div class="form-group">
+            <label for="email">Email</label>
+            <input type="email" id="email" name="email" placeholder="Enter your email" required>
+          </div>
+          <div class="form-group">
+            <label for="password">Password</label>
+            <input type="password" id="password" name="password" placeholder="Enter your password" required>
+          </div>
+          <button type="submit" class="btn">Sign In</button>
+        </form>
+        <p class="footer-text">Don't have an account? <a href="SignUp.html">Sign Up</a></p>
+      </div>
     </div>
   </div>
-  <script src="https://cdn.jsdelivr.net/npm/jwt-decode@3.1.2/build/jwt-decode.min.js"></script>
   <script type="module" src="SignIn.js"></script>
 </body>
 </html>

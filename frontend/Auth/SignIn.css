@@ -1,0 +1,148 @@
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body, html {
+    height: 100%;
+    font-family: Arial, sans-serif;
+    background: linear-gradient(to bottom right, #fffaf3, #ffe5c4); /* Gradient mai subtil */
+    margin: 0;
+    padding: 0;
+  }
+
+body {
+  background-image: url('https://www.transparenttextures.com/patterns/paw-print.png'); /* Pattern cu lăbuțe */
+  background-size: 200px 200px; /* Dimensiunea patternului */
+  background-blend-mode: overlay; /* Combină patternul cu gradientul */
+  opacity: 0.9; /* Face patternul mai subtil */
+}
+
+.container {
+  display: flex;
+  height: 100vh;
+  width: 100%;
+}
+
+/* Adaugă un efect de blur subtil pe margini */.photo-section {
+  flex: 3;
+  position: relative;
+  overflow: hidden;
+  height: 80%;
+  margin: auto 0;
+  background-color: rgba(255, 255, 255, 0.8); /* Fundal semi-transparent */
+  filter: brightness(1.0) saturate(1.2); /* Tonuri calde și lumină îmbunătățită */
+}
+
+.photo-section img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  position: absolute;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 1s ease-in-out, visibility 1s ease-in-out;
+  border-radius: 15px; /* Colțuri rotunjite pentru imagini */
+  filter: blur(2px); /* Blur subtil pe margini */
+}
+
+.photo-section img.active {
+  opacity: 0.5; /* Imaginea activă este parțial transparentă */
+  visibility: visible;
+  filter: blur(0); /* Elimină blur-ul pentru imaginea activă */
+}
+
+/* Overlay transparent pentru text */
+.photo-section .welcome-text {
+    position: absolute;
+    top: 35%; /* Mută textul mai sus */
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 90px; /* Dimensiunea textului mai mare */
+    font-weight: 700; /* Grosime mai mare pentru text */
+    color: white;
+    text-shadow: 5px 5px 10px rgba(0, 0, 0, 0.8); /* Umbra textului mai pronunțată */
+    z-index: 1;
+    text-align: center;
+    background: rgba(255, 255, 255, 0.85); /* Fundal alb cu opacitate mai mare */
+    padding: 50px 220px; /* Crește dimensiunea chenarului */
+    border-radius: 25px; /* Colțuri mai rotunjite */
+  }
+
+.signin-section {
+  flex: 1;
+  background-color: rgba(255, 255, 255, 0.6); /* Fundal semi-transparent */
+  backdrop-filter: blur(10px); /* Efect de blur */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.card {
+  width: 100%;
+  max-width: 350px;
+  padding: 20px;
+  background: linear-gradient(to bottom right, #ffffff, #ffe9cc); /* Gradient cald */
+  backdrop-filter: blur(10px); /* Efect de blur */
+  border-radius: 20px; /* Colțuri rotunjite */
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1); /* Umbra subtilă */
+}
+
+.card h1 {
+    font-size: 24px; /* Dimensiunea textului */
+    font-weight: 600; /* Grosime mai mare */
+    color: #333; /* Culoare mai prietenoasă */
+    margin-bottom: 20px;
+    text-align: center;
+  }
+
+.form-group {
+  margin-bottom: 15px;
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: 5px;
+}
+
+.form-group input {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+}
+
+.btn {
+    width: 100%;
+    padding: 10px;
+    background-color: #fca311; /* Culoare caldă */
+    color: white;
+    border: none;
+    border-radius: 10px; /* Colțuri rotunjite */
+    cursor: pointer;
+    font-size: 16px;
+    font-weight: 600;
+    transition: all 0.3s ease; /* Tranziție lină */
+  }
+  
+  .btn:hover {
+    background-color: #fb8500; /* Culoare mai intensă la hover */
+    transform: scale(1.02); /* Efect de mărire ușoară */
+  }
+
+.footer-text {
+  margin-top: 15px;
+  text-align: center;
+}
+
+.footer-text a {
+    color: #fca311; /* Culoare caldă */
+    font-weight: 500; /* Grosime mai mare */
+    text-decoration: underline; /* Subliniază textul */
+    transition: color 0.3s ease; /* Tranziție lină */
+  }
+  
+  .footer-text a:hover {
+    color: #fb8500; /* Culoare mai intensă la hover */
+  }
