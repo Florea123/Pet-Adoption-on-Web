@@ -2,19 +2,20 @@ const url = require('url');
 const User = require('../models/User');
 const { generateToken } = require('../middleware/auth');
 const Address = require('../models/Address');
+const { parseRequestBody } = require('../utils/requestUtils');
 
 // Function to authenticate a user by email
 async function getUserByEmailAndPassword(req, res) {
-  const { email } = req.body;
-  const { password } = req.body;
-
-  if (!email || !password) {
-    res.writeHead(400, { 'Content-Type': 'application/json' });
-    res.end(JSON.stringify({ error: 'Missing email or password' })); 
-    return;
-  }
-
   try {
+    const body = await parseRequestBody(req);
+    const { email, password } = body;
+
+    if (!email || !password) {
+      res.writeHead(400, { 'Content-Type': 'application/json' });
+      res.end(JSON.stringify({ error: 'Missing email or password' })); 
+      return;
+    }
+
     const user = await User.findByEmailAndPassword(email, password);
     if (!user) {
       res.writeHead(404, { 'Content-Type': 'application/json' });
@@ -31,11 +32,12 @@ async function getUserByEmailAndPassword(req, res) {
     res.end(JSON.stringify({ error: 'Internal Server Error' })); 
   }
 }
+
 // Function to insert a new user
 async function insertUser(req, res) {
   try {
-    // The body has already been parsed in server.js
-    const { firstName, lastName, email, password, phone, address } = req.body;
+    const body = await parseRequestBody(req);
+    const { firstName, lastName, email, password, phone, address } = body;
     console.log('Received data:', { firstName, lastName, email, password, phone, address });
 
     // Validate required fields

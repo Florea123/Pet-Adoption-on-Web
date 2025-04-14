@@ -1,7 +1,7 @@
 const http = require('http');
 const { getUserByEmailAndPassword, insertUser } = require('./routes/UserRoute');
 const { authenticate } = require('./middleware/auth');
-const { getAllAnimals, getAnimalDetailsById,findBySpecies } = require('./routes/AnimalRoute');
+const { getAllAnimals, getAnimalDetailsById, findBySpecies, createAnimal } = require('./routes/AnimalRoute');
 
 const port = 3000;
 
@@ -16,56 +16,50 @@ const server = http.createServer(async (req, res) => {
     return;
   }
 
-  if (req.method === 'POST' && req.url.startsWith('/users/login')) {
-    let body = '';
-    req.on('data', chunk => {
-      body += chunk.toString();
-    });
+  try {
+    // User routes
+    if (req.method === 'POST' && req.url.startsWith('/users/login')) {
+      await getUserByEmailAndPassword(req, res);
+      return;
+    }
 
-    req.on('end', async () => {
-      try {
-        req.body = JSON.parse(body); // Parse JSON body
-        await getUserByEmailAndPassword(req, res); // Pass the parsed body to the handler
-      } catch (err) {
-        console.error('Invalid JSON:', err);
-        res.writeHead(400, { 'Content-Type': 'application/json' });
-        res.end(JSON.stringify({ error: 'Invalid JSON' })); // Ensure JSON response
-      }
-    });
+    if (req.method === 'POST' && req.url.startsWith('/users/signup')) {
+      await insertUser(req, res);
+      return;
+    }
+
+    // Animal routes
+    if(req.method === 'GET' && req.url.startsWith('/animals/all')) {
+      await getAllAnimals(req, res);
+      return;
+    } 
+
+    if (req.method === 'POST' && req.url.startsWith('/animals/details')) {
+      await getAnimalDetailsById(req, res);
+      return;
+    }
+
+    if (req.method === 'POST' && req.url.startsWith('/animals/species')) {
+      await findBySpecies(req, res);
+      return;
+    }
+
+    if (req.method === 'POST' && req.url.startsWith('/animals/create')) {
+      await createAnimal(req, res);
+      return;
+    }
+
+    // Route not found
+    res.writeHead(404, { 'Content-Type': 'application/json' });
+    res.end(JSON.stringify({ error: 'Route not found' }));
+    
+  } catch (err) {
+    console.error('Server error:', err);
+    if (!res.headersSent) {
+      res.writeHead(500, { 'Content-Type': 'application/json' });
+      res.end(JSON.stringify({ error: 'Internal Server Error' }));
+    }
   }
-
-  if (req.method === 'POST' && req.url.startsWith('/users/signup')) {
-    let body = '';
-    req.on('data', chunk => {
-      body += chunk.toString();
-    });
-
-    req.on('end', async () => {
-      try {
-        req.body = JSON.parse(body); 
-
-        await insertUser(req, res); 
-      } catch (err) {
-        console.error('Invalid JSON:', err);
-        res.writeHead(400, { 'Content-Type': 'application/json' });
-        res.end(JSON.stringify({ error: 'Invalid JSON' })); 
-      }
-    });
-  }
-
-
-  if(req.method === 'GET' && req.url.startsWith('/animals/all')) {
-    await getAllAnimals(req, res);
-  } 
-
-  if (req.method === 'POST' && req.url.startsWith('/animals/details')) {
-    await getAnimalDetailsById(req, res);
-  }
-
-  if (req.method === 'GET' && req.url.startsWith('/animals/species')) {
-    await findBySpecies(req, res);
-  }
-
 });
 
 server.listen(port, () => {

@@ -5,10 +5,16 @@ class FeedingSchedule {
   static async create(animal_id, feeding_time, food_type, notes) {
     const connection = await getConnection();
     try {
+      // Convert the feeding_time string to the proper Oracle function call
+      const feedingTimes = feeding_time.split(',');
+      const feedingTimeSQL = `feeding_time_array(${
+        feedingTimes.map(time => `TO_TIMESTAMP('${time}', 'HH24:MI:SS')`).join(',')
+      })`;
+      
       const result = await connection.execute(
         `INSERT INTO FeedingSchedule (animal_id, feeding_time, food_type, notes) 
-         VALUES (:animal_id, :feeding_time, :food_type, :notes)`,
-        { animal_id, feeding_time, food_type, notes },
+         VALUES (:animal_id, ${feedingTimeSQL}, :food_type, :notes)`,
+        { animal_id, food_type, notes },
         { autoCommit: true }
       );
       return result;
