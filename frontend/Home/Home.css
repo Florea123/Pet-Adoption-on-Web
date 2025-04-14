@@ -26,6 +26,7 @@ body {
   flex-direction: column;
   z-index: 1000;
   overflow-y: auto;
+  overflow-x: hidden; 
 }
 
 .sidebar-header h1 {
@@ -176,7 +177,9 @@ body {
   align-items: center;
   justify-content: space-between;
   width: 100%;
+  flex-wrap: wrap; 
 }
+
 
 .profile-circle {
   width: 40px;
@@ -194,12 +197,33 @@ body {
   display: flex;
   align-items: center;
   gap: 10px;
+  max-width: 170px; 
+  overflow: hidden; 
 }
 
-/* Adjust disconnect button to appear inline */
+/* User name and email styling */
+.user-name {
+  font-weight: bold;
+  font-size: 0.9rem; 
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis; 
+  max-width: 120px; 
+}
+
+.user-email {
+  font-size: 0.75rem; 
+  color: #666;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 120px; 
+}
+
+/* Keep disconnect button compact */
 .disconnect-btn {
   margin: 0;
-  padding: 8px 12px;
+  padding: 6px;
   background-color: #ef4444;
   color: white;
   border: none;
@@ -209,6 +233,26 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
-  max-width: 40px;
-  height: 40px;
+  min-width: 30px;
+  max-width: 30px;
+  height: 30px;
+  font-size: 0.8rem;
+}
+
+/* When sidebar gets very small */
+@media (max-width: 300px) {
+  .profile-info {
+    max-width: 150px;
+  }
+  
+  .user-name, .user-email {
+    max-width: 100px;
+  }
+  
+  .disconnect-btn {
+    min-width: 25px;
+    max-width: 25px;
+    height: 25px;
+    font-size: 0.7rem;
+  }
 }
