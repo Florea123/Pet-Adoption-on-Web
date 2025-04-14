@@ -20,13 +20,20 @@ document
 
       if (response.ok) {
         const data = await response.json();
+        console.log("Login successful, received token");
+        
         // Store the token in localStorage
         localStorage.setItem("Token", data.token);
+        console.log("Token saved to localStorage");
 
         // Decode the token and save user details
         const decoded = decodeToken();
         if (decoded) {
+          console.log("Token decoded successfully:", decoded);
           user.setUser(decoded);
+          console.log("User saved to localStorage:", user.getUser());
+        } else {
+          console.error("Failed to decode token");
         }
 
         // Redirect to the home page
@@ -43,6 +50,7 @@ document
       alert("An error occurred. Please try again.");
     }
   });
+
 
 const imageFolder = './images/';
 const imageFiles = ['Imagine1.webp', 'Imagine2.jpg', 'Imagine3.webp','Imagine4.jpg']; // Numele fișierelor din folder
