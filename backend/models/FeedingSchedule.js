@@ -36,6 +36,20 @@ class FeedingSchedule {
       await connection.close();
     }
   }
+
+  static async deleteByAnimalId(animal_id) {
+    const connection = await getConnection();
+    try {
+      const result = await connection.execute(
+        `DELETE FROM FeedingSchedule WHERE animal_id = :animal_id`,
+        { animal_id },
+        { autoCommit: true }
+      );
+      return result.rowsAffected > 0;
+    } finally {
+      await connection.close();
+    }
+  }
 }
 
 module.exports = FeedingSchedule;

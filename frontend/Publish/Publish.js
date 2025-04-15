@@ -74,8 +74,8 @@ window.updateBreedOptions = function() {
 
     // Definirea raselor pentru fiecare specie
     const breeds = {
-        dog: ['Labrador', 'Golden Retriever', 'Ciobănesc German', 'Bulldog'],
-        cat: ['Siameză', 'Persană', 'Maine Coon', 'Bengaleză']
+        Câine: ['Labrador', 'Golden Retriever', 'Ciobănesc German', 'Bulldog'],
+        Pisică: ['Siameză', 'Persană', 'Maine Coon', 'Bengaleză']
     };
 
     // Verifică dacă specia selectată are rase definite
