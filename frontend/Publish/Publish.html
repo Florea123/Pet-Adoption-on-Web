@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="ro">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Publică Animal</title>
+  <link rel="stylesheet" href="Publish.css">
+</head>
+<body>
+  <div class="container">
+    <div class="card">
+      <h1 class="title">Publică Animal</h1>
+      <form id="publishForm" class="form-grid" onsubmit="submitPublishForm(event)">
+        <!-- Nume -->
+        <div class="form-group full-width">
+          <label for="name">Nume</label>
+          <input type="text" id="name" name="name" placeholder="Introdu numele animalului" required>
+        </div>
+
+        <!-- Specie și Rasă -->
+        <div class="form-group">
+          <label for="species">Specie</label>
+          <select id="species" name="species" onchange="updateBreedOptions()" required>
+            <option value="">Selectează o specie</option>
+            <option value="Câine">Câine</option>
+            <option value="Pisică">Pisică</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="breed">Rasă</label>
+          <select id="breed" name="breed" required>
+            <option value="">Selectează o rasă</option>
+          </select>
+        </div>
+
+        <!-- Vârstă și Gen -->
+        <div class="form-group">
+          <label for="age">Vârstă</label>
+          <input type="number" id="age" name="age" placeholder="Introdu vârsta" required>
+        </div>
+        <div class="form-group">
+          <label for="gender">Gen</label>
+          <select id="gender" name="gender" required>
+            <option value="male">Mascul</option>
+            <option value="female">Femelă</option>
+          </select>
+        </div>
+
+        <!-- Atașează Poză -->
+        <div class="form-group full-width">
+          <label for="photo">Atașează Poză</label>
+          <input type="file" id="photo" name="photo" accept="image/*" required>
+        </div>
+
+        <!-- Program de Hrănire -->
+        <div class="form-group full-width">
+          <label for="feedingTime">Program de Hrănire</label>
+          <input type="text" id="feedingTime" name="feedingTime" placeholder="Exemplu: 08:00:00,18:00:00" required>
+        </div>
+        <div class="form-group full-width">
+          <label for="foodType">Tip de Hrană</label>
+          <textarea id="foodType" name="foodType" placeholder="Introdu tipurile de hrană (câte una pe linie)" rows="3"></textarea>
+        </div>
+        <div class="form-group full-width">
+          <label for="notes">Notițe</label>
+          <textarea id="notes" name="notes" placeholder="Introdu notițe suplimentare" rows="3"></textarea>
+        </div>
+
+        <!-- Istoric Medical -->
+        <h2>Istoric Medical</h2>
+        <div class="form-group full-width">
+          <label for="vetNumber">Număr Veterinar</label>
+          <input type="text" id="vetNumber" name="vetNumber" placeholder="Introdu numărul veterinarului" required>
+        </div>
+
+        <div id="medical-history-container">
+          <div class="medical-history-entry">
+            <div class="form-group">
+              <label for="recordDate">Dată Înregistrare</label>
+              <input type="date" id="recordDate" name="recordDate" value="2025-04-14" required>
+            </div>
+            <div class="form-group full-width">
+              <label for="description">Descriere</label>
+              <textarea id="description" name="description" placeholder="Introdu detalii despre vaccinuri, deparazitări etc." rows="3"></textarea>
+            </div>
+          </div>
+        </div>
+
+        <!-- Buton pentru a adăuga mai multe intrări -->
+        <div class="form-group full-width">
+          <button type="button" class="btn add-entry-btn" onclick="addMedicalHistoryEntry()">+ Adaugă Mai Multe</button>
+        </div>
+
+        <div class="form-group full-width">
+          <label for="firstAidNoted">Prim Ajutor</label>
+          <textarea id="firstAidNoted" name="firstAidNoted" placeholder="Introdu instrucțiuni de prim ajutor" rows="3"></textarea>
+        </div>
+
+        <!-- Multimedia -->
+        <h2>Multimedia</h2>
+        <div id="multimedia-container">
+          <!-- Intrările multimedia vor fi adăugate aici dinamic -->
+        </div>
+        <div class="form-group full-width">
+          <button type="button" class="btn add-entry-btn" onclick="addMultimediaEntry()">+ Adaugă Multimedia</button>
+        </div>
+
+        <!-- Relații -->
+        <h2>Relații</h2>
+        <div class="form-group full-width">
+          <label for="relations">Relații</label>
+          <textarea id="relations" name="relations" placeholder="Introdu numele animalelor înrudite (câte unul pe linie)" rows="3"></textarea>
+        </div>
+
+        <!-- Buton de Publicare -->
+        <div class="form-group full-width">
+          <button type="submit" class="btn">Publică</button>
+        </div>
+      </form>
+    </div>
+  </div>
+  <script type="module" src="Publish.js"></script>
+</body>
+</html>

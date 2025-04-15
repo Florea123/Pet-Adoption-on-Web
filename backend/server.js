@@ -1,7 +1,13 @@
 const http = require('http');
 const { getUserByEmailAndPassword, insertUser } = require('./routes/UserRoute');
 const { authenticate } = require('./middleware/auth');
-const { getAllAnimals, getAnimalDetailsById, findBySpecies, createAnimal } = require('./routes/AnimalRoute');
+const { 
+  getAllAnimals, 
+  getAnimalDetailsById, 
+  findBySpecies, 
+  createAnimal,
+  deleteAnimal 
+} = require('./routes/AnimalRoute');
 
 const port = 3000;
 
@@ -46,6 +52,11 @@ const server = http.createServer(async (req, res) => {
 
     if (req.method === 'POST' && req.url.startsWith('/animals/create')) {
       await createAnimal(req, res);
+      return;
+    }
+
+    if (req.method === 'DELETE' && req.url.startsWith('/animals/delete')) {
+      await deleteAnimal(req, res);
       return;
     }
 

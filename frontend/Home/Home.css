@@ -45,6 +45,25 @@ body, html {
   margin-bottom: 30px;
 }
 
+.sidebar-header .btn {
+  width: 100%;
+  padding: 10px;
+  background-color: #fca311; /* Culoare caldă */
+  color: white;
+  border: none;
+  border-radius: 10px; /* Colțuri rotunjite */
+  cursor: pointer;
+  font-size: 16px;
+  font-weight: 600;
+  margin-top: 15px; /* Spațiu între titlu și buton */
+  transition: all 0.3s ease; /* Tranziție lină */
+}
+
+.sidebar-header .btn:hover {
+  background-color: #fb8500; /* Culoare mai intensă la hover */
+  transform: scale(1.02); /* Efect de mărire ușoară */
+}
+
 .filter-section {
   flex: 1;
   overflow-y: auto;
@@ -177,10 +196,14 @@ body, html {
 
 
 .user-section {
-  margin-top: auto;
-  border-top: 1px solid #e5e7eb;
-  padding-top: 20px;
-  background-color: white;
+  background: linear-gradient(to bottom right, #ffffff, #ffe9cc); /* Gradient cald */
+  backdrop-filter: blur(10px); /* Efect de blur */
+  border-radius: 15px; /* Colțuri rotunjite */
+  padding: 15px;
+  margin-top: auto; /* Mută secțiunea în partea de jos */
+  box-shadow: 0 -2px 5px rgba(0, 0, 0, 0.1); /* Umbra subtilă */
+  text-align: center;
+  color: #6b7280; /* Gri cald pentru text */
 }
 
 
