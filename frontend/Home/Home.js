@@ -1,15 +1,20 @@
 import userModel from '../models/User.js';
+import { requireAuth } from '../utils/authUtils.js';
 
 const API_URL = 'http://localhost:3000';
-const user = userModel.getUser();
+const token = localStorage.getItem('Token');
 
+//const user = userModel.getUser();
+let user;
 // Store all animals and species data
 let allAnimals = [];
 let uniqueSpecies = new Set();
 let selectedSpecies = new Set();
 
-// Initial data loading
 async function initialize() {
+  user = requireAuth();
+  if (!user) return;
+  
   await fetchAnimals();
   renderSpeciesFilters();
   displayUserInfo();
@@ -72,7 +77,13 @@ function disconnectUser() {
 // Existing code for fetching animals
 async function fetchAnimals() {
   try {
-    const response = await fetch(`${API_URL}/animals/all`);
+    const response = await fetch(`${API_URL}/animals/all`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`
+      }
+    });
     if (!response.ok) {
       throw new Error('Failed to fetch animals');
     }
@@ -179,7 +190,10 @@ async function openAnimalDetailsPopup(animalId) {
   try {
     const response = await fetch(`${API_URL}/animals/details`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: { 
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`
+      },
       body: JSON.stringify({ animalId }),
     });
 

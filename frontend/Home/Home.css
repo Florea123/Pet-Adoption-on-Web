@@ -64,6 +64,10 @@ body, html {
   transform: scale(1.02); /* Efect de mărire ușoară */
 }
 
+.sidebar-header .btn + .btn {
+  margin-top: 10px;
+}
+
 .filter-section {
   flex: 1;
   overflow-y: auto;
