@@ -11,10 +11,15 @@ const {
 
 const port = 3000;
 
+function withAuth(handler) {
+  return (req, res) => authenticate(req, res, () => handler(req, res));
+}
+
+
 const server = http.createServer(async (req, res) => {
   res.setHeader('Access-Control-Allow-Origin', '*');
-  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+  res.setHeader('Access-Control-Allow-Methods', '*');
+  res.setHeader('Access-Control-Allow-Headers', '*');
 
   if (req.method === 'OPTIONS') {
     res.writeHead(204);
@@ -36,28 +41,25 @@ const server = http.createServer(async (req, res) => {
 
     // Animal routes
     if(req.method === 'GET' && req.url.startsWith('/animals/all')) {
-      await getAllAnimals(req, res);
-      return;
+      return withAuth(getAllAnimals)(req, res);
     } 
 
     if (req.method === 'POST' && req.url.startsWith('/animals/details')) {
-      await getAnimalDetailsById(req, res);
+      return withAuth(getAnimalDetailsById)(req, res);
       return;
     }
 
     if (req.method === 'POST' && req.url.startsWith('/animals/species')) {
-      await findBySpecies(req, res);
+      return withAuth(findBySpecies)(req, res);
       return;
     }
 
     if (req.method === 'POST' && req.url.startsWith('/animals/create')) {
-      await createAnimal(req, res);
-      return;
+      return withAuth(createAnimal)(req, res);
     }
 
     if (req.method === 'DELETE' && req.url.startsWith('/animals/delete')) {
-      await deleteAnimal(req, res);
-      return;
+      return withAuth(deleteAnimal)(req, res);
     }
 
     // Route not found
