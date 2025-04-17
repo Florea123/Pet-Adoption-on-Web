@@ -7,6 +7,7 @@
   <link rel="stylesheet" href="Publish.css">
 </head>
 <body>
+  <button type="button" class="btn back-to-home-btn" onclick="redirectToHome()">Back to Home</button>
   <div class="container">
     <div class="card">
       <h1 class="title">Publică Animal</h1>
@@ -22,8 +23,16 @@
           <label for="species">Specie</label>
           <select id="species" name="species" onchange="updateBreedOptions()" required>
             <option value="">Selectează o specie</option>
-            <option value="dog">Câine</option>
-            <option value="cat">Pisică</option>
+            <option value="Caine">Caine</option>
+            <option value="Pisica">Pisica</option>
+            <option value="Papagal">Papagal</option>
+            <option value="Hamster">Hamster</option>
+            <option value="Iepure">Iepure</option>
+            <option value="Peste">Peste</option>
+            <option value="Broasca testoasa">Broasca testoasa</option>
+            <option value="Sobolan">Sobolan de companie</option>
+            <option value="Porcusor de Guineea">Porcusor de Guineea</option>
+            <option value="Sarpe">Sarpe</option>
           </select>
         </div>
         <div class="form-group">
@@ -53,14 +62,24 @@
         </div>
 
         <!-- Program de Hrănire -->
-        <div class="form-group full-width">
-          <label for="feedingTime">Program de Hrănire</label>
-          <input type="text" id="feedingTime" name="feedingTime" placeholder="Exemplu: 08:00:00,18:00:00" required>
+        <h2>Program de Hrănire</h2>
+        <div id="feeding-schedule-container">
+          <div class="feeding-schedule-entry">
+            <div class="form-group">
+              <label for="feedingTime">Ora Hrănire</label>
+              <input type="time" name="feedingTime" required>
+            </div>
+            <div class="form-group full-width">
+              <label for="foodType">Tip de Hrană</label>
+              <textarea name="foodType" placeholder="Introdu tipurile de hrană" rows="2"></textarea>
+            </div>
+            <button type="button" class="btn delete-entry-btn" onclick="deleteFeedingScheduleEntry(this)">Șterge</button>
+          </div>
         </div>
         <div class="form-group full-width">
-          <label for="foodType">Tip de Hrană</label>
-          <textarea id="foodType" name="foodType" placeholder="Introdu tipurile de hrană (câte una pe linie)" rows="3"></textarea>
+          <button type="button" class="btn add-entry-btn" onclick="addFeedingScheduleEntry()">+ Adaugă Program de Hrănire</button>
         </div>
+
         <div class="form-group full-width">
           <label for="notes">Notițe</label>
           <textarea id="notes" name="notes" placeholder="Introdu notițe suplimentare" rows="3"></textarea>

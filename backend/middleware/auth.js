@@ -28,6 +28,8 @@ const authenticate = (req, res, next) => {
   }
 
   const token = authHeader.split(' ')[1];
+  console.log('Token primit:', token);
+
   if (!token) {
     res.writeHead(401, { 'Content-Type': 'application/json' });
     res.end(JSON.stringify({ error: 'Token missing' }));
@@ -36,6 +38,7 @@ const authenticate = (req, res, next) => {
 
   try {
     const decoded = jwt.verify(token, secret);
+    console.log('Token decodat:', decoded);
     req.user = decoded; 
     next(); 
   } catch (err) {

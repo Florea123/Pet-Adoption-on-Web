@@ -81,6 +81,17 @@ select {
   border-radius: 5px;
   font-size: 14px;
   cursor: pointer;
+  max-height: 300px;
+  overflow-y: auto;
+}
+
+/* Stilizare pentru opțiunile din dropdown */
+select option {
+  padding: 8px;
+}
+
+select option:hover {
+  background-color: #ffe9cc;
 }
 
 textarea {
@@ -165,6 +176,13 @@ input[type="file"]:focus {
   padding-top: 10px;
 }
 
+/* Styling pentru intrările din programul de hrănire */
+.feeding-schedule-entry {
+  margin-bottom: 20px;
+  border-top: 1px solid #ccc;
+  padding-top: 10px;
+}
+
 /* Styling pentru butonul de ștergere */
 .delete-entry-btn {
   background-color: #ef4444; /* Roșu cald */
@@ -182,4 +200,41 @@ input[type="file"]:focus {
 .delete-entry-btn:hover {
   background-color: #dc2626; /* Roșu mai intens */
   transform: scale(1.02);
+}
+
+/* Ascunde butonul de ștergere */
+.delete-entry-btn.hidden {
+  display: none;
+}
+
+/* Styling pentru mesajele de eroare */
+.error-message {
+  color: #ef4444; /* Roșu pentru eroare */
+  font-size: 14px;
+  margin-top: 10px;
+}
+
+/* Styling for the back-to-home button */
+.back-to-home-btn {
+  position: fixed; /* Fixează butonul în colțul din stânga sus */
+  top: 10px; /* Distanța față de partea de sus */
+  left: 10px; /* Distanța față de partea stângă */
+  background-color: #3b82f6; /* Albastru cald */
+  color: white;
+  border: none;
+  border-radius: 8px; /* Colțuri mai rotunjite */
+  cursor: pointer;
+  font-size: 14px; /* Dimensiune mai mare a textului */
+  font-weight: 600;
+  padding: 8px 15px; /* Dimensiune mai mare a butonului */
+  width: auto; /* Lungime automată */
+  min-width: 100px; /* Lungime minimă mai mare */
+  transition: all 0.3s ease;
+  z-index: 1000; /* Asigură-te că butonul este deasupra altor elemente */
+  text-align: center; /* Text centrat */
+}
+
+.back-to-home-btn:hover {
+  background-color: #2563eb; /* Albastru mai intens */
+  transform: scale(1.1); /* Efect de mărire mai pronunțat */
 }

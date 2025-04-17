@@ -64,44 +64,94 @@ window.deleteMultimediaEntry = function(button) {
 };
 
 window.updateBreedOptions = function() {
-    const species = document.getElementById('species').value; // Preia specia selectată
-    console.log('Specie selectată:', species); // Adaugă log pentru debugging
+    const species = document.getElementById('species').value;
+    console.log('Specie selectată:', species);
 
-    const breedSelect = document.getElementById('breed'); // Selectează dropdown-ul pentru rase
-
-    // Șterge opțiunile existente
+    const breedSelect = document.getElementById('breed');
     breedSelect.innerHTML = '<option value="">Selectează o rasă</option>';
 
     // Definirea raselor pentru fiecare specie
     const breeds = {
-        dog: ['Labrador', 'Golden Retriever', 'Ciobănesc German', 'Bulldog'],
-        cat: ['Siameză', 'Persană', 'Maine Coon', 'Bengaleză']
+        'Caine': ['Labrador Retriever', 'Golden Retriever', 'Ciobanesc German', 'Bulldog', 'Beagle', 'Bichon', 'Boxer', 'Chihuahua', 'Dalmatian', 'Husky Siberian', 'Jack Russell Terrier', 'Pug', 'Rottweiler', 'Shih Tzu'],
+        'Pisica': ['Siameza', 'Persana', 'Maine Coon', 'Bengaleza', 'Birmaneza', 'British Shorthair', 'Ragdoll', 'Sphynx', 'Scottish Fold', 'Norvegiana de Padure', 'Abisiniana'],
+        'Papagal': ['Perus', 'Agapornis', 'Cacadu', 'Ara', 'Alexandrin', 'Jako', 'Rozela', 'Nimfa', 'Caique', 'Conure'],
+        'Hamster': ['Sirian', 'Roborovski', 'Campbell', 'Chinezesc', 'Albastru Rus'],
+        'Iepure': ['Dutch', 'Rex', 'Berbec', 'Iepure de Angora', 'Flemish Giant', 'Mini Lop', 'Olandez', 'California'],
+        'Peste': ['Guppy', 'Neon', 'Scalar', 'Discus', 'Betta', 'Gourami', 'Molly', 'Tetra', 'Platy', 'Corydoras'],
+        'Broasca testoasa': ['De uscat mediteraneana', 'Cu tample rosii', 'Pictata', 'De cutie', 'Acvatica', 'Muscatoare', 'De mare'],
+        'Sobolan': ['Fancy', 'Dumbo', 'Rex', 'Standard', 'Manx', 'Hairless', 'Berkshire'],
+        'Porcusor de Guineea': ['American', 'Abisinian', 'Peruvian', 'Silkie', 'Texel', 'Teddy', 'Baldwin'],
+        'Sarpe': ['Piton regal', 'Corn snake', 'Boa constrictor', 'Sarpe de lapte', 'Sarpe de casa', 'Gopher snake', 'Anaconda']
     };
 
     // Verifică dacă specia selectată are rase definite
     if (breeds[species]) {
-        console.log('Adaug rase pentru:', species); // Adaugă log pentru debugging
+        console.log('Adaug rase pentru:', species);
         breeds[species].forEach(breed => {
-            console.log('Adaug rasă:', breed); // Adaugă log pentru debugging
+            console.log('Adaug rasă:', breed);
             const option = document.createElement('option');
-            option.value = breed.toLowerCase(); // Setează valoarea opțiunii
-            option.textContent = breed; // Textul afișat în dropdown
-            breedSelect.appendChild(option); // Adaugă opțiunea în dropdown
+            option.value = breed.toLowerCase();
+            option.textContent = breed;
+            breedSelect.appendChild(option);
         });
     }
 };
 
-window.submitPublishForm = async function(event) {
-    event.preventDefault(); // Previne comportamentul implicit al formularului
+// Funcție pentru a adăuga o nouă intrare în programul de hrănire
+window.addFeedingScheduleEntry = function() {
+    const container = document.getElementById('feeding-schedule-container');
 
-    // Preia utilizatorul conectat din modelul User
-    const user = userModel.getUser();
-    if (!user || !user.id) {
-        alert('Utilizatorul nu este conectat. Te rugăm să te autentifici.');
-        window.location.href = '../Auth/SignIn.html';
-        return;
-    }
-    const userID = user.id; // Obține userID-ul utilizatorului conectat
+    const newEntry = document.createElement('div');
+    newEntry.className = 'feeding-schedule-entry';
+    newEntry.innerHTML = `
+      <div class="form-group">
+        <label for="feedingTime">Ora Hrănire</label>
+        <input type="time" name="feedingTime" required>
+      </div>
+      <div class="form-group full-width">
+        <label for="foodType">Tip de Hrană</label>
+        <textarea name="foodType" placeholder="Introdu tipurile de hrană" rows="2"></textarea>
+      </div>
+      <button type="button" class="btn delete-entry-btn" onclick="deleteFeedingScheduleEntry(this)">Șterge</button>
+    `;
+
+    container.appendChild(newEntry);
+
+    // Actualizează starea butoanelor de ștergere
+    updateDeleteButtons();
+};
+
+// Funcție pentru a șterge o intrare din programul de hrănire
+window.deleteFeedingScheduleEntry = function(button) {
+    const entry = button.parentElement;
+    entry.remove();
+
+    // Actualizează starea butoanelor de ștergere
+    updateDeleteButtons();
+};
+
+// Funcție pentru a actualiza starea butoanelor de ștergere
+function updateDeleteButtons() {
+    const entries = document.querySelectorAll('.feeding-schedule-entry');
+    entries.forEach((entry, index) => {
+        const deleteButton = entry.querySelector('.delete-entry-btn');
+        if (index === 0) {
+            deleteButton.style.display = 'none'; // Ascunde butonul pentru prima intrare
+        } else {
+            deleteButton.style.display = 'inline-block'; // Afișează butonul pentru celelalte intrări
+        }
+    });
+}
+
+// Asigură-te că butonul de ștergere este ascuns pentru prima intrare la încărcarea paginii
+document.addEventListener('DOMContentLoaded', function() {
+    updateDeleteButtons();
+});
+
+window.submitPublishForm = async function(event) {
+    event.preventDefault(); 
+
+    const userID = user.id;
 
     // Preia datele din formular
     const name = document.getElementById('name').value;
@@ -110,12 +160,20 @@ window.submitPublishForm = async function(event) {
     const age = parseInt(document.getElementById('age').value, 10);
     const gender = document.getElementById('gender').value;
 
-    // Feeding Schedule
-    const feedingSchedule = {
-        feeding_time: document.getElementById('feedingTime').value,
-        food_type: document.getElementById('foodType').value,
-        notes: document.getElementById('notes').value,
-    };
+    // Colectează toate intrările din programul de hrănire
+    const feedingSchedule = [];
+    const feedingEntries = document.querySelectorAll('.feeding-schedule-entry');
+    feedingEntries.forEach((entry) => {
+        const feedingTime = entry.querySelector('[name="feedingTime"]').value;
+        const foodType = entry.querySelector('[name="foodType"]').value;
+        feedingSchedule.push({ feedingTime, foodType });
+    });
+
+    // Verifică dacă există cel puțin o intrare în programul de hrănire
+    if (feedingSchedule.length === 0) {
+        alert('Trebuie să adăugați cel puțin o intrare în Programul de Hrănire.');
+        return;
+    }
 
     // Medical History
     const medicalHistory = {
@@ -173,7 +231,8 @@ window.submitPublishForm = async function(event) {
         relations,
     };
 
-    console.log('Payload:', payload); // Debugging
+    console.log('Payload:', payload); 
+    console.log('Payload trimis către backend:', payload);
 
     // Trimite datele către backend
     try {
@@ -188,7 +247,8 @@ window.submitPublishForm = async function(event) {
             window.location.href = '../Home/Home.html'; // Redirecționează către pagina Home
         } else {
             const error = await response.json();
-            alert(`Eroare: ${error.message}`);
+            console.error('Răspuns din backend:', error); // Log răspunsul complet
+            alert(`Eroare: ${error.error || 'A apărut o eroare necunoscută'}`);
         }
     } catch (err) {
         console.error('Eroare la trimiterea datelor:', err);
@@ -213,4 +273,8 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Inițializează alte configurări dacă este necesar
     console.log('Publish.js încărcat complet.');
-});
+  });
+
+window.redirectToHome = function() {
+    window.location.href = '../Home/Home.html';
+};

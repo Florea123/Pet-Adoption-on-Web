@@ -115,6 +115,8 @@ async function findBySpecies(req, res) {
 async function createAnimal(req, res) {
   try {
     const body = await parseRequestBody(req);
+    console.log('Date primite în backend:', body); // Log datele primite
+
     const {
       userID,
       name,
@@ -128,7 +130,6 @@ async function createAnimal(req, res) {
       relations,
     } = body;
 
-    // Validate required fields
     if (!userID || !name || !breed || !species || !age || !gender) {
       res.writeHead(400, { "Content-Type": "application/json" });
       res.end(JSON.stringify({ error: "Missing required animal fields" }));
@@ -138,7 +139,6 @@ async function createAnimal(req, res) {
     // Create the animal
     await Animal.create(userID, name, breed, species, age, gender);
 
-    // Get the ID of the newly created animal
     const animals = await Animal.findByUserId(userID);
     const newAnimal = animals.find(
       (animal) =>
@@ -153,7 +153,6 @@ async function createAnimal(req, res) {
 
     const animalId = newAnimal.ANIMALID;
 
-    // Insert feeding schedule if provided
     if (feedingSchedule) {
       const { feeding_time, food_type, notes } = feedingSchedule;
       await FeedingSchedule.create(
@@ -164,8 +163,7 @@ async function createAnimal(req, res) {
       );
     }
 
-    // Insert medical history if provided
-     if (medicalHistory) {
+    if (medicalHistory) {
       const { vetNumber, recordDate, description, first_aid_noted } =
         medicalHistory;
       // Convert recordDate to Oracle date format
@@ -179,7 +177,6 @@ async function createAnimal(req, res) {
       );
     }
 
-    // Insert multimedia if provided
     if (multimedia && multimedia.length > 0) {
       for (const media of multimedia) {
         const { mediaType, url, description } = media;
@@ -194,12 +191,10 @@ async function createAnimal(req, res) {
       }
     }
 
-    // Insert relations if provided
     if (relations && relations.friendWith) {
       await Relations.create(animalId, relations.friendWith);
     }
 
-    // Send success response with the newly created animal's ID
     res.writeHead(201, { "Content-Type": "application/json" });
     res.end(
       JSON.stringify({
@@ -208,7 +203,7 @@ async function createAnimal(req, res) {
       })
     );
   } catch (err) {
-    console.error("Error parsing request or creating animal:", err);
+    console.error("Eroare în backend:", err);
     res.writeHead(400, { "Content-Type": "application/json" });
     res.end(
       JSON.stringify({ error: "Invalid request data or database error" })
