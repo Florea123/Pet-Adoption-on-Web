@@ -71,8 +71,6 @@ window.deleteMultimediaEntry = function(button) {
 
 window.updateBreedOptions = function() {
     const species = document.getElementById('species').value; // Preia specia selectată
-    console.log('Specie selectată:', species); // Adaugă log pentru debugging
-
     const breedSelect = document.getElementById('breed'); // Selectează dropdown-ul pentru rase
 
     // Șterge opțiunile existente
@@ -81,14 +79,19 @@ window.updateBreedOptions = function() {
     // Definirea raselor pentru fiecare specie
     const breeds = {
         Câine: ['Labrador', 'Golden Retriever', 'Ciobănesc German', 'Bulldog'],
-        Pisică: ['Siameză', 'Persană', 'Maine Coon', 'Bengaleză']
+        Pisică: ['Siameză', 'Persană', 'Maine Coon', 'Bengaleză'],
+        Papagal: ['Ara', 'Cacadu', 'Peruș', 'Nimfă'],
+        Hamster: ['Sirian', 'Pitic Alb', 'Roborovski', 'Chinezesc'],
+        Iepure: ['Olandez', 'Cap de Leu', 'Rex', 'Fluture'],
+        Pește: ['Guppy', 'Neon', 'Betta', 'Scalar'],
+        'Broască Țestoasă': ['Țestoasă de Florida', 'Țestoasă Grecească', 'Țestoasă de Apă'],
+        Șarpe: ['Python Regal', 'Boa Constrictor', 'Șarpe de Porumb'],
+        'Porcușor de Guineea': ['Abisinian', 'American', 'Peruvian', 'Texel']
     };
 
     // Verifică dacă specia selectată are rase definite
     if (breeds[species]) {
-        console.log('Adaug rase pentru:', species); // Adaugă log pentru debugging
         breeds[species].forEach(breed => {
-            console.log('Adaug rasă:', breed); // Adaugă log pentru debugging
             const option = document.createElement('option');
             option.value = breed.toLowerCase(); // Setează valoarea opțiunii
             option.textContent = breed; // Textul afișat în dropdown
@@ -97,26 +100,74 @@ window.updateBreedOptions = function() {
     }
 };
 
+// Funcție pentru a adăuga o nouă intrare în programul de hrănire
+window.addFeedingScheduleEntry = function() {
+    const container = document.getElementById('feeding-schedule-container');
+
+    const newEntry = document.createElement('div');
+    newEntry.className = 'feeding-schedule-entry';
+    newEntry.innerHTML = `
+      <div class="form-group">
+        <label for="feedingTime">Ora Hrănire</label>
+        <input type="time" name="feedingTime" required>
+      </div>
+      <div class="form-group full-width">
+        <label for="foodType">Tip de Hrană</label>
+        <textarea name="foodType" placeholder="Introdu tipurile de hrană" rows="2"></textarea>
+      </div>
+      <button type="button" class="btn delete-entry-btn" onclick="deleteFeedingScheduleEntry(this)">Șterge</button>
+    `;
+
+    container.appendChild(newEntry);
+};
+
+// Funcție pentru a șterge o intrare din programul de hrănire
+window.deleteFeedingScheduleEntry = function(button) {
+    const container = document.getElementById('feeding-schedule-container');
+    const entries = container.querySelectorAll('.feeding-schedule-entry');
+
+    // Permite ștergerea doar dacă există mai mult de o intrare
+    if (entries.length > 1) {
+        const entry = button.parentElement;
+        entry.remove();
+        updateDeleteButtons(); // Actualizează starea butoanelor de ștergere
+    } else {
+        alert('Prima intrare nu poate fi ștearsă.');
+    }
+};
+
+// Funcție pentru a actualiza starea butoanelor de ștergere
+function updateDeleteButtons() {
+    const entries = document.querySelectorAll('.feeding-schedule-entry');
+    entries.forEach((entry, index) => {
+        const deleteButton = entry.querySelector('.delete-entry-btn');
+        if (index === 0) {
+            deleteButton.style.display = 'none'; // Ascunde butonul pentru prima intrare
+        } else {
+            deleteButton.style.display = 'inline-block'; // Afișează butonul pentru celelalte intrări
+        }
+    });
+}
+
+// Medical History
 window.submitPublishForm = async function(event) {
-    event.preventDefault(); 
+    event.preventDefault();
 
-    //const user = userModel.getUser();
-  
     const userID = user.id;
-
-    // Preia datele din formular
     const name = document.getElementById('name').value;
     const species = document.getElementById('species').value;
     const breed = document.getElementById('breed').value;
     const age = parseInt(document.getElementById('age').value, 10);
     const gender = document.getElementById('gender').value;
 
-    // Feeding Schedule
-    const feedingSchedule = {
-        feeding_time: document.getElementById('feedingTime').value,
-        food_type: document.getElementById('foodType').value,
-        notes: document.getElementById('notes').value,
-    };
+    // Colectează toate intrările din programul de hrănire
+    const feedingSchedule = [];
+    const feedingEntries = document.querySelectorAll('.feeding-schedule-entry');
+    feedingEntries.forEach((entry) => {
+        const feedingTime = entry.querySelector('[name="feedingTime"]').value;
+        const foodType = entry.querySelector('[name="foodType"]').value;
+        feedingSchedule.push({ feedingTime, foodType });
+    });
 
     // Medical History
     const medicalHistory = {
@@ -174,7 +225,7 @@ window.submitPublishForm = async function(event) {
         relations,
     };
 
-    console.log('Payload:', payload); 
+    console.log('Payload trimis către backend:', payload);
 
     // Trimite datele către backend
     try {
@@ -192,7 +243,8 @@ window.submitPublishForm = async function(event) {
             window.location.href = '../Home/Home.html'; 
         } else {
             const error = await response.json();
-            alert(`Eroare: ${error.message}`);
+            console.error('Răspuns din backend:', error);
+            alert(`Eroare: ${error.error || 'A apărut o eroare necunoscută'}`);
         }
     } catch (err) {
         console.error('Eroare la trimiterea datelor:', err);
@@ -200,8 +252,9 @@ window.submitPublishForm = async function(event) {
     }
 };
 
-// Adaugă un eveniment când documentul este încărcat complet
+// Asigură-te că butonul de ștergere este ascuns pentru prima intrare la încărcarea paginii
 document.addEventListener('DOMContentLoaded', function() {
+    updateDeleteButtons();
 
     // Check if user is authenticated before loading page content
     user = requireAuth();
@@ -222,4 +275,8 @@ document.addEventListener('DOMContentLoaded', function() {
   
     // Inițializează alte configurări dacă este necesar
     console.log('Publish.js încărcat complet.');
-  });
+});
+
+window.redirectToHome = function() {
+    window.location.href = '../Home/Home.html';
+};
