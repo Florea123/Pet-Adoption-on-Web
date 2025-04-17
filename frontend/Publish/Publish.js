@@ -5,6 +5,13 @@ const API_URL = 'http://localhost:3000';
 const token = localStorage.getItem('Token');
 let user; 
 
+import userModel from '../models/User.js'; 
+import { requireAuth } from '../utils/authUtils.js'; 
+
+const API_URL = 'http://localhost:3000'; 
+const token = localStorage.getItem('Token');
+let user; 
+
 
 // Definește funcțiile ca globale pentru a fi accesibile din HTML
 window.addMedicalHistoryEntry = function() {
@@ -201,6 +208,7 @@ window.submitPublishForm = async function(event) {
             multimedia.push({
                 mediaType,
                 url: URL.createObjectURL(file), 
+                url: URL.createObjectURL(file), 
                 description,
             });
         }
@@ -230,7 +238,12 @@ window.submitPublishForm = async function(event) {
     // Trimite datele către backend
     try {
         const response = await fetch(`${API_URL}/animals/create`, {
+        const response = await fetch(`${API_URL}/animals/create`, {
             method: 'POST',
+            headers: { 
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`
+            },
             headers: { 
                 'Content-Type': 'application/json',
                 'Authorization': `Bearer ${token}`
@@ -240,6 +253,7 @@ window.submitPublishForm = async function(event) {
 
         if (response.ok) {
             alert('Animal publicat cu succes!');
+            window.location.href = '../Home/Home.html'; 
             window.location.href = '../Home/Home.html'; 
         } else {
             const error = await response.json();
@@ -271,7 +285,16 @@ document.addEventListener('DOMContentLoaded', function() {
           console.log('No file selected');
         }
       });
+      photoInput.addEventListener('change', function(event) {
+        const file = event.target.files[0];
+        if (file) {
+          console.log('Selected file:', file.name);
+        } else {
+          console.log('No file selected');
+        }
+      });
     }
+  
   
     // Inițializează alte configurări dacă este necesar
     console.log('Publish.js încărcat complet.');
