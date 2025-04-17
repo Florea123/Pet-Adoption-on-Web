@@ -115,8 +115,6 @@ async function findBySpecies(req, res) {
 async function createAnimal(req, res) {
   try {
     const body = await parseRequestBody(req);
-    console.log('Date primite în backend:', body); // Log datele primite
-
     const {
       userID,
       name,
@@ -130,6 +128,7 @@ async function createAnimal(req, res) {
       relations,
     } = body;
 
+    
     if (!userID || !name || !breed || !species || !age || !gender) {
       res.writeHead(400, { "Content-Type": "application/json" });
       res.end(JSON.stringify({ error: "Missing required animal fields" }));
@@ -139,6 +138,7 @@ async function createAnimal(req, res) {
     // Create the animal
     await Animal.create(userID, name, breed, species, age, gender);
 
+   
     const animals = await Animal.findByUserId(userID);
     const newAnimal = animals.find(
       (animal) =>
@@ -153,6 +153,7 @@ async function createAnimal(req, res) {
 
     const animalId = newAnimal.ANIMALID;
 
+    
     if (feedingSchedule) {
       const { feeding_time, food_type, notes } = feedingSchedule;
       await FeedingSchedule.create(
@@ -163,7 +164,8 @@ async function createAnimal(req, res) {
       );
     }
 
-    if (medicalHistory) {
+    
+     if (medicalHistory) {
       const { vetNumber, recordDate, description, first_aid_noted } =
         medicalHistory;
       // Convert recordDate to Oracle date format
@@ -176,6 +178,7 @@ async function createAnimal(req, res) {
         first_aid_noted
       );
     }
+
 
     if (multimedia && multimedia.length > 0) {
       for (const media of multimedia) {
@@ -191,10 +194,12 @@ async function createAnimal(req, res) {
       }
     }
 
+    
     if (relations && relations.friendWith) {
       await Relations.create(animalId, relations.friendWith);
     }
 
+    
     res.writeHead(201, { "Content-Type": "application/json" });
     res.end(
       JSON.stringify({
@@ -203,11 +208,44 @@ async function createAnimal(req, res) {
       })
     );
   } catch (err) {
-    console.error("Eroare în backend:", err);
+    console.error("Error parsing request or creating animal:", err);
     res.writeHead(400, { "Content-Type": "application/json" });
     res.end(
       JSON.stringify({ error: "Invalid request data or database error" })
     );
+  }
+}
+
+async function deleteAnimal(req, res) {
+  try {
+    const body = await parseRequestBody(req);
+    const { animalId } = body;
+
+    if (!animalId) {
+      res.writeHead(400, { "Content-Type": "application/json" });
+      res.end(JSON.stringify({ error: "Animal ID is required" }));
+      return;
+    }
+
+    // Check if animal exists
+    const animal = await Animal.findById(animalId);
+    if (!animal) {
+      res.writeHead(404, { "Content-Type": "application/json" });
+      res.end(JSON.stringify({ error: "Animal not found" }));
+      return;
+    }
+
+    // Delete the animal and all related data
+    await Animal.deleteAnimalWithRelatedData(animalId);
+
+    res.writeHead(200, { "Content-Type": "application/json" });
+    res.end(JSON.stringify({ 
+      message: "Animal and all related data successfully deleted",
+    }));
+  } catch (err) {
+    console.error("Error deleting animal:", err);
+    res.writeHead(500, { "Content-Type": "application/json" });
+    res.end(JSON.stringify({ error: "Internal Server Error" }));
   }
 }
 
@@ -216,4 +254,6 @@ module.exports = {
   getAnimalDetailsById,
   findBySpecies,
   createAnimal,
+  deleteAnimal
 };
+

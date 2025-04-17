@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Animals</title>
+    <link rel="stylesheet" href="../Home/Home.css">
+    <link rel="stylesheet" href="User_Animals.css">
+</head>
+<body>
+    <div class="app-container">
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <h1>Pet Adoption</h1>
+                <button id="publish-btn" class="btn" onclick="location.href='../Publish/Publish.html'">Publish</button>
+                <button id="my-animals-btn" class="btn active" onclick="location.href='./User_Animals.html'">My Animals</button>
+                <button id="home-btn" class="btn" onclick="location.href='../Home/Home.html'">Home</button>
+            </div>
+            <!-- User info section at the bottom of sidebar -->
+            <div class="user-section">
+                <div id="user-info">
+                    <!-- User info will be populated dynamically -->
+                    <div class="loader">Loading user info...</div>
+                </div>
+            </div>
+        </aside>
+        
+        <main class="main-content">
+            <h1 class="page-title">My Animals</h1>
+            <div id="my-animals-container" class="cards-container">
+                <!-- User's animals will be displayed here -->
+                <div class="loader">Loading your animals...</div>
+            </div>
+        </main>
+    </div>
+    
+    <script type="module" src="User_Animals.js"></script>
+</body>
+</html>

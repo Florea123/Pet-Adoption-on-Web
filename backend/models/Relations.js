@@ -30,6 +30,21 @@ class Relations {
       await connection.close();
     }
   }
+  
+  static async deleteByAnimalId(animalId) {
+    const connection = await getConnection();
+    try {
+      const result = await connection.execute(
+        `DELETE FROM Relations WHERE animalId = :animalId`,
+        { animalId },
+        { autoCommit: true }
+      );
+      return result.rowsAffected > 0;
+    } finally {
+      await connection.close();
+    }
+  }
+  
 }
 
 module.exports = Relations;

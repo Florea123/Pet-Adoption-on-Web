@@ -22,7 +22,7 @@ async function initialize() {
 // Function to fetch animals belonging to the current user
 async function fetchUserAnimals() {
     try {
-        // Cererea include header-ul Authorization
+        // Use the findByUserId endpoint to fetch all animals for the user
         const response = await fetch(`${API_URL}/animals/all`, {
             method: 'GET',
             headers: {
@@ -93,12 +93,6 @@ function displayUserAnimals(animals) {
 async function handleDeleteAnimal(event) {
     const animalId = event.target.dataset.animalId;
     
-    if (!token) {
-        alert('You need to be logged in to delete animals');
-        window.location.href = '../Auth/SignIn.html';
-        return;
-    }
-    
     if (!confirm('Are you sure you want to delete this animal?')) {
         return;
     }
@@ -106,25 +100,9 @@ async function handleDeleteAnimal(event) {
     try {
         const response = await fetch(`${API_URL}/animals/delete`, {
             method: 'DELETE',
-            headers: { 
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${token}`  // Adaugă token-ul de autorizare
-            },
+            headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ animalId: parseInt(animalId) })
         });
-
-        if (!response.ok) {
-            if (response.status === 401) {
-                alert('Your session has expired. Please log in again.');
-                window.location.href = '../Auth/SignIn.html';
-            } else if (response.status === 403) {
-                alert('You do not have permission to delete this animal.');
-            } else {
-                const error = await response.json();
-                alert(`Error: ${error.error || 'Failed to delete animal'}`);
-            }
-            return;
-        }
 
         if (response.ok) {
             // Remove the deleted animal from the UI

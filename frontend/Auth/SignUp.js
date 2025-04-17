@@ -1,4 +1,12 @@
+import { redirectIfLoggedIn } from '../utils/authUtils.js';
 const API_URL = 'http://localhost:3000';
+
+
+document.addEventListener('DOMContentLoaded', function() {
+  // If user is already logged in, redirect to home page
+  if (redirectIfLoggedIn()) return;
+});
+
 
 document.getElementById('signUpForm').addEventListener('submit', async (event) => {
   event.preventDefault();

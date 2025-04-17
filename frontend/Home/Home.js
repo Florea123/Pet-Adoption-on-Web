@@ -1,15 +1,20 @@
 import userModel from '../models/User.js';
+import { requireAuth } from '../utils/authUtils.js';
 
 const API_URL = 'http://localhost:3000';
-const user = userModel.getUser();
+const token = localStorage.getItem('Token');
 
+//const user = userModel.getUser();
+let user;
 // Store all animals and species data
 let allAnimals = [];
 let uniqueSpecies = new Set();
 let selectedSpecies = new Set();
 
-// Initial data loading
 async function initialize() {
+  user = requireAuth();
+  if (!user) return;
+  
   await fetchAnimals();
   renderSpeciesFilters();
   displayUserInfo();
@@ -72,7 +77,13 @@ function disconnectUser() {
 // Existing code for fetching animals
 async function fetchAnimals() {
   try {
-    const response = await fetch(`${API_URL}/animals/all`);
+    const response = await fetch(`${API_URL}/animals/all`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`
+      }
+    });
     if (!response.ok) {
       throw new Error('Failed to fetch animals');
     }
@@ -149,7 +160,7 @@ function filterAnimals() {
 
 function displayAnimals(animals) {
   const container = document.getElementById('animal-cards-container');
-  container.innerHTML = '';
+  container.innerHTML = ''; 
 
   if (animals.length === 0) {
     container.innerHTML = '<div class="no-results">No animals match your filters</div>';
@@ -170,21 +181,19 @@ function displayAnimals(animals) {
       </div>
     `;
 
-    card.addEventListener('click', () => {
-      console.log('Card clicked:', animal.ANIMALID); // Log pentru a verifica dacă evenimentul este declanșat
-      openAnimalDetailsPopup(animal.ANIMALID);
-    });
-
+    card.addEventListener('click', () => openAnimalDetailsPopup(animal.ANIMALID));
     container.appendChild(card);
   });
 }
 
 async function openAnimalDetailsPopup(animalId) {
-  console.log('Animal ID:', animalId); // Log pentru a verifica dacă funcția este apelată
   try {
     const response = await fetch(`${API_URL}/animals/details`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: { 
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`
+      },
       body: JSON.stringify({ animalId }),
     });
 
@@ -193,7 +202,6 @@ async function openAnimalDetailsPopup(animalId) {
     }
 
     const animalDetails = await response.json();
-    console.log('Animal Details:', animalDetails); // Log pentru a verifica datele primite
     showPopup(animalDetails);
   } catch (error) {
     console.error('Error fetching animal details:', error);
@@ -201,109 +209,34 @@ async function openAnimalDetailsPopup(animalId) {
 }
 
 function showPopup(details) {
-  console.log('Popup details:', details); // Log pentru a verifica datele primite
   const popup = document.createElement('div');
   popup.className = 'popup';
 
-  // Prima multimedia este poza principală
-  const mainImage = details.multimedia[0]?.URL || 'https://via.placeholder.com/300x200?text=No+Image';
-
-  // Generare HTML pentru medicalHistory
-  const medicalHistory = details.medicalHistory.length > 0
-    ? details.medicalHistory.map((entry) => `
-        <li><strong>Date:</strong> ${entry.recordDate || 'N/A'} - <strong>Description:</strong> ${entry.description || 'N/A'}</li>
-      `).join('')
-    : '<li>No medical history available</li>';
-
-  // Generare HTML pentru feedingSchedule
-  const feedingSchedule = details.feedingSchedule.length > 0
-    ? details.feedingSchedule.map((entry) => `
-        <li><strong>Time:</strong> ${entry.feedingTime || 'N/A'} - <strong>Food:</strong> ${entry.foodType || 'N/A'}</li>
-      `).join('')
-    : '<li>No feeding schedule available</li>';
-
-  // Generare HTML pentru relations
-  const relations = details.relations?.friendWith
-    ? `<p>${details.relations.friendWith}</p>`
-    : '<p>No relations available</p>';
+  const multimedia = details.multimedia.map(
+    (media) => `<img src="${media.URL}" alt="${media.DESCRIPTION}" />`
+  ).join('');
 
   popup.innerHTML = `
     <div class="popup-content">
       <span class="close-btn">&times;</span>
-      <div class="popup-left">
-        <img src="${mainImage}" alt="${details.animal.NAME}" class="main-image">
-        <div class="additional-info">
-          <h3>Medical History</h3>
-          <ul>${medicalHistory}</ul>
-          <h3>Feeding Schedule</h3>
-          <ul>${feedingSchedule}</ul>
-          <h3>Relations</h3>
-          ${relations}
-        </div>
-      </div>
-      <div class="popup-right">
-        <h2>${details.animal.NAME}</h2>
-        <p><strong>Breed:</strong> ${details.animal.BREED}</p>
-        <p><strong>Species:</strong> ${details.animal.SPECIES}</p>
-        <p><strong>Age:</strong> ${details.animal.AGE}</p>
-        <p><strong>Gender:</strong> ${details.animal.GENDER === 'male' ? 'Male' : 'Female'}</p>
-        <p><strong>Owner:</strong> ${details.owner.FIRSTNAME} ${details.owner.LASTNAME}</p>
-        <p><strong>City:</strong> ${details.address[0]?.CITY || 'Unknown'}</p>
-      </div>
+      <h2>${details.animal.NAME}</h2>
+      <p><strong>Breed:</strong> ${details.animal.BREED}</p>
+      <p><strong>Species:</strong> ${details.animal.SPECIES}</p>
+      <p><strong>Age:</strong> ${details.animal.AGE}</p>
+      <p><strong>Gender:</strong> ${details.animal.GENDER}</p>
+      <p><strong>Owner:</strong> ${details.owner.FIRSTNAME} ${details.owner.LASTNAME}</p>
+      <p><strong>Address:</strong> ${details.address[0]?.STREET}, ${details.address[0]?.CITY}, ${details.address[0]?.STATE}, ${details.address[0]?.COUNTRY}</p>
+      <h3>Multimedia</h3>
+      <div class="multimedia">${multimedia}</div>
     </div>
   `;
 
-  // Închide popup-ul la clic pe butonul de închidere
+  // Close popup on clicking the close button
   popup.querySelector('.close-btn').addEventListener('click', () => {
     popup.remove();
   });
 
   document.body.appendChild(popup);
-  console.log('Popup added to DOM'); // Log pentru a verifica dacă popup-ul este adăugat
-}
-
-async function getAnimalDetailsById(req, res) {
-  try {
-    const body = await parseRequestBody(req);
-    console.log('Request body:', body); // Log pentru a verifica datele primite
-    const { animalId } = body;
-
-    if (!animalId) {
-      res.writeHead(400, { "Content-Type": "application/json" });
-      res.end(JSON.stringify({ error: "Animal ID is required" }));
-      return;
-    }
-
-    const animal = await Animal.findById(animalId);
-    if (!animal) {
-      res.writeHead(404, { "Content-Type": "application/json" });
-      res.end(JSON.stringify({ error: "Animal not found" }));
-      return;
-    }
-
-    const multimedia = await MultiMedia.findByAnimalId(animalId);
-    const feedingSchedule = await FeedingSchedule.findByAnimalId(animalId);
-    const medicalHistory = await MedicalHistory.findByAnimalId(animalId);
-    const owner = await User.findById(animal.USERID);
-    const address = await Address.findByUserId(animal.USERID);
-
-    const response = {
-      animal,
-      multimedia,
-      feedingSchedule,
-      medicalHistory,
-      owner,
-      address,
-    };
-
-    console.log('Animal details response:', response); // Log pentru a verifica răspunsul
-    res.writeHead(200, { "Content-Type": "application/json" });
-    res.end(JSON.stringify(response));
-  } catch (err) {
-    console.error("Error fetching animal details:", err);
-    res.writeHead(500, { "Content-Type": "application/json" });
-    res.end(JSON.stringify({ error: "Internal Server Error" }));
-  }
 }
 
 // Initialize the page
