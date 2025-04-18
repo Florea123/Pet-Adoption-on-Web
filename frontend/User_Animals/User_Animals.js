@@ -100,7 +100,10 @@ async function handleDeleteAnimal(event) {
     try {
         const response = await fetch(`${API_URL}/animals/delete`, {
             method: 'DELETE',
-            headers: { 'Content-Type': 'application/json' },
+            headers: { 
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`
+             },
             body: JSON.stringify({ animalId: parseInt(animalId) })
         });
 

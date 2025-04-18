@@ -1,14 +1,14 @@
 const { getConnection } = require('../db');
-const  oracledb = require('oracledb');
+const oracledb = require('oracledb');
 
 class MultiMedia {
-  static async create(animal_id, media, url, description, upload_date) {
+  static async create(animalID, media, url, description, upload_date) {
     const connection = await getConnection();
     try {
       const result = await connection.execute(
-        `INSERT INTO MultiMedia (animal_id, media, url, description, upload_date) 
-         VALUES (:animal_id, :media, :url, :description, :upload_date)`,
-        { animal_id, media, url, description, upload_date },
+        `INSERT INTO MultiMedia (animalID, media, url, description, upload_date) 
+         VALUES (:animalID, :media, :url, :description, :upload_date)`,
+        { animalID, media, url, description, upload_date },
         { autoCommit: true }
       );
       return result;
@@ -17,12 +17,12 @@ class MultiMedia {
     }
   }
 
-  static async findByAnimalId(animal_id) {
+  static async findByAnimalId(animalID) {
     const connection = await getConnection();
     try {
       const result = await connection.execute(
-        `SELECT * FROM MultiMedia WHERE animal_id = :animal_id`,
-        { animal_id },
+        `SELECT * FROM MultiMedia WHERE animalID = :animalID`,
+        { animalID },
         { outFormat: oracledb.OUT_FORMAT_OBJECT }
       );
       return result.rows;
@@ -31,12 +31,12 @@ class MultiMedia {
     }
   }
 
-  static async findByAnimalIdOnePhoto(animal_id) {
+  static async findByAnimalIdOnePhoto(animalID) {
     const connection = await getConnection();
     try {
       const result = await connection.execute(
-        `SELECT * FROM MultiMedia WHERE animal_id = :animal_id AND ROWNUM = 1`,
-        { animal_id },
+        `SELECT * FROM MultiMedia WHERE animalID = :animalID AND ROWNUM = 1`,
+        { animalID },
         { outFormat: oracledb.OUT_FORMAT_OBJECT }
       );
       return result.rows;
@@ -45,12 +45,12 @@ class MultiMedia {
     }
   }
 
-  static async deleteByAnimalId(animal_id) {
+  static async deleteByAnimalId(animalID) {
     const connection = await getConnection();
     try {
       const result = await connection.execute(
-        `DELETE FROM MultiMedia WHERE animal_id = :animal_id`,
-        { animal_id },
+        `DELETE FROM MultiMedia WHERE animalID = :animalID`,
+        { animalID },
         { autoCommit: true }
       );
       return result.rowsAffected > 0;
@@ -58,7 +58,6 @@ class MultiMedia {
       await connection.close();
     }
   }
-
 }
 
 module.exports = MultiMedia;

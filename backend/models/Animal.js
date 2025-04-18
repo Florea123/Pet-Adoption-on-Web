@@ -73,7 +73,7 @@ class Animal {
     }
   }
 
-  static async deleteAnimalWithRelatedData(animalId) {
+  static async deleteAnimalWithRelatedData(animalID) {
     const connection = await getConnection();
     try {
       // Import required models first
@@ -83,37 +83,36 @@ class Animal {
       const MedicalHistory = require('./MedicalHistory');
       
       try {
-        await Relations.deleteByAnimalId(animalId);
+        await Relations.deleteByAnimalId(animalID);
         console.log(`Relations deleted`);
       } catch (err) {
         console.error('Error deleting relations:', err);
       }
       
       try {
-        await MultiMedia.deleteByAnimalId(animalId);
+        await MultiMedia.deleteByAnimalId(animalID);
         console.log(`Multimedia deleted`);
       } catch (err) {
         console.error('Error deleting multimedia:', err);
       }
       
       try {
-        await FeedingSchedule.deleteByAnimalId(animalId);
+        await FeedingSchedule.deleteByAnimalId(animalID);
         console.log(`Feeding schedule deleted`);
       } catch (err) {
         console.error('Error deleting feeding schedule:', err);
       }
       
       try {
-        await MedicalHistory.deleteByAnimalId(animalId);
+        await MedicalHistory.deleteByAnimalId(animalID);
         console.log(`Medical history deleted`);
       } catch (err) {
         console.error('Error deleting medical history:', err);
       }
-      
 
       const animalResult = await connection.execute(
-        `DELETE FROM Animal WHERE animalID = :animalId`,
-        { animalId },
+        `DELETE FROM Animal WHERE animalID = :animalID`,
+        { animalID },
         { autoCommit: true } 
       );
       
@@ -131,7 +130,6 @@ class Animal {
       }
     }
   }
-
 }
 
 module.exports = Animal;
