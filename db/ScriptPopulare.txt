@@ -1,4 +1,4 @@
-BEGIN
+=BEGIN
     -- Inserare Users
     INSERT INTO Users (firstName, lastName, email, password, phone)
     VALUES ('Andrei', 'Popescu', 'andrei.popescu@example.com', 'hashed_password_123', '0755123456');
@@ -39,20 +39,20 @@ BEGIN
     VALUES (4, 'Bella', 'Siameză', 'Pisică', 4, 'female');
 
     -- Inserare MedicalHistory
-    INSERT INTO MedicalHistory (animal_id, vetNumber, recordDate, description, first_aid_noted)
+    INSERT INTO MedicalHistory (animalID, vetNumber, recordDate, description, first_aid_noted)
     VALUES (1, 'VET001', SYSDATE, 'Tratament pentru infecție respiratorie', 'Da');
     
-    INSERT INTO MedicalHistory (animal_id, vetNumber, recordDate, description, first_aid_noted)
+    INSERT INTO MedicalHistory (animalID, vetNumber, recordDate, description, first_aid_noted)
     VALUES (2, 'VET002', SYSDATE, 'Vaccinare antirabică', 'Nu');
 
-    INSERT INTO MedicalHistory (animal_id, vetNumber, recordDate, description, first_aid_noted)
+    INSERT INTO MedicalHistory (animalID, vetNumber, recordDate, description, first_aid_noted)
     VALUES (3, 'VET003', SYSDATE, 'Tratament pentru alergii', 'Da');
 
-    INSERT INTO MedicalHistory (animal_id, vetNumber, recordDate, description, first_aid_noted)
+    INSERT INTO MedicalHistory (animalID, vetNumber, recordDate, description, first_aid_noted)
     VALUES (4, 'VET004', SYSDATE, 'Sterilizare', 'Nu');
 
     -- Inserare FeedingSchedule
-    INSERT INTO FeedingSchedule (animal_id, feeding_time, food_type, notes)
+    INSERT INTO FeedingSchedule (animalID, feeding_time, food_type, notes)
     VALUES (
         1, 
         feeding_time_array(
@@ -63,7 +63,7 @@ BEGIN
         'Dimineața și seara'
     );
     
-    INSERT INTO FeedingSchedule (animal_id, feeding_time, food_type, notes)
+    INSERT INTO FeedingSchedule (animalID, feeding_time, food_type, notes)
     VALUES (
         2, 
         feeding_time_array(
@@ -74,7 +74,7 @@ BEGIN
         'Se hrănește cu lapte'
     );
 
-    INSERT INTO FeedingSchedule (animal_id, feeding_time, food_type, notes)
+    INSERT INTO FeedingSchedule (animalID, feeding_time, food_type, notes)
     VALUES (
         3, 
         feeding_time_array(
@@ -85,7 +85,7 @@ BEGIN
         'Dimineața și seara'
     );
 
-    INSERT INTO FeedingSchedule (animal_id, feeding_time, food_type, notes)
+    INSERT INTO FeedingSchedule (animalID, feeding_time, food_type, notes)
     VALUES (
         4, 
         feeding_time_array(
@@ -97,29 +97,29 @@ BEGIN
     );
 
     -- Inserare MultiMedia
-    INSERT INTO MultiMedia (animal_id, media, url, description, upload_date)
+    INSERT INTO MultiMedia (animalID, media, url, description, upload_date)
     VALUES (1, 'photo', 'http://exemplu.com/foto_rex.jpg', 'Fotografie cu Rex', SYSDATE);
     
-    INSERT INTO MultiMedia (animal_id, media, url, description, upload_date)
+    INSERT INTO MultiMedia (animalID, media, url, description, upload_date)
     VALUES (2, 'video', 'http://exemplu.com/video_luna.mp4', 'Video cu Luna jucându-se', SYSDATE);
 
-    INSERT INTO MultiMedia (animal_id, media, url, description, upload_date)
+    INSERT INTO MultiMedia (animalID, media, url, description, upload_date)
     VALUES (3, 'photo', 'http://exemplu.com/foto_max.jpg', 'Fotografie cu Max', SYSDATE);
 
-    INSERT INTO MultiMedia (animal_id, media, url, description, upload_date)
+    INSERT INTO MultiMedia (animalID, media, url, description, upload_date)
     VALUES (4, 'video', 'http://exemplu.com/video_bella.mp4', 'Video cu Bella dormind', SYSDATE);
 
     -- Inserare Relations
-    INSERT INTO Relations (animalId, friendWith)
+    INSERT INTO Relations (animalID, friendWith)
     VALUES (1, 'Luna');
     
-    INSERT INTO Relations (animalId, friendWith)
+    INSERT INTO Relations (animalID, friendWith)
     VALUES (2, 'Rex');
 
-    INSERT INTO Relations (animalId, friendWith)
+    INSERT INTO Relations (animalID, friendWith)
     VALUES (3, 'Bella');
 
-    INSERT INTO Relations (animalId, friendWith)
+    INSERT INTO Relations (animalID, friendWith)
     VALUES (4, 'Max');
 
     -- Commit pentru a salva datele

@@ -165,6 +165,13 @@ input[type="file"]:focus {
   padding-top: 10px;
 }
 
+/* Styling pentru intrările din programul de hrănire */
+.feeding-schedule-entry {
+  margin-bottom: 20px;
+  border-top: 1px solid #ccc;
+  padding-top: 10px;
+}
+
 /* Styling pentru butonul de ștergere */
 .delete-entry-btn {
   background-color: #ef4444; /* Roșu cald */
@@ -182,4 +189,33 @@ input[type="file"]:focus {
 .delete-entry-btn:hover {
   background-color: #dc2626; /* Roșu mai intens */
   transform: scale(1.02);
+}
+
+/* Ascunde butonul de ștergere */
+.delete-entry-btn.hidden {
+  display: none;
+}
+
+/* Poziționează butonul "Back to Home" în colțul din stânga sus */
+.back-to-home-btn {
+  position: fixed; /* Fixează butonul în colțul din stânga sus */
+  top: 10px; /* Distanța față de partea de sus */
+  left: 10px; /* Distanța față de partea stângă */
+  background-color: #3b82f6; /* Albastru cald */
+  color: white;
+  border: none;
+  border-radius: 5px; /* Colțuri rotunjite */
+  cursor: pointer;
+  font-size: 14px; /* Dimensiune mai mică a textului */
+  font-weight: 600;
+  padding: 8px 12px; /* Dimensiune mai mică a butonului */
+  transition: all 0.3s ease;
+  z-index: 1000; /* Asigură-te că butonul este deasupra altor elemente */
+  text-align: center;
+  width: auto; /* Elimină extinderea pe toată linia */
+}
+
+.back-to-home-btn:hover {
+  background-color: #2563eb; /* Albastru mai intens */
+  transform: scale(1.05); /* Efect de mărire ușoară */
 }

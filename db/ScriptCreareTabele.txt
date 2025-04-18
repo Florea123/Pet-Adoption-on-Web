@@ -48,38 +48,38 @@ CREATE TABLE Animal (
 
 CREATE TABLE MedicalHistory (
     id NUMBER PRIMARY KEY,
-    animal_id NUMBER,
+    animalID NUMBER,
     vetNumber VARCHAR2(50),
     recordDate DATE,
     description VARCHAR2(4000),
     first_aid_noted VARCHAR2(4000),
-    CONSTRAINT fk_medical_animal FOREIGN KEY (animal_id) REFERENCES Animal(animalID)
+    CONSTRAINT fk_medical_animal FOREIGN KEY (animalID) REFERENCES Animal(animalID)
 );
 
 CREATE TABLE FeedingSchedule (
     id NUMBER PRIMARY KEY,
-    animal_id NUMBER UNIQUE,
+    animalID NUMBER UNIQUE,
     feeding_time feeding_time_array,
     food_type VARCHAR2(100),
     notes VARCHAR2(4000),
-    CONSTRAINT fk_feeding_animal FOREIGN KEY (animal_id) REFERENCES Animal(animalID)
+    CONSTRAINT fk_feeding_animal FOREIGN KEY (animalID) REFERENCES Animal(animalID)
 );
 
 CREATE TABLE MultiMedia (
     id NUMBER PRIMARY KEY,
-    animal_id NUMBER,
+    animalID NUMBER,
     media VARCHAR2(10) CHECK (media IN ('photo', 'video', 'audio')),
     url VARCHAR2(1000),
     description VARCHAR2(4000),
     upload_date DATE,
-    CONSTRAINT fk_multimedia_animal FOREIGN KEY (animal_id) REFERENCES Animal(animalID)
+    CONSTRAINT fk_multimedia_animal FOREIGN KEY (animalID) REFERENCES Animal(animalID)
 );
 
 CREATE TABLE Relations (
     id NUMBER PRIMARY KEY,
-    animalId NUMBER UNIQUE,
+    animalID NUMBER UNIQUE,
     friendWith VARCHAR2(4000),
-    CONSTRAINT fk_relation_animal FOREIGN KEY (animalId) REFERENCES Animal(animalID)
+    CONSTRAINT fk_relation_animal FOREIGN KEY (animalID) REFERENCES Animal(animalID)
 );
 
 -- Recreating sequences

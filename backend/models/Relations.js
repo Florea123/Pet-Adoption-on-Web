@@ -2,13 +2,13 @@ const { getConnection } = require('../db');
 const oracledb = require('oracledb'); 
 
 class Relations {
-  static async create(animalId, friendWith) {
+  static async create(animalID, friendWith) {
     const connection = await getConnection();
     try {
       const result = await connection.execute(
-        `INSERT INTO Relations (animalId, friendWith) 
-         VALUES (:animalId, :friendWith)`,
-        { animalId, friendWith },
+        `INSERT INTO Relations (animalID, friendWith) 
+         VALUES (:animalID, :friendWith)`,
+        { animalID, friendWith },
         { autoCommit: true }
       );
       return result;
@@ -17,12 +17,12 @@ class Relations {
     }
   }
 
-  static async findByAnimalId(animalId) {
+  static async findByAnimalId(animalID) {
     const connection = await getConnection();
     try {
       const result = await connection.execute(
-        `SELECT * FROM Relations WHERE animalId = :animalId`,
-        { animalId },
+        `SELECT * FROM Relations WHERE animalID = :animalID`,
+        { animalID },
         { outFormat: oracledb.OUT_FORMAT_OBJECT }
       );
       return result.rows;
@@ -31,12 +31,12 @@ class Relations {
     }
   }
   
-  static async deleteByAnimalId(animalId) {
+  static async deleteByAnimalId(animalID) {
     const connection = await getConnection();
     try {
       const result = await connection.execute(
-        `DELETE FROM Relations WHERE animalId = :animalId`,
-        { animalId },
+        `DELETE FROM Relations WHERE animalID = :animalID`,
+        { animalID },
         { autoCommit: true }
       );
       return result.rowsAffected > 0;
@@ -44,7 +44,6 @@ class Relations {
       await connection.close();
     }
   }
-  
 }
 
 module.exports = Relations;

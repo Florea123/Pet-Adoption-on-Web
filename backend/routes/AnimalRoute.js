@@ -128,7 +128,6 @@ async function createAnimal(req, res) {
       relations,
     } = body;
 
-    
     if (!userID || !name || !breed || !species || !age || !gender) {
       res.writeHead(400, { "Content-Type": "application/json" });
       res.end(JSON.stringify({ error: "Missing required animal fields" }));
@@ -137,8 +136,7 @@ async function createAnimal(req, res) {
 
     // Create the animal
     await Animal.create(userID, name, breed, species, age, gender);
-
-   
+    
     const animals = await Animal.findByUserId(userID);
     const newAnimal = animals.find(
       (animal) =>
@@ -153,37 +151,75 @@ async function createAnimal(req, res) {
 
     const animalId = newAnimal.ANIMALID;
 
-    
+    // Handle Feeding Schedule
     if (feedingSchedule) {
-      const { feeding_time, food_type, notes } = feedingSchedule;
-      await FeedingSchedule.create(
-        animalId,
-        feeding_time,
-        food_type,
-        notes
-      );
-    }
-
+      console.log("Feeding schedule:", feedingSchedule);
     
-     if (medicalHistory) {
-      const { vetNumber, recordDate, description, first_aid_noted } =
-        medicalHistory;
-      // Convert recordDate to Oracle date format
-      const formattedDate = new Date(recordDate);
-      await MedicalHistory.create(
-        animalId,
-        vetNumber,
-        formattedDate,
-        description,
-        first_aid_noted
-      );
+      if (Array.isArray(feedingSchedule)) {
+        // Extract feeding times from the array of objects
+        const feedingTimes = feedingSchedule.map((item) => item.feedingTime);
+        const foodType = feedingSchedule
+          .map((item) => item.foodType)
+          .join(", ");
+        const notes = "Scheduled feeding times";
+    
+        console.log("Extracted feeding times:", feedingTimes);
+    
+        await FeedingSchedule.create(
+          animalId,
+          feedingTimes, 
+          foodType,
+          notes
+        );
+      }
     }
 
+    // Handle Medical History
+    if (medicalHistory) {
+      console.log("Medical history:", medicalHistory);
+      
+      if (Array.isArray(medicalHistory)) {
+        // Handle array of medical records
+        for (const record of medicalHistory) {
+          const { vetNumber, recordDate, description, first_aid_noted } = record;
+          // Convert recordDate to Oracle date format
+          const formattedDate = new Date(recordDate);
+          
+          await MedicalHistory.create(
+            animalId,
+            vetNumber,
+            formattedDate,
+            description,
+            first_aid_noted
+          );
+        }
+      } else {
+        // Handle single record case
+        const { vetNumber, recordDate, description, first_aid_noted } = medicalHistory;
+        // Convert recordDate to Oracle date format
+        const formattedDate = new Date(recordDate);
+        
+        await MedicalHistory.create(
+          animalId,
+          vetNumber,
+          formattedDate,
+          description,
+          first_aid_noted
+        );
+      }
+    }
 
+    // Handle Multimedia
     if (multimedia && multimedia.length > 0) {
+      console.log("Multimedia:", multimedia);
+      
+      // Multimedia is already an array, so we can simply iterate through it
       for (const media of multimedia) {
         const { mediaType, url, description } = media;
-        const upload_date = new Date(); 
+        const upload_date = new Date();
+        
+        console.log(`Creating multimedia: ${mediaType}, ${url}`);
+        
         await MultiMedia.create(
           animalId,
           mediaType,
@@ -194,17 +230,16 @@ async function createAnimal(req, res) {
       }
     }
 
-    
+    // Handle Relations
     if (relations && relations.friendWith) {
       await Relations.create(animalId, relations.friendWith);
     }
 
-    
     res.writeHead(201, { "Content-Type": "application/json" });
     res.end(
       JSON.stringify({
         message: "Animal and related data created successfully",
-        animalId
+        animalId,
       })
     );
   } catch (err) {
@@ -239,9 +274,11 @@ async function deleteAnimal(req, res) {
     await Animal.deleteAnimalWithRelatedData(animalId);
 
     res.writeHead(200, { "Content-Type": "application/json" });
-    res.end(JSON.stringify({ 
-      message: "Animal and all related data successfully deleted",
-    }));
+    res.end(
+      JSON.stringify({
+        message: "Animal and all related data successfully deleted",
+      })
+    );
   } catch (err) {
     console.error("Error deleting animal:", err);
     res.writeHead(500, { "Content-Type": "application/json" });
@@ -254,6 +291,5 @@ module.exports = {
   getAnimalDetailsById,
   findBySpecies,
   createAnimal,
-  deleteAnimal
+  deleteAnimal,
 };
-
