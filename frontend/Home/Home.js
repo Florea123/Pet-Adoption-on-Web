@@ -74,7 +74,7 @@ function disconnectUser() {
   window.location.href = '../Auth/SignIn.html';
 }
 
-// Existing code for fetching animals
+// fetching animals
 async function fetchAnimals() {
   try {
     const response = await fetch(`${API_URL}/animals/all`, {
@@ -104,7 +104,7 @@ async function fetchAnimals() {
   }
 }
 
-// Existing code for species filters
+// species filters
 function renderSpeciesFilters() {
   const filtersContainer = document.getElementById('species-filters');
   filtersContainer.innerHTML = ''; // Clear loading message
@@ -130,7 +130,7 @@ function renderSpeciesFilters() {
   });
 }
 
-// Rest of your existing code for species filtering, animal display, etc.
+// species filtering, animal display, etc.
 function handleSpeciesFilterChange(event) {
   const species = event.target.value;
   
@@ -170,10 +170,25 @@ function displayAnimals(animals) {
   animals.forEach((animal) => {
     const card = document.createElement('div');
     card.className = 'card';
+    
+    // Check for piped media 
+    let imageSource = 'https://via.placeholder.com/300x200?text=No+Image';
+    
+    if (animal.multimedia && animal.multimedia.length > 0) {
+      const media = animal.multimedia[0];
+      if (media.pipeUrl) {
+        imageSource = `${API_URL}${media.pipeUrl}`;
+      } else if (media.fileData && media.mimeType) {
+        // Fallback to base64 if available
+        imageSource = `data:${media.mimeType};base64,${media.fileData}`;
+      } else if (media.URL) {
+        // Last resort: direct URL
+        imageSource = media.URL;
+      }
+    }
 
-    const imageUrl = animal.multimedia && animal.multimedia[0]?.URL || 'https://via.placeholder.com/300x200?text=No+Image';
     card.innerHTML = `
-      <img src="${imageUrl}" alt="${animal.NAME}">
+      <img src="${imageSource}" alt="${animal.NAME}">
       <div class="card-content">
         <h2>${animal.NAME}</h2>
         <p>Breed: ${animal.BREED}</p>
@@ -212,9 +227,33 @@ function showPopup(details) {
   const popup = document.createElement('div');
   popup.className = 'popup';
 
-  const multimedia = details.multimedia.map(
-    (media) => `<img src="${media.URL}" alt="${media.DESCRIPTION}" />`
-  ).join('');
+  // Generate multimedia HTML with support for pipe URLs
+  const multimedia = details.multimedia.map(media => {
+    let mediaHtml = '';
+    if (media.pipeUrl) {
+      const mediaUrl = `${API_URL}${media.pipeUrl}`;
+      if (media.MEDIA === 'photo') {
+        mediaHtml = `<img src="${mediaUrl}" alt="${media.DESCRIPTION || 'Animal image'}" />`;
+      } else if (media.MEDIA === 'video') {
+        mediaHtml = `<video controls><source src="${mediaUrl}">Your browser does not support the video tag.</video>`;
+      } else if (media.MEDIA === 'audio') {
+        mediaHtml = `<audio controls><source src="${mediaUrl}">Your browser does not support the audio tag.</audio>`;
+      }
+    } else if (media.fileData && media.mimeType) {
+      // Fallback to base64
+      const dataUrl = `data:${media.mimeType};base64,${media.fileData}`;
+      if (media.mimeType.startsWith('image/')) {
+        mediaHtml = `<img src="${dataUrl}" alt="${media.DESCRIPTION || 'Animal image'}" />`;
+      } else if (media.mimeType.startsWith('video/')) {
+        mediaHtml = `<video controls><source src="${dataUrl}" type="${media.mimeType}">Your browser does not support the video tag.</video>`;
+      } else if (media.mimeType.startsWith('audio/')) {
+        mediaHtml = `<audio controls><source src="${dataUrl}" type="${media.mimeType}">Your browser does not support the audio tag.</audio>`;
+      }
+    } else if (media.URL) {
+      mediaHtml = `<img src="${media.URL}" alt="${media.DESCRIPTION || 'Animal image'}" />`;
+    }
+    return mediaHtml;
+  }).join('');
 
   popup.innerHTML = `
     <div class="popup-content">

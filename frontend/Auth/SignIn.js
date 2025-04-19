@@ -34,14 +34,19 @@ document
         console.log("Token saved to localStorage");
 
         // Decode the token and save user details
-        const decoded = decodeToken();
-        if (decoded) {
-          console.log("Token decoded successfully:", decoded);
-          user.setUser(decoded);
-          console.log("User saved to localStorage:", user.getUser());
-        } else {
-          console.error("Failed to decode token");
-        }
+        const decoded = jwt_decode(data.token);
+        console.log("Decoded token:", decoded);
+
+        // Save user information to the user model
+        user.setUser({
+          id: decoded.id,
+          email: decoded.email,
+          firstName: decoded.firstName,
+          lastName: decoded.lastName,
+          phone: decoded.phone
+        });
+        
+        console.log("User information saved to model");
 
         // Redirect to the home page
         window.location.href = "../Home/Home.html";

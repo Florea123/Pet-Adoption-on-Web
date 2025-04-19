@@ -85,7 +85,7 @@ async function findBySpecies(req, res) {
       res.end(JSON.stringify({ error: "Species is required" }));
       return;
     }
-    console.log("Species:", species);
+  
     const animals = await Animal.findBySpecies(species);
     if (!animals || animals.length === 0) {
       res.writeHead(404, { "Content-Type": "application/json" });
@@ -153,8 +153,6 @@ async function createAnimal(req, res) {
 
     // Handle Feeding Schedule
     if (feedingSchedule) {
-      console.log("Feeding schedule:", feedingSchedule);
-    
       if (Array.isArray(feedingSchedule)) {
         // Extract feeding times from the array of objects
         const feedingTimes = feedingSchedule.map((item) => item.feedingTime);
@@ -162,8 +160,6 @@ async function createAnimal(req, res) {
           .map((item) => item.foodType)
           .join(", ");
         const notes = "Scheduled feeding times";
-    
-        console.log("Extracted feeding times:", feedingTimes);
     
         await FeedingSchedule.create(
           animalId,

@@ -24,6 +24,7 @@ async function getUserByEmailAndPassword(req, res) {
     }
 
     const token = generateToken(user);
+    console.log('User authenticated successfully:', user);
     res.writeHead(200, { 'Content-Type': 'application/json' });
     res.end(JSON.stringify({ message: 'Authentication successful', token })); 
   } catch (err) {
