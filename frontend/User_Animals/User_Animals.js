@@ -65,11 +65,26 @@ function displayUserAnimals(animals) {
     animals.forEach((animal) => {
         const card = document.createElement('div');
         card.className = 'card';
-
-        const imageUrl = animal.multimedia && animal.multimedia[0]?.URL || 'https://via.placeholder.com/300x200?text=No+Image';
+        
+        // Check for piped media URL first, then fallbacks
+        let imageSource = 'https://via.placeholder.com/300x200?text=No+Image';
+        
+        if (animal.multimedia && animal.multimedia.length > 0) {
+            const media = animal.multimedia[0];
+            if (media.pipeUrl) {
+                // Use the media pipe URL
+                imageSource = `${API_URL}${media.pipeUrl}`;
+            } else if (media.fileData && media.mimeType) {
+                // Fallback to base64 if available
+                imageSource = `data:${media.mimeType};base64,${media.fileData}`;
+            } else if (media.URL) {
+                // Last resort: direct URL
+                imageSource = media.URL;
+            }
+        }
         
         card.innerHTML = `
-            <img src="${imageUrl}" alt="${animal.NAME}">
+            <img src="${imageSource}" alt="${animal.NAME}">
             <div class="card-content">
                 <h2>${animal.NAME}</h2>
                 <p>Breed: ${animal.BREED}</p>
