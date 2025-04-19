@@ -1,8 +1,11 @@
 const API_URL = 'http://localhost:3000';
 
-
+/**
+ * Creates and displays a detailed animal popup with image slideshow
+ * @param {object} details - Animal details including animal data, multimedia, owner, and relations
+ */
 export function showAnimalDetailsPopup(details) {
- 
+  // Remove any existing popups
   const existingPopup = document.getElementById('animal-detail-popup');
   if (existingPopup) {
     existingPopup.remove();
@@ -10,7 +13,7 @@ export function showAnimalDetailsPopup(details) {
   
   // Extract data
   console.log('Animal details:', details);
-  const { animal, multimedia, owner, address, feedingSchedule, medicalHistory } = details;
+  const { animal, multimedia, owner, address, feedingSchedule, medicalHistory, relations } = details;
   
   // Create popup elements
   const popupBackdrop = document.createElement('div');
@@ -70,12 +73,28 @@ export function showAnimalDetailsPopup(details) {
         ${medicalHistory.map(record => `
           <div class="medical-record">
             <div class="record-header">
-              <strong>Date:</strong> ${formatDate(record.RECORD_DATE)}
-              ${record.VET_NUMBER ? `<span class="vet-number">Vet #${record.VET_NUMBER}</span>` : ''}
+              <strong>Date:</strong> ${formatDate(record.RECORDDATE)}
+              ${record.VETNUMBER ? `<span class="vet-number">Vet #${record.VETNUMBER}</span>` : ''}
             </div>
             <div class="record-description">${record.DESCRIPTION || 'No details provided'}</div>
             ${record.FIRST_AID_NOTED ? 
               `<div class="first-aid-notes"><strong>First Aid Notes:</strong> ${record.FIRST_AID_NOTED}</div>` : ''}
+          </div>
+        `).join('')}
+      </div>
+    `;
+  }
+  
+  // Generate relations HTML - update to handle simple text values
+  let relationsHtml = '<p>No relations available.</p>';
+  if (relations && relations.length > 0) {
+    relationsHtml = `
+      <div class="relations-list">
+        ${relations.map(relation => `
+          <div class="relation-item">
+            <div class="relation-name">
+              <strong>Friend:</strong> ${relation.FRIENDWITH}
+            </div>
           </div>
         `).join('')}
       </div>
@@ -121,6 +140,11 @@ export function showAnimalDetailsPopup(details) {
       <div class="animal-medical-history">
         <h3>Medical History</h3>
         ${medicalHistoryHtml}
+      </div>
+
+      <div class="animal-relations">
+        <h3>Friends With</h3>
+        ${relationsHtml}
       </div>
       
       <div class="animal-owner">
@@ -225,13 +249,27 @@ export function showAnimalDetailsPopup(details) {
   });
 }
 
+/**
+ * Format a date string or timestamp
+ * @param {string|Date} dateValue - Date to format
+ * @returns {string} Formatted date string
+ */
 function formatDate(dateValue) {
   if (!dateValue) return 'N/A';
   
   try {
+    // Handle ISO date format (2025-04-24T00:00:00.000Z)
     const date = new Date(dateValue);
-    return date.toLocaleDateString();
+    if (!isNaN(date)) {
+      return date.toLocaleDateString('en-US', {
+        year: 'numeric',
+        month: 'short',
+        day: 'numeric'
+      });
+    }
+    return dateValue.toString();
   } catch (e) {
+    console.error('Error formatting date:', e);
     return dateValue.toString();
   }
 }
@@ -240,14 +278,29 @@ function formatTime(timeValue) {
   if (!timeValue) return 'N/A';
   
   try {
-    // Check if it's a full timestamp
+    // Handle Oracle date/time format: "01-APR-25 02.22.00.000000000 PM"
+    const oracleDateTimeRegex = /\d{2}-[A-Z]{3}-\d{2}\s+(\d{2}[.:]\d{2}[.:]\d{2}(?:\.\d+)?)\s+(AM|PM)/i;
+    const match = timeValue.toString().match(oracleDateTimeRegex);
+    
+    if (match) {
+      // Extract time and AM/PM
+      const timeStr = match[1].replace(/[.:]/g, ':');  // Replace periods with colons
+      const ampm = match[2];
+      // Format as HH:MM AM/PM by removing seconds
+      const timeParts = timeStr.split(':');
+      return `${timeParts[0]}:${timeParts[1]} ${ampm}`;
+    }
+    
+    // Check if it's a full timestamp with 'T'
     if (timeValue.includes('T')) {
       const date = new Date(timeValue);
       return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
     }
+    
     // Handle time-only strings
     return timeValue;
   } catch (e) {
+    console.error('Error formatting time:', e);
     return timeValue.toString();
   }
 }

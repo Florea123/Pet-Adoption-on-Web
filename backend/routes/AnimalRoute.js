@@ -57,6 +57,15 @@ async function getAnimalDetailsById(req, res) {
     const owner = await User.findById(animal.USERID);
     const address = await Address.findByUserId(animal.USERID);
 
+    const relations = await Relations.findByAnimalId(animalId);
+    let friendRelations = [];
+    if (relations && relations.length > 0) {
+      friendRelations = relations.map((relation) => ({
+        ID: relation.ID,
+        FRIENDWITH: relation.FRIENDWITH,
+      }));
+    }
+
     const response = {
       animal,
       multimedia,
@@ -64,14 +73,15 @@ async function getAnimalDetailsById(req, res) {
       medicalHistory,
       owner,
       address,
+      relations: friendRelations,
     };
 
     res.writeHead(200, { "Content-Type": "application/json" });
     res.end(JSON.stringify(response));
-  } catch (err) {
-    console.error("Error fetching animal details:", err);
+  } catch (error) {
+    console.error("Error fetching animal details:", error);
     res.writeHead(500, { "Content-Type": "application/json" });
-    res.end(JSON.stringify({ error: "Internal Server Error" }));
+    res.end(JSON.stringify({ message: "Failed to fetch animal details" }));
   }
 }
 
