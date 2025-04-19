@@ -1,5 +1,6 @@
 import userModel from "../models/User.js";
 import { requireAuth } from "../utils/authUtils.js";
+import { showLoading, hideLoading } from "../utils/loadingUtils.js";
 
 const API_URL = "http://localhost:3000";
 const token = localStorage.getItem("Token");
@@ -7,7 +8,11 @@ let user;
 
 // Initialize the page
 document.addEventListener("DOMContentLoaded", function () {
-  console.log("Initializing Publish page...");
+  // Add link to CSS for loading spinner
+  const linkElement = document.createElement("link");
+  linkElement.rel = "stylesheet";
+  linkElement.href = "../utils/loadingUtils.css"; 
+  document.head.appendChild(linkElement);
 
   user = requireAuth();
   if (!user) return;
@@ -30,15 +35,8 @@ document.addEventListener("DOMContentLoaded", function () {
   if (photoInput) {
     photoInput.addEventListener("change", function (event) {
       const file = event.target.files[0];
-      if (file) {
-        console.log("Selected file:", file.name);
-      } else {
-        console.log("No file selected");
-      }
     });
   }
-
-  console.log("Publish.js loaded completely.");
 });
 
 // Add initial feeding entry
@@ -203,188 +201,236 @@ function updateDeleteButtons() {
 // Form submission
 window.submitPublishForm = async function (event) {
   event.preventDefault();
-  console.log("Form submission started");
+  
+  try {
+    // Show loading spinner
+    showLoading("Publicare în curs...");
+    
+    const userID = user.id;
+    const name = document.getElementById("name").value;
+    const species = document.getElementById("species").value;
+    const breed = document.getElementById("breed").value;
+    const age = parseInt(document.getElementById("age").value, 10);
+    const gender = document.getElementById("gender").value;
 
-  const userID = user.id;
-  const name = document.getElementById("name").value;
-  const species = document.getElementById("species").value;
-  const breed = document.getElementById("breed").value;
-  const age = parseInt(document.getElementById("age").value, 10);
-  const gender = document.getElementById("gender").value;
+    // Collect feeding schedule entries
+    const feedingSchedule = [];
+    const feedingEntries = document.querySelectorAll(".feeding-schedule-entry");
 
-  // Collect feeding schedule entries with proper format
-  const feedingSchedule = [];
-  const feedingEntries = document.querySelectorAll(".feeding-schedule-entry");
+    feedingEntries.forEach((entry) => {
+      const timeInput = entry.querySelector('[name="feedingTime"]');
+      const foodTypeInput = entry.querySelector('[name="foodType"]');
 
-  feedingEntries.forEach((entry) => {
-    const timeInput = entry.querySelector('[name="feedingTime"]');
-    const foodTypeInput = entry.querySelector('[name="foodType"]');
-
-    if (timeInput && timeInput.value) {
-      feedingSchedule.push({
-        feedingTime: timeInput.value, // Format: "HH:MM"
-        foodType: foodTypeInput ? foodTypeInput.value : "",
-      });
-    }
-  });
-
-  console.log("Collected feeding schedule:", feedingSchedule);
-
-  // Medical History
-  const medicalHistoryEntries = document.querySelectorAll(
-    ".medical-history-entry"
-  );
-  const medicalHistory = [];
-
-  medicalHistoryEntries.forEach((entry) => {
-    const recordDateInput = entry.querySelector('[name="recordDate"]');
-    const descriptionInput = entry.querySelector('[name="description"]');
-
-    if (recordDateInput && recordDateInput.value) {
-      medicalHistory.push({
-        vetNumber: document.getElementById("vetNumber").value,
-        recordDate: recordDateInput.value,
-        description: descriptionInput ? descriptionInput.value : "",
-        first_aid_noted: document.getElementById("firstAidNoted").value,
-      });
-    }
-  });
-
-  // If no entries were found, use the primary form fields
-  if (medicalHistory.length === 0) {
-    medicalHistory.push({
-      vetNumber: document.getElementById("vetNumber").value,
-      recordDate: document.getElementById("recordDate").value,
-      description: document.getElementById("description").value,
-      first_aid_noted: document.getElementById("firstAidNoted").value,
-    });
-  }
-
-  // Collect multimedia entries
-  const multimedia = [];
-  const photoInput = document.getElementById("photo");
-  if (photoInput && photoInput.files.length > 0) {
-    const photoFile = photoInput.files[0];
-    const fileName = `${Date.now()}_${photoFile.name.replace(/\s+/g, "_")}`;
-    const mediaType = "photo";
-    const serverPath = `/server/${mediaType}/${fileName}`;
-
-    // Upload the file to server
-    await uploadFileToServer(photoFile, mediaType, fileName);
-
-    multimedia.push({
-      mediaType: mediaType,
-      url: serverPath,
-      description: "Main photo",
-    });
-  }
-
-  // Additional multimedia entries
-  const multimediaEntries = document.querySelectorAll(".multimedia-entry");
-  for (const entry of multimediaEntries) {
-    const mediaTypeSelect = entry.querySelector('[name="mediaType"]');
-    const fileInput = entry.querySelector('[name="file"]');
-    const descriptionInput = entry.querySelector('[name="description"]');
-
-    if (fileInput && fileInput.files.length > 0) {
-      const file = fileInput.files[0];
-      const mediaType = mediaTypeSelect ? mediaTypeSelect.value : "photo";
-      const fileName = `${Date.now()}_${file.name.replace(/\s+/g, "_")}`;
-      const serverPath = `/server/${mediaType}/${fileName}`;
-
-      // Upload the file to server
-      await uploadFileToServer(file, mediaType, fileName);
-
-      multimedia.push({
-        mediaType: mediaType,
-        url: serverPath,
-        description: descriptionInput ? descriptionInput.value : "",
-      });
-    }
-  }
-
-  // Helper function to upload files to the server
-  async function uploadFileToServer(file, mediaType, fileName) {
-    const formData = new FormData();
-    formData.append("file", file);
-    formData.append("mediaType", mediaType);
-    formData.append("fileName", fileName);
-
-    try {
-      const uploadResponse = await fetch(`${API_URL}/upload`, {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-        body: formData,
-      });
-
-      if (!uploadResponse.ok) {
-        throw new Error("Failed to upload file");
+      if (timeInput && timeInput.value) {
+        feedingSchedule.push({
+          feedingTime: timeInput.value,
+          foodType: foodTypeInput ? foodTypeInput.value : "",
+        });
       }
+    });
 
-      return await uploadResponse.json();
-    } catch (error) {
-      console.error("Error uploading file:", error);
-      throw error;
+    // Medical History
+    const medicalHistoryEntries = document.querySelectorAll(".medical-history-entry");
+    const medicalHistory = [];
+
+    medicalHistoryEntries.forEach((entry) => {
+      const recordDateInput = entry.querySelector('[name="recordDate"]');
+      const descriptionInput = entry.querySelector('[name="description"]');
+
+      if (recordDateInput && recordDateInput.value) {
+        medicalHistory.push({
+          recordDate: recordDateInput.value,
+          description: descriptionInput ? descriptionInput.value : "",
+          vetNumber: document.getElementById("vetNumber").value,
+          first_aid_noted: document.getElementById("firstAidNoted").value
+        });
+      }
+    });
+
+    // Upload all files first
+    const multimedia = [];
+    const uploadPromises = [];
+
+    // Main photo
+    const photoInput = document.getElementById("photo");
+    if (photoInput && photoInput.files.length > 0) {
+      const photoFile = photoInput.files[0];
+      const fileName = `${Date.now()}_${photoFile.name.replace(/\s+/g, "_")}`;
+      const mediaType = "photo";
+
+      try {
+        const serverPath = await uploadFileToServer(photoFile, mediaType, fileName);
+        multimedia.push({
+          mediaType: mediaType,
+          url: serverPath,
+          description: "Main photo",
+        });
+      } catch (uploadError) {
+        console.error("Error uploading main photo:", uploadError);
+        throw new Error("Failed to upload main photo. Please check your connection.");
+      }
     }
-  }
 
-  // Relations
-  const relationsInput = document.getElementById("relations");
-  const relations =
-    relationsInput && relationsInput.value
+    // Additional multimedia entries
+    const multimediaEntries = document.querySelectorAll(".multimedia-entry");
+    for (const entry of multimediaEntries) {
+      const mediaTypeSelect = entry.querySelector('[name="mediaType"]');
+      const fileInput = entry.querySelector('[name="file"]');
+      const descriptionInput = entry.querySelector('[name="description"]');
+
+      if (fileInput && fileInput.files.length > 0) {
+        const file = fileInput.files[0];
+        const mediaType = mediaTypeSelect ? mediaTypeSelect.value : "photo";
+        const fileName = `${Date.now()}_${file.name.replace(/\s+/g, "_")}`;
+        const description = descriptionInput ? descriptionInput.value : "";
+
+        try {
+          const serverPath = await uploadFileToServer(file, mediaType, fileName);
+          multimedia.push({
+            mediaType: mediaType,
+            url: serverPath,
+            description: description,
+          });
+        } catch (uploadError) {
+          console.error("Error uploading additional media:", uploadError);
+          // Continue with other files instead of failing completely
+        }
+      }
+    }
+
+    // Relations
+    const relationsInput = document.getElementById("relations");
+    const relations = relationsInput && relationsInput.value
       ? {
           friendWith: relationsInput.value
             .split(",")
             .map((name) => name.trim())
-            .filter((name) => name) // Remove empty items
+            .filter((name) => name)
             .join(","),
         }
       : null;
 
-  // Create final payload
-  const payload = {
-    userID,
-    name,
-    breed,
-    species,
-    age,
-    gender,
-    feedingSchedule,
-    medicalHistory,
-    multimedia,
-    relations: relations && relations.friendWith ? relations : null,
-  };
+    // Prepare final payload
+    const payload = {
+      userID,
+      name,
+      breed,
+      species,
+      age,
+      gender,
+      feedingSchedule,
+      medicalHistory,
+      multimedia,
+      relations: relations && relations.friendWith ? relations : null,
+    };
 
-  console.log("Payload being sent to backend:", payload);
+    console.log("Sending payload:", payload);
+    
+    // Send data to server with fetch API and timeout
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 15000); // 15 second timeout
+    
+    try {
+      console.log(`Connecting to ${API_URL}/animals/create`);
+      const response = await fetch(`${API_URL}/animals/create`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${token}`,
+        },
+        body: JSON.stringify(payload),
+        signal: controller.signal
+      });
+      
+      clearTimeout(timeoutId);
 
-  // Send data to backend
-  try {
-    const response = await fetch(`${API_URL}/animals/create`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
-      },
-      body: JSON.stringify(payload),
-    });
+      if (!response.ok) {
+        const errorText = await response.text();
+        let errorMessage;
+        try {
+          const errorData = JSON.parse(errorText);
+          errorMessage = errorData.error || `Server error: ${response.status}`;
+        } catch (e) {
+          errorMessage = `Server error: ${response.status}`;
+        }
+        throw new Error(errorMessage);
+      }
 
-    if (response.ok) {
-      alert("Animal publicat cu succes!");
+      // Success path
+      const responseData = await response.json();
+      console.log("Server response complete:", responseData);
+      
+      // Add a deliberate delay to ensure backend processing completes
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      
+      // Hide loading spinner
+      hideLoading();
+
+      // Set a redirect flag in case direct redirection fails
+      sessionStorage.setItem("redirect_after_publish", "true");
+      
+      // Now redirect only after complete server response and delay
+      console.log("Server processing complete, redirecting...");
       window.location.href = "../Home/Home.html";
-    } else {
-      const error = await response.json();
-      console.error("Backend response:", error);
-      alert(`Error: ${error.error || "An unknown error occurred"}`);
+      
+    } catch (fetchError) {
+      clearTimeout(timeoutId);
+      
+      if (fetchError.name === 'AbortError') {
+        throw new Error("Request timed out. Please check your server connection.");
+      } else {
+        throw fetchError;
+      }
     }
-  } catch (err) {
-    console.error("Error sending data:", err);
-    alert("A apărut o eroare. Te rugăm să încerci din nou.");
+    
+  } catch (error) {
+    console.error("Error during publication:", error);
+    hideLoading();
+    alert(`Error: ${error.message || "Failed to publish animal"}`);
   }
 };
 
+// Helper function to upload files to the server
+async function uploadFileToServer(file, mediaType, fileName) {
+  const formData = new FormData();
+  formData.append("file", file);
+  formData.append("mediaType", mediaType);
+  formData.append("fileName", fileName);
+  
+  // Set a timeout for the upload
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), 30000); // 30 second timeout for uploads
+  
+  try {
+    console.log(`Uploading ${fileName} to ${API_URL}/upload`);
+    const uploadResponse = await fetch(`${API_URL}/upload`, {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+      body: formData,
+      signal: controller.signal
+    });
+    
+    clearTimeout(timeoutId);
+    
+    if (!uploadResponse.ok) {
+      throw new Error(`Upload failed with status ${uploadResponse.status}`);
+    }
+
+    const responseData = await uploadResponse.json();
+    console.log(`Upload successful: ${fileName}`);
+    return responseData.filePath;
+    
+  } catch (error) {
+    if (error.name === 'AbortError') {
+      throw new Error("Upload timed out. Please try again with a smaller file or check your connection.");
+    }
+    throw error;
+  }
+}
+
 // Navigation
-window.redirectToHome = function () {
-  window.location.href = "../Home/Home.html";
+window.redirectToHome = function() {
+  window.location.replace("../Home/Home.html");
 };

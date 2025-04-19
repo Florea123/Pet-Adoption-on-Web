@@ -106,11 +106,16 @@ const server = http.createServer(async (req, res) => {
           return;
         }
         
+        // Generate the exact same path that will be stored in the database
+        const mediaType = req.body.mediaType || 'photo';
+        const fileName = req.file.filename;
+        const storagePath = `/server/${mediaType}/${fileName}`;
+        
         // Return the file path that was saved
         res.writeHead(200, { 'Content-Type': 'application/json' });
         res.end(JSON.stringify({ 
           success: true,
-          filePath: `/server/${req.body.mediaType}/${req.file.filename}` 
+          filePath: storagePath
         }));
       } catch (err) {
         console.error('Error handling file upload:', err);

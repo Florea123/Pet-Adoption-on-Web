@@ -74,7 +74,7 @@ function disconnectUser() {
   window.location.href = '../Auth/SignIn.html';
 }
 
-// Existing code for fetching animals
+// fetching animals
 async function fetchAnimals() {
   try {
     const response = await fetch(`${API_URL}/animals/all`, {
@@ -104,7 +104,7 @@ async function fetchAnimals() {
   }
 }
 
-// Existing code for species filters
+// species filters
 function renderSpeciesFilters() {
   const filtersContainer = document.getElementById('species-filters');
   filtersContainer.innerHTML = ''; // Clear loading message
@@ -130,7 +130,7 @@ function renderSpeciesFilters() {
   });
 }
 
-// Rest of your existing code for species filtering, animal display, etc.
+// species filtering, animal display, etc.
 function handleSpeciesFilterChange(event) {
   const species = event.target.value;
   
@@ -171,15 +171,12 @@ function displayAnimals(animals) {
     const card = document.createElement('div');
     card.className = 'card';
     
-    // Check for piped media URL first, then fallbacks
+    // Check for piped media 
     let imageSource = 'https://via.placeholder.com/300x200?text=No+Image';
     
     if (animal.multimedia && animal.multimedia.length > 0) {
       const media = animal.multimedia[0];
-      console.log('Media:', media);
       if (media.pipeUrl) {
-        // Use the media pipe URL
-        window.open(`${API_URL}${media.pipeUrl}`, '_blank');
         imageSource = `${API_URL}${media.pipeUrl}`;
       } else if (media.fileData && media.mimeType) {
         // Fallback to base64 if available
@@ -253,7 +250,6 @@ function showPopup(details) {
         mediaHtml = `<audio controls><source src="${dataUrl}" type="${media.mimeType}">Your browser does not support the audio tag.</audio>`;
       }
     } else if (media.URL) {
-      // Last resort: direct URL
       mediaHtml = `<img src="${media.URL}" alt="${media.DESCRIPTION || 'Animal image'}" />`;
     }
     return mediaHtml;

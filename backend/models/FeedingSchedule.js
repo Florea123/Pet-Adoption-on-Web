@@ -5,8 +5,7 @@ class FeedingSchedule {
   static async create(animalID, feeding_times, food_type, notes) {
     const connection = await getConnection();
     try {
-      console.log('Feeding times array:', feeding_times);
-      
+
       if (!Array.isArray(feeding_times)) {
         throw new Error('feeding_times must be an array of time strings');
       }
@@ -16,8 +15,7 @@ class FeedingSchedule {
         feeding_times.map(time => `TO_TIMESTAMP('${time}', 'HH24:MI')`).join(',')
       })`;
       
-      console.log('SQL feeding times:', feedingTimeSQL);
-      
+   
       const result = await connection.execute(
         `INSERT INTO FeedingSchedule (animalID, feeding_time, food_type, notes) 
          VALUES (:animalID, ${feedingTimeSQL}, :food_type, :notes)`,
