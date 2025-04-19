@@ -1,5 +1,6 @@
 import userModel from '../models/User.js';
 import { requireAuth } from '../utils/authUtils.js';
+import { showAnimalDetailsPopup } from '../AnimalCard/AnimalCard.js'; 
 
 const API_URL = 'http://localhost:3000';
 const token = localStorage.getItem('Token');
@@ -217,65 +218,11 @@ async function openAnimalDetailsPopup(animalId) {
     }
 
     const animalDetails = await response.json();
-    showPopup(animalDetails);
+    
+    showAnimalDetailsPopup(animalDetails);
   } catch (error) {
     console.error('Error fetching animal details:', error);
   }
-}
-
-function showPopup(details) {
-  const popup = document.createElement('div');
-  popup.className = 'popup';
-
-  // Generate multimedia HTML with support for pipe URLs
-  const multimedia = details.multimedia.map(media => {
-    let mediaHtml = '';
-    if (media.pipeUrl) {
-      const mediaUrl = `${API_URL}${media.pipeUrl}`;
-      if (media.MEDIA === 'photo') {
-        mediaHtml = `<img src="${mediaUrl}" alt="${media.DESCRIPTION || 'Animal image'}" />`;
-      } else if (media.MEDIA === 'video') {
-        mediaHtml = `<video controls><source src="${mediaUrl}">Your browser does not support the video tag.</video>`;
-      } else if (media.MEDIA === 'audio') {
-        mediaHtml = `<audio controls><source src="${mediaUrl}">Your browser does not support the audio tag.</audio>`;
-      }
-    } else if (media.fileData && media.mimeType) {
-      // Fallback to base64
-      const dataUrl = `data:${media.mimeType};base64,${media.fileData}`;
-      if (media.mimeType.startsWith('image/')) {
-        mediaHtml = `<img src="${dataUrl}" alt="${media.DESCRIPTION || 'Animal image'}" />`;
-      } else if (media.mimeType.startsWith('video/')) {
-        mediaHtml = `<video controls><source src="${dataUrl}" type="${media.mimeType}">Your browser does not support the video tag.</video>`;
-      } else if (media.mimeType.startsWith('audio/')) {
-        mediaHtml = `<audio controls><source src="${dataUrl}" type="${media.mimeType}">Your browser does not support the audio tag.</audio>`;
-      }
-    } else if (media.URL) {
-      mediaHtml = `<img src="${media.URL}" alt="${media.DESCRIPTION || 'Animal image'}" />`;
-    }
-    return mediaHtml;
-  }).join('');
-
-  popup.innerHTML = `
-    <div class="popup-content">
-      <span class="close-btn">&times;</span>
-      <h2>${details.animal.NAME}</h2>
-      <p><strong>Breed:</strong> ${details.animal.BREED}</p>
-      <p><strong>Species:</strong> ${details.animal.SPECIES}</p>
-      <p><strong>Age:</strong> ${details.animal.AGE}</p>
-      <p><strong>Gender:</strong> ${details.animal.GENDER}</p>
-      <p><strong>Owner:</strong> ${details.owner.FIRSTNAME} ${details.owner.LASTNAME}</p>
-      <p><strong>Address:</strong> ${details.address[0]?.STREET}, ${details.address[0]?.CITY}, ${details.address[0]?.STATE}, ${details.address[0]?.COUNTRY}</p>
-      <h3>Multimedia</h3>
-      <div class="multimedia">${multimedia}</div>
-    </div>
-  `;
-
-  // Close popup on clicking the close button
-  popup.querySelector('.close-btn').addEventListener('click', () => {
-    popup.remove();
-  });
-
-  document.body.appendChild(popup);
 }
 
 // Initialize the page
