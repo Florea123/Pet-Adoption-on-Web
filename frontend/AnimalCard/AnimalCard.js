@@ -1,9 +1,5 @@
 const API_URL = 'http://localhost:3000';
 
-/**
- * Creates and displays a detailed animal popup with image slideshow
- * @param {object} details - Animal details including animal data, multimedia, owner, and relations
- */
 export function showAnimalDetailsPopup(details) {
   // Remove any existing popups
   const existingPopup = document.getElementById('animal-detail-popup');
@@ -21,7 +17,7 @@ export function showAnimalDetailsPopup(details) {
   popupBackdrop.className = 'animal-popup-backdrop';
 
   // Filter valid images for slideshow
-  const images = multimedia && multimedia.length > 0 
+  const media = multimedia && multimedia.length > 0 
     ? multimedia.filter(media => 
         media.pipeUrl || (media.fileData && media.mimeType) || media.URL
       ) 
@@ -106,18 +102,18 @@ export function showAnimalDetailsPopup(details) {
     <button class="popup-close-button" aria-label="Close">&times;</button>
     
     <div class="popup-image-container">
-      ${images.length > 0 ? `
+      ${media.length > 0 ? `
         <div class="slideshow-container">
-          <img id="slideshow-image" class="popup-animal-image" src="" alt="${animal.NAME || 'Animal'}">
-          <button class="slideshow-nav prev" id="prev-button" ${images.length <= 1 ? 'style="display:none"' : ''}>&#10094;</button>
-          <button class="slideshow-nav next" id="next-button" ${images.length <= 1 ? 'style="display:none"' : ''}>&#10095;</button>
+          <div id="media-display" class="media-display"></div>
+          <button class="slideshow-nav prev" id="prev-button" ${media.length <= 1 ? 'style="display:none"' : ''}>&#10094;</button>
+          <button class="slideshow-nav next" id="next-button" ${media.length <= 1 ? 'style="display:none"' : ''}>&#10095;</button>
           <div class="slideshow-dots" id="slideshow-dots">
-            ${images.map((_, i) => `<span class="dot" data-index="${i}"></span>`).join('')}
+            ${media.map((item, i) => `<span class="dot" data-index="${i}"></span>`).join('')}
           </div>
         </div>
       ` : `
         <div class="no-image-placeholder">
-          <img src="https://via.placeholder.com/400x300?text=No+Images+Available" alt="No images available">
+          <img src="https://via.placeholder.com/400x300?text=No+Media+Available" alt="No media available">
         </div>
       `}
     </div>
@@ -161,29 +157,72 @@ export function showAnimalDetailsPopup(details) {
   popupBackdrop.appendChild(popupContent);
   document.body.appendChild(popupBackdrop);
   
-  // Set up slideshow functionality if there are images
-  if (images.length > 0) {
-    let currentImageIndex = 0;
-    const slideshowImage = document.getElementById('slideshow-image');
+  // Set up slideshow functionality 
+  if (media.length > 0) {
+    let currentMediaIndex = 0;
+    const mediaDisplay = document.getElementById('media-display');
     const dots = document.querySelectorAll('.dot');
     
-    // Function to update image display
-    const showImage = (index) => {
-      currentImageIndex = index;
-      const media = images[index];
+    // Function to update media display
+    const showMedia = (index) => {
+      currentMediaIndex = index;
+      const mediaItem = media[index];
       
-      // Determine image source
-      let imageSource;
-      if (media.pipeUrl) {
-        imageSource = `${API_URL}${media.pipeUrl}`;
-      } else if (media.fileData && media.mimeType) {
-        imageSource = `data:${media.mimeType};base64,${media.fileData}`;
-      } else if (media.URL) {
-        imageSource = media.URL;
+      // Clear previous media
+      mediaDisplay.innerHTML = '';
+      
+      // Determine media source
+      let mediaSource;
+      if (mediaItem.pipeUrl) {
+        mediaSource = `${API_URL}${mediaItem.pipeUrl}`;
+      } else if (mediaItem.fileData && mediaItem.mimeType) {
+        mediaSource = `data:${mediaItem.mimeType};base64,${mediaItem.fileData}`;
+      } else if (mediaItem.URL) {
+        mediaSource = mediaItem.URL;
       }
       
-      // Set image source and update active dot
-      slideshowImage.src = imageSource;
+      // Determine media type based on URL or mime type
+      let mediaType = detectMediaType(mediaItem);
+      
+     
+      if (mediaType === 'video') {
+        const videoElement = document.createElement('video');
+        videoElement.className = 'popup-animal-video';
+        videoElement.src = mediaSource;
+        videoElement.controls = true;
+        videoElement.controlsList = 'nodownload';
+        videoElement.preload = 'metadata';
+        mediaDisplay.appendChild(videoElement);
+      } else if (mediaType === 'audio') {
+        
+        const audioContainer = document.createElement('div');
+        audioContainer.className = 'audio-container';
+        
+        //  audio element
+        const audioElement = document.createElement('audio');
+        audioElement.className = 'popup-animal-audio';
+        audioElement.src = mediaSource;
+        audioElement.controls = true;
+        audioElement.controlsList = 'nodownload';
+        audioElement.preload = 'metadata';
+        
+       
+        audioContainer.appendChild(audioElement);
+        mediaDisplay.appendChild(audioContainer);
+        
+        
+        const prevButton = document.getElementById('prev-button');
+        const nextButton = document.getElementById('next-button');
+        if (prevButton) prevButton.style.zIndex = '20';
+        if (nextButton) nextButton.style.zIndex = '20';
+      } else {
+        // Default to image display
+        const imgElement = document.createElement('img');
+        imgElement.className = 'popup-animal-image';
+        imgElement.src = mediaSource;
+        imgElement.alt = animal.NAME || 'Animal';
+        mediaDisplay.appendChild(imgElement);
+      }
       
       // Update active dot indicator
       dots.forEach((dot, i) => {
@@ -191,8 +230,8 @@ export function showAnimalDetailsPopup(details) {
       });
     };
     
-    // Show first image
-    showImage(0);
+    // Show first media item
+    showMedia(0);
     
     // Set up event listeners for navigation
     const prevButton = document.getElementById('prev-button');
@@ -200,27 +239,27 @@ export function showAnimalDetailsPopup(details) {
     
     prevButton.addEventListener('click', (e) => {
       e.stopPropagation(); // Prevent backdrop click
-      const newIndex = (currentImageIndex - 1 + images.length) % images.length;
-      showImage(newIndex);
+      const newIndex = (currentMediaIndex - 1 + media.length) % media.length;
+      showMedia(newIndex);
     });
     
     nextButton.addEventListener('click', (e) => {
       e.stopPropagation(); // Prevent backdrop click
-      const newIndex = (currentImageIndex + 1) % images.length;
-      showImage(newIndex);
+      const newIndex = (currentMediaIndex + 1) % media.length;
+      showMedia(newIndex);
     });
     
     // Add dot navigation
     dots.forEach((dot) => {
       dot.addEventListener('click', (e) => {
-        e.stopPropagation(); // Prevent backdrop click
+        e.stopPropagation(); 
         const index = parseInt(dot.getAttribute('data-index'));
-        showImage(index);
+        showMedia(index);
       });
     });
   }
   
-  // Add close functionality
+  // Close functionality
   const closeButton = popupContent.querySelector('.popup-close-button');
   closeButton.addEventListener('click', () => {
     popupBackdrop.remove();
@@ -249,11 +288,48 @@ export function showAnimalDetailsPopup(details) {
   });
 }
 
-/**
- * Format a date string or timestamp
- * @param {string|Date} dateValue - Date to format
- * @returns {string} Formatted date string
- */
+
+//Detect media type 
+function detectMediaType(mediaItem) {
+  // Check based on mediaType property if available
+  if (mediaItem.mediaType) {
+    if (mediaItem.mediaType.toLowerCase() === 'video') return 'video';
+    if (mediaItem.mediaType.toLowerCase() === 'audio') return 'audio';
+    if (mediaItem.mediaType.toLowerCase() === 'photo') return 'image';
+  }
+  
+  // Check based on MIME type
+  if (mediaItem.mimeType) {
+    if (mediaItem.mimeType.startsWith('video/')) return 'video';
+    if (mediaItem.mimeType.startsWith('audio/')) return 'audio';
+    if (mediaItem.mimeType.startsWith('image/')) return 'image';
+  }
+  
+  // Check based on URL extension
+  if (mediaItem.URL || mediaItem.pipeUrl) {
+    const url = mediaItem.URL || mediaItem.pipeUrl;
+    const extension = url.split('.').pop().toLowerCase();
+    
+    // Common video formats
+    if (['mp4', 'webm', 'ogg', 'mov', 'avi', 'wmv', 'flv', 'mkv'].includes(extension)) {
+      return 'video';
+    }
+    
+    // Common audio formats
+    if (['mp3', 'wav', 'ogg', 'aac', 'flac', 'm4a'].includes(extension)) {
+      return 'audio';
+    }
+    
+    // Common image formats
+    if (['jpg', 'jpeg', 'png', 'gif', 'bmp', 'webp', 'svg'].includes(extension)) {
+      return 'image';
+    }
+  }
+  
+ 
+  return 'image';
+}
+
 function formatDate(dateValue) {
   if (!dateValue) return 'N/A';
   
@@ -284,7 +360,7 @@ function formatTime(timeValue) {
     
     if (match) {
       // Extract time and AM/PM
-      const timeStr = match[1].replace(/[.:]/g, ':');  // Replace periods with colons
+      const timeStr = match[1].replace(/[.:]/g, ':');  
       const ampm = match[2];
       // Format as HH:MM AM/PM by removing seconds
       const timeParts = timeStr.split(':');
