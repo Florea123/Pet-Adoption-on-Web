@@ -255,11 +255,10 @@ window.submitPublishForm = async function (event) {
     const photoInput = document.getElementById("photo");
     if (photoInput && photoInput.files.length > 0) {
       const photoFile = photoInput.files[0];
-      const fileName = `${Date.now()}_${photoFile.name.replace(/\s+/g, "_")}`;
       const mediaType = "photo";
 
       try {
-        const serverPath = await uploadFileToServer(photoFile, mediaType, fileName);
+        const serverPath = await uploadFileToServer(photoFile, mediaType);
         multimedia.push({
           mediaType: mediaType,
           url: serverPath,
@@ -281,11 +280,10 @@ window.submitPublishForm = async function (event) {
       if (fileInput && fileInput.files.length > 0) {
         const file = fileInput.files[0];
         const mediaType = mediaTypeSelect ? mediaTypeSelect.value : "photo";
-        const fileName = `${Date.now()}_${file.name.replace(/\s+/g, "_")}`;
         const description = descriptionInput ? descriptionInput.value : "";
 
         try {
-          const serverPath = await uploadFileToServer(file, mediaType, fileName);
+          const serverPath = await uploadFileToServer(file, mediaType);
           multimedia.push({
             mediaType: mediaType,
             url: serverPath,
@@ -392,17 +390,22 @@ window.submitPublishForm = async function (event) {
 
 // Helper function to upload files to the server
 async function uploadFileToServer(file, mediaType, fileName) {
+  // Create FormData object for file upload
   const formData = new FormData();
-  formData.append("file", file);
+  
+  // Append the file with its original name to preserve the extension
+  formData.append("file", file, file.name);
   formData.append("mediaType", mediaType);
-  formData.append("fileName", fileName);
+  
+  // Log file details for debugging
+  console.log(`Uploading file: ${file.name}, type: ${file.type}, size: ${file.size}`);
   
   // Set a timeout for the upload
   const controller = new AbortController();
   const timeoutId = setTimeout(() => controller.abort(), 30000); // 30 second timeout for uploads
   
   try {
-    console.log(`Uploading ${fileName} to ${API_URL}/upload`);
+    console.log(`Sending to ${API_URL}/upload`);
     const uploadResponse = await fetch(`${API_URL}/upload`, {
       method: "POST",
       headers: {
@@ -419,7 +422,7 @@ async function uploadFileToServer(file, mediaType, fileName) {
     }
 
     const responseData = await uploadResponse.json();
-    console.log(`Upload successful: ${fileName}`);
+    console.log(`Upload successful: ${file.name}, server path: ${responseData.filePath}`);
     return responseData.filePath;
     
   } catch (error) {

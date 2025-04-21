@@ -1,8 +1,6 @@
 const { getConnection } = require("../db");
 const oracledb = require("oracledb");
-const fs = require("fs");
-const path = require("path");
-const { Transform } = require("stream");
+const fileUtils = require("../utils/fileStorageUtils");
 
 class MultiMedia {
   static async create(animalID, media, url, description, upload_date) {
@@ -71,32 +69,13 @@ class MultiMedia {
     try {
       const mediaRecords = await this.findByAnimalId(animalID);
 
-      // Delete the files from the filesystem
+      // Delete the files 
       for (const record of mediaRecords) {
-        try {
-          if (record.URL) {
-            const urlPath = record.URL;
-            const normalizedPath = urlPath.startsWith("/")
-              ? urlPath.substring(1)
-              : urlPath;
-            const projectRoot = path.resolve(__dirname, "..", "..");
-            const filePath = path.join(projectRoot, normalizedPath);
-
-            console.log(`Attempting to delete file: ${filePath}`);
-
-            // Check if file exists before trying to delete
-            if (fs.existsSync(filePath)) {
-              fs.unlinkSync(filePath);
-              console.log(`Successfully deleted file: ${filePath}`);
-            } else {
-              console.warn(`File not found, cannot delete: ${filePath}`);
-            }
+        if (record.URL) {
+          const deleted = fileUtils.deleteFile(record.URL);
+          if (!deleted) {
+            console.warn(`Could not delete file for media ID ${record.ID}`);
           }
-        } catch (fileError) {
-          console.error(
-            `Error deleting file for media ID ${record.ID}:`,
-            fileError
-          );
         }
       }
 
@@ -149,54 +128,10 @@ class MultiMedia {
         return;
       }
 
-      const normalizedPath = urlPath.startsWith("/")
-        ? urlPath.substring(1)
-        : urlPath;
-      const projectRoot = path.resolve(__dirname, "..", "..");
-      const filePath = path.join(projectRoot, normalizedPath);
-
-      if (!fs.existsSync(filePath)) {
-        console.error(`File not found: ${filePath}`);
-        res.writeHead(404, { "Content-Type": "application/json" });
-        res.end(
-          JSON.stringify({ error: "Media file not found", path: filePath })
-        );
-        return;
-      }
-
-      // Determine MIME type based on media type and file extension
-      let mimeType = "application/octet-stream";
-      const ext = path.extname(filePath).toLowerCase();
-
-      if (mediaRecord.MEDIA === "photo") {
-        if (ext === ".jpg" || ext === ".jpeg") mimeType = "image/jpeg";
-        else if (ext === ".png") mimeType = "image/png";
-        else if (ext === ".gif") mimeType = "image/gif";
-        else if (ext === ".webp") mimeType = "image/webp";
-      } else if (mediaRecord.MEDIA === "video") {
-        if (ext === ".mp4") mimeType = "video/mp4";
-        else if (ext === ".webm") mimeType = "video/webm";
-      } else if (mediaRecord.MEDIA === "audio") {
-        if (ext === ".mp3") mimeType = "audio/mpeg";
-        else if (ext === ".wav") mimeType = "audio/wav";
-      }
-
-      res.writeHead(200, {
-        "Content-Type": mimeType,
-        "Cache-Control": "max-age=31536000",
-      });
-
-      // Stream the file to the client
-      const fileStream = fs.createReadStream(filePath);
-      fileStream.pipe(res);
-
-      fileStream.on("error", (error) => {
-        console.error("Error streaming file:", error);
-        if (!res.headersSent) {
-          res.writeHead(500, { "Content-Type": "application/json" });
-          res.end(JSON.stringify({ error: "Error streaming file" }));
-        }
-      });
+      // Use the utility function to resolve the file path and stream it
+      const filePath = fileUtils.resolveFilePath(urlPath);
+      await fileUtils.streamFile(filePath, res);
+      
     } catch (error) {
       console.error("Error in pipeMediaStream:", error);
       if (!res.headersSent) {

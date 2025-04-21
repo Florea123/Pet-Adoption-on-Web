@@ -1,9 +1,5 @@
 const API_URL = 'http://localhost:3000';
 
-/**
- * Creates and displays a detailed animal popup with image slideshow
- * @param {object} details - Animal details including animal data, multimedia, owner, and relations
- */
 export function showAnimalDetailsPopup(details) {
   // Remove any existing popups
   const existingPopup = document.getElementById('animal-detail-popup');
@@ -161,7 +157,7 @@ export function showAnimalDetailsPopup(details) {
   popupBackdrop.appendChild(popupContent);
   document.body.appendChild(popupBackdrop);
   
-  // Set up slideshow functionality if there are images
+  // Set up slideshow functionality 
   if (images.length > 0) {
     let currentImageIndex = 0;
     const slideshowImage = document.getElementById('slideshow-image');
@@ -175,6 +171,7 @@ export function showAnimalDetailsPopup(details) {
       // Determine image source
       let imageSource;
       if (media.pipeUrl) {
+        window.open(`${API_URL}${media.pipeUrl}`, '_blank');
         imageSource = `${API_URL}${media.pipeUrl}`;
       } else if (media.fileData && media.mimeType) {
         imageSource = `data:${media.mimeType};base64,${media.fileData}`;
@@ -185,16 +182,16 @@ export function showAnimalDetailsPopup(details) {
       // Set image source and update active dot
       slideshowImage.src = imageSource;
       
-      // Update active dot indicator
+      
       dots.forEach((dot, i) => {
         dot.classList.toggle('active', i === index);
       });
     };
     
-    // Show first image
+
     showImage(0);
     
-    // Set up event listeners for navigation
+    // event listeners for navigation
     const prevButton = document.getElementById('prev-button');
     const nextButton = document.getElementById('next-button');
     
@@ -213,14 +210,14 @@ export function showAnimalDetailsPopup(details) {
     // Add dot navigation
     dots.forEach((dot) => {
       dot.addEventListener('click', (e) => {
-        e.stopPropagation(); // Prevent backdrop click
+        e.stopPropagation(); 
         const index = parseInt(dot.getAttribute('data-index'));
         showImage(index);
       });
     });
   }
   
-  // Add close functionality
+  // close functionality
   const closeButton = popupContent.querySelector('.popup-close-button');
   closeButton.addEventListener('click', () => {
     popupBackdrop.remove();
@@ -249,11 +246,6 @@ export function showAnimalDetailsPopup(details) {
   });
 }
 
-/**
- * Format a date string or timestamp
- * @param {string|Date} dateValue - Date to format
- * @returns {string} Formatted date string
- */
 function formatDate(dateValue) {
   if (!dateValue) return 'N/A';
   
@@ -284,7 +276,7 @@ function formatTime(timeValue) {
     
     if (match) {
       // Extract time and AM/PM
-      const timeStr = match[1].replace(/[.:]/g, ':');  // Replace periods with colons
+      const timeStr = match[1].replace(/[.:]/g, ':');  
       const ampm = match[2];
       // Format as HH:MM AM/PM by removing seconds
       const timeParts = timeStr.split(':');
