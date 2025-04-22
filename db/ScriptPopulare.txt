@@ -1,4 +1,4 @@
-=BEGIN
+BEGIN
     -- Inserare Users
     INSERT INTO Users (firstName, lastName, email, password, phone)
     VALUES ('Andrei', 'Popescu', 'andrei.popescu@example.com', 'hashed_password_123', '0755123456');
