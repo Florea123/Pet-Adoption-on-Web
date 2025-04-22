@@ -1,5 +1,6 @@
 import userModel from '../models/User.js';
 import { requireAuth } from '../utils/authUtils.js';
+import Sidebar from '../SideBar/Sidebar.js';
 
 const API_URL = 'http://localhost:3000';
 const token = localStorage.getItem('Token');
@@ -10,12 +11,12 @@ let currentMessages = [];
 let pollingInterval;
 
 async function initialize() {
-  
   user = requireAuth();
   if (!user) return;
   
-  displayUserInfo();
-  await loadConversations();
+  // Render sidebar
+  document.getElementById('sidebar-container').innerHTML = Sidebar.render('messages');
+  new Sidebar('messages');
   
   // Set up event listeners
   document.getElementById('send-message-form').addEventListener('submit', handleSendMessage);
@@ -27,6 +28,9 @@ async function initialize() {
     }
     await loadConversations();
   }, 5000);
+  
+  // Load conversations
+  await loadConversations();
   
   // Clean up polling when page is unloaded
   window.addEventListener('beforeunload', () => {
@@ -208,14 +212,12 @@ async function handleSendMessage(event) {
   }
 }
 
-
 async function sendMessage(receiverId, content) {
   try {
     const token = localStorage.getItem('Token');
     
     if (!token) {
       console.error('No authentication token found');
-      
       return false;
     }
     
@@ -243,7 +245,7 @@ async function sendMessage(receiverId, content) {
   }
 }
 
-// Add "Contact Owner" button handler to AnimalCard.js popup
+// "Contact Owner" button 
 export function setupContactButton(ownerId, ownerName) {
   const contactButton = document.querySelector('.contact-button');
   if (contactButton) {
@@ -284,60 +286,6 @@ function formatTimestamp(timestamp) {
   }
 }
 
-// Display user information in the sidebar (reused from other pages)
-function displayUserInfo() {
-  const userInfoContainer = document.getElementById('user-info');
-  
-  if (user && user.firstName && user.email) {
-    const firstInitial = user.firstName.charAt(0).toUpperCase();
-    const fullName = `${user.firstName} ${user.lastName}`;
-    const profileColor = getRandomColor();
-    
-    userInfoContainer.innerHTML = `
-      <div class="user-info-container">
-        <div class="user-profile">
-          <div class="profile-info">
-            <div class="profile-circle" style="background-color: ${profileColor}">
-              ${firstInitial}
-            </div>
-            <div>
-              <div class="user-name">${fullName}</div>
-              <div class="user-email">${user.email}</div>
-            </div>
-          </div>
-          <button id="disconnect-btn" class="disconnect-btn" title="Disconnect">D</button>
-        </div>
-      </div>
-    `;
-    
-    // Add disconnect functionality
-    document.getElementById('disconnect-btn').addEventListener('click', disconnectUser);
-  } else {
-    userInfoContainer.innerHTML = `
-      <div class="user-info-container">
-        <p>Not logged in</p>
-        <a href="../Auth/SignIn.html" class="btn">Sign In</a>
-      </div>
-    `;
-  }
-}
-
-// Generate a random color (reused from other components)
-function getRandomColor() {
-  const colors = [
-    '#3b82f6', '#ef4444', '#10b981', '#f59e0b', 
-    '#8b5cf6', '#ec4899', '#6366f1', '#14b8a6'
-  ];
-  return colors[Math.floor(Math.random() * colors.length)];
-}
-
-// Handle user disconnect (reused from other components)
-function disconnectUser() {
-  userModel.clearUser();
-  localStorage.removeItem('Token');
-  window.location.href = '../Auth/SignIn.html';
-}
-
 // Check URL for direct conversation opening
 function checkUrlForDirectMessage() {
   const urlParams = new URLSearchParams(window.location.search);
@@ -353,10 +301,10 @@ function checkUrlForDirectMessage() {
   }
 }
 
-// Initialize page
+
 document.addEventListener('DOMContentLoaded', () => {
   initialize();
   
   // Check for direct message parameter in URL
-  setTimeout(checkUrlForDirectMessage, 500); // Short delay to ensure other initialization completes
+  setTimeout(checkUrlForDirectMessage, 500); 
 });

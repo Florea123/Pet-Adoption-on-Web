@@ -5,26 +5,12 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Messages</title>
     <link rel="stylesheet" href="../Home/Home.css">
+    <link rel="stylesheet" href="../SideBar/Sidebar.css">
     <link rel="stylesheet" href="Messages.css">
 </head>
 <body>
     <div class="app-container">
-        <aside class="sidebar">
-            <div class="sidebar-header">
-                <h1>Pet Adoption</h1>
-                <button id="publish-btn" class="btn" onclick="location.href='../Publish/Publish.html'">Publish</button>
-                <button id="my-animals-btn" class="btn" onclick="location.href='../User_Animals/User_Animals.html'">My Animals</button>
-                <button id="messages-btn" class="btn active">Messages</button>
-                <button id="home-btn" class="btn" onclick="location.href='../Home/Home.html'">Home</button>
-            </div>
-            <!-- User info section at the bottom of sidebar -->
-            <div class="user-section">
-                <div id="user-info">
-                    <!-- User info will be populated dynamically -->
-                    <div class="loader">Loading user info...</div>
-                </div>
-            </div>
-        </aside>
+        <div id="sidebar-container"></div>
         
         <main class="main-content">
             <h1 class="page-title">Messages</h1>
