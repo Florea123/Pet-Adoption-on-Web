@@ -1,10 +1,10 @@
 body, html {
   height: 100%;
   font-family: Arial, sans-serif;
-  background: linear-gradient(to bottom right, #fffaf3, #ffe5c4); /* Gradient cald */
-  background-image: url('https://www.transparenttextures.com/patterns/paw-print.png'); /* Pattern cu lăbuțe */
-  background-size: 200px 200px; /* Dimensiunea patternului */
-  background-blend-mode: overlay; /* Combină patternul cu gradientul */
+  background: linear-gradient(to bottom right, #fffaf3, #ffe5c4);
+  background-image: url('https://www.transparenttextures.com/patterns/paw-print.png');
+  background-size: 200px 200px;
+  background-blend-mode: overlay;
   margin: 0;
   padding: 0;
 }
@@ -13,93 +13,11 @@ body, html {
 .app-container {
   display: flex;
   min-height: 100vh;
-  background-color: rgba(255, 255, 255, 0.8); /* Fundal semi-transparent */
-  backdrop-filter: blur(10px); /* Efect de blur */
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1); /* Umbra subtilă */
-  border-radius: 20px; /* Colțuri rotunjite */
+  background-color: rgba(255, 255, 255, 0.8);
+  backdrop-filter: blur(10px);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+  border-radius: 20px;
   overflow: hidden;
-}
-
-
-/* Sidebar styles */
-.sidebar {
-  width: 250px;
-  background: linear-gradient(to bottom right, #ffffff, #ffe9cc); /* Gradient cald */
-  backdrop-filter: blur(10px); /* Efect de blur */
-  box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1); /* Umbra subtilă */
-  padding: 20px;
-  position: fixed;
-  top: 0;
-  bottom: 0;
-  left: 0;
-  display: flex;
-  flex-direction: column;
-  z-index: 1000;
-  overflow-y: auto;
-  border-radius: 20px; /* Colțuri rotunjite */
-}
-
-.sidebar-header h1 {
-  color: #f59e0b; /* Portocaliu cald */
-  font-size: 1.8rem;
-  margin-bottom: 30px;
-}
-
-.sidebar-header .btn {
-  width: 100%;
-  padding: 10px;
-  background-color: #fca311; /* Culoare caldă */
-  color: white;
-  border: none;
-  border-radius: 10px; /* Colțuri rotunjite */
-  cursor: pointer;
-  font-size: 16px;
-  font-weight: 600;
-  margin-top: 15px; /* Spațiu între titlu și buton */
-  transition: all 0.3s ease; /* Tranziție lină */
-}
-
-.sidebar-header .btn:hover {
-  background-color: #fb8500; /* Culoare mai intensă la hover */
-  transform: scale(1.02); /* Efect de mărire ușoară */
-}
-
-.sidebar-header .btn + .btn {
-  margin-top: 10px;
-}
-
-.filter-section {
-  flex: 1;
-  overflow-y: auto;
-  margin-bottom: 20px;
-}
-
-.filter-section h2 {
-  color: #d97706; /* Portocaliu mai intens */
-  font-size: 1.5rem;
-  margin-bottom: 20px;
-}
-
-.filter-options {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-}
-
-.filter-option {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.filter-option input[type="checkbox"] {
-  cursor: pointer;
-}
-
-.filter-option label {
-  cursor: pointer;
-  font-size: 1rem;
-  color: #6b7280; /* Gri cald */
 }
 
 /* Main content area */
@@ -117,23 +35,23 @@ body, html {
 }
 
 .card {
-  background: linear-gradient(to bottom right, #ffffff, #ffe9cc); /* Gradient cald */
-  border-radius: 15px; /* Colțuri rotunjite */
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* Umbra subtilă */
+  background: linear-gradient(to bottom right, #ffffff, #ffe9cc);
+  border-radius: 15px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
   overflow: hidden;
   transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
 
 .card:hover {
   transform: translateY(-5px);
-  box-shadow: 0 6px 10px rgba(0, 0, 0, 0.15); /* Umbra mai intensă la hover */
+  box-shadow: 0 6px 10px rgba(0, 0, 0, 0.15);
 }
 
 .card img {
   width: 100%;
   height: 200px;
   object-fit: cover;
-  border-radius: 15px 15px 0 0; /* Colțuri rotunjite doar sus */
+  border-radius: 15px 15px 0 0;
 }
 
 .card-content {
@@ -143,12 +61,12 @@ body, html {
 .card-content h2 {
   font-size: 1.2rem;
   margin: 0;
-  color: #d97706; /* Portocaliu cald */
+  color: #d97706;
 }
 
 .card-content p {
   margin: 0.5rem 0;
-  color: #6b7280; /* Gri cald */
+  color: #6b7280;
 }
 
 /* Loading indicator */
@@ -158,6 +76,18 @@ body, html {
   padding: 20px;
 }
 
+/* Empty state styling */
+.no-results {
+  grid-column: 1 / -1;
+  text-align: center;
+  padding: 40px;
+  background: linear-gradient(to bottom right, #ffffff, #ffe9cc);
+  border-radius: 15px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  font-size: 1.2rem;
+  color: #6b7280;
+}
+
 /* Popup styles */
 .popup {
   position: fixed;
@@ -165,7 +95,7 @@ body, html {
   left: 0;
   width: 100%;
   height: 100%;
-  background-color: rgba(0, 0, 0, 0.5); /* Fundal semi-transparent */
+  background-color: rgba(0, 0, 0, 0.5);
   display: flex;
   justify-content: center;
   align-items: center;
@@ -173,14 +103,14 @@ body, html {
 }
 
 .popup-content {
-  background: linear-gradient(to bottom right, #ffffff, #ffe9cc); /* Gradient cald */
+  background: linear-gradient(to bottom right, #ffffff, #ffe9cc);
   padding: 2rem;
-  border-radius: 20px; /* Colțuri rotunjite */
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2); /* Umbra subtilă */
+  border-radius: 20px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
 }
 
 .popup-content h2 {
-  color: #d97706; /* Portocaliu cald */
+  color: #d97706;
 }
 
 .popup-content .close-btn {
@@ -196,114 +126,4 @@ body, html {
   max-width: 100%;
   height: auto;
   margin: 0.5rem 0;
-}
-
-
-.user-section {
-  background: linear-gradient(to bottom right, #ffffff, #ffe9cc); /* Gradient cald */
-  backdrop-filter: blur(10px); /* Efect de blur */
-  border-radius: 15px; /* Colțuri rotunjite */
-  padding: 15px;
-  margin-top: auto; /* Mută secțiunea în partea de jos */
-  box-shadow: 0 -2px 5px rgba(0, 0, 0, 0.1); /* Umbra subtilă */
-  text-align: center;
-  color: #6b7280; /* Gri cald pentru text */
-}
-
-
-.user-info-container {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-}
-
-.user-profile {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  width: 100%;
-  flex-wrap: wrap; 
-}
-
-
-.profile-circle {
-  width: 40px;
-  height: 40px;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-weight: bold;
-  color: white;
-}
-
-/* Profile info container */
-.profile-info {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  max-width: 170px; 
-  overflow: hidden; 
-}
-
-/* User name and email styling */
-.user-name {
-  font-weight: bold;
-  font-size: 0.9rem; 
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis; 
-  max-width: 120px; 
-}
-
-.user-email {
-  font-size: 0.75rem; 
-  color: #666;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  max-width: 120px; 
-}
-
-/* Keep disconnect button compact */
-.disconnect-btn {
-  margin: 0;
-  padding: 6px;
-  background-color: #ef4444;
-  color: white;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
-  font-weight: bold;
-  padding: 8px 12px;
-  transition: background-color 0.3s ease;
-}
-
-.disconnect-btn:hover {
-  background-color: #fb8500; /* Portocaliu mai intens */
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  min-width: 30px;
-  max-width: 30px;
-  height: 30px;
-  font-size: 0.8rem;
-}
-
-/* When sidebar gets very small */
-@media (max-width: 300px) {
-  .profile-info {
-    max-width: 150px;
-  }
-  
-  .user-name, .user-email {
-    max-width: 100px;
-  }
-  
-  .disconnect-btn {
-    min-width: 25px;
-    max-width: 25px;
-    height: 25px;
-    font-size: 0.7rem;
-  }
 }

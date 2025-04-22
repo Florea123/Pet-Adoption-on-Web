@@ -1,8 +1,8 @@
 body, html {
   height: 100%;
   font-family: Arial, sans-serif;
-  background: linear-gradient(to bottom right, #fffaf3, #ffe5c4); /* Gradient cald */
-  background-image: url('https://www.transparenttextures.com/patterns/paw-print.png'); /* Pattern cu lăbuțe */
+  background: linear-gradient(to bottom right, #fffaf3, #ffe5c4);
+  background-image: url('https://www.transparenttextures.com/patterns/paw-print.png');
   background-size: 200px 200px;
   background-blend-mode: overlay;
   margin: 0;
@@ -14,8 +14,8 @@ body, html {
   justify-content: center;
   align-items: center;
   height: 100vh;
-  overflow-y: auto; /* Permite scroll vertical */
-  padding: 20px; /* Adaugă spațiu pentru margini */
+  overflow-y: auto; 
+  padding: 20px; 
 }
 
 .card {
@@ -174,7 +174,7 @@ input[type="file"]:focus {
 
 /* Styling pentru butonul de ștergere */
 .delete-entry-btn {
-  background-color: #ef4444; /* Roșu cald */
+  background-color: #ef4444; 
   color: white;
   border: none;
   border-radius: 10px;
@@ -187,7 +187,7 @@ input[type="file"]:focus {
 }
 
 .delete-entry-btn:hover {
-  background-color: #dc2626; /* Roșu mai intens */
+  background-color: #dc2626; 
   transform: scale(1.02);
 }
 
@@ -196,26 +196,26 @@ input[type="file"]:focus {
   display: none;
 }
 
-/* Poziționează butonul "Back to Home" în colțul din stânga sus */
+
 .back-to-home-btn {
-  position: fixed; /* Fixează butonul în colțul din stânga sus */
-  top: 10px; /* Distanța față de partea de sus */
-  left: 10px; /* Distanța față de partea stângă */
-  background-color: #3b82f6; /* Albastru cald */
+  position: fixed; 
+  top: 10px; 
+  left: 10px; 
+  background-color: #3b82f6; 
   color: white;
   border: none;
-  border-radius: 5px; /* Colțuri rotunjite */
+  border-radius: 5px; 
   cursor: pointer;
-  font-size: 14px; /* Dimensiune mai mică a textului */
+  font-size: 14px;
   font-weight: 600;
-  padding: 8px 12px; /* Dimensiune mai mică a butonului */
+  padding: 8px 12px; 
   transition: all 0.3s ease;
-  z-index: 1000; /* Asigură-te că butonul este deasupra altor elemente */
+  z-index: 1000; 
   text-align: center;
-  width: auto; /* Elimină extinderea pe toată linia */
+  width: auto; 
 }
 
 .back-to-home-btn:hover {
-  background-color: #2563eb; /* Albastru mai intens */
-  transform: scale(1.05); /* Efect de mărire ușoară */
+  background-color: #2563eb; 
+  transform: scale(1.05); 
 }

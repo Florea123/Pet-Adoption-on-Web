@@ -1,13 +1,12 @@
 import userModel from '../models/User.js';
 import { requireAuth } from '../utils/authUtils.js';
 import { showAnimalDetailsPopup } from '../AnimalCard/AnimalCard.js'; 
+import Sidebar from '../SideBar/Sidebar.js';
 
 const API_URL = 'http://localhost:3000';
 const token = localStorage.getItem('Token');
 
-//const user = userModel.getUser();
 let user;
-// Store all animals and species data
 let allAnimals = [];
 let uniqueSpecies = new Set();
 let selectedSpecies = new Set();
@@ -16,93 +15,12 @@ async function initialize() {
   user = requireAuth();
   if (!user) return;
   
+  // Render sidebar
+  document.getElementById('sidebar-container').innerHTML = Sidebar.render('home');
+  new Sidebar('home');
+  
   await fetchAnimals();
   renderSpeciesFilters();
-  displayUserInfo();
-}
-
-// Generate a random color for the profile circle
-function getRandomColor() {
-  const colors = [
-    '#3b82f6', '#ef4444', '#10b981', '#f59e0b', 
-    '#8b5cf6', '#ec4899', '#6366f1', '#14b8a6'
-  ];
-  return colors[Math.floor(Math.random() * colors.length)];
-}
-
-// Display user information in the sidebar
-function displayUserInfo() {
-  const userInfoContainer = document.getElementById('user-info');
-  
-  if (user && user.firstName && user.email) {
-    const firstInitial = user.firstName.charAt(0).toUpperCase();
-    const fullName = `${user.firstName} ${user.lastName}`;
-    const profileColor = getRandomColor();
-    
-    userInfoContainer.innerHTML = `
-      <div class="user-info-container">
-        <div class="user-profile">
-          <div class="profile-info">
-            <div class="profile-circle" style="background-color: ${profileColor}">
-              ${firstInitial}
-            </div>
-            <div>
-              <div class="user-name">${fullName}</div>
-              <div class="user-email">${user.email}</div>
-            </div>
-          </div>
-          <button id="disconnect-btn" class="disconnect-btn" title="Disconnect">D</button>
-        </div>
-      </div>
-    `;
-    
-    // Add disconnect functionality
-    document.getElementById('disconnect-btn').addEventListener('click', disconnectUser);
-  } else {
-    userInfoContainer.innerHTML = `
-      <div class="user-info-container">
-        <p>Not logged in</p>
-        <a href="../Auth/SignIn.html" class="btn">Sign In</a>
-      </div>
-    `;
-  }
-}
-
-// Handle user disconnect
-function disconnectUser() {
-  userModel.clearUser();
-  localStorage.removeItem('Token');
-  window.location.href = '../Auth/SignIn.html';
-}
-
-// fetching animals
-async function fetchAnimals() {
-  try {
-    const response = await fetch(`${API_URL}/animals/all`, {
-      method: 'GET',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${token}`
-      }
-    });
-    if (!response.ok) {
-      throw new Error('Failed to fetch animals');
-    }
-    allAnimals = await response.json();
-    
-    // Extract unique species
-    allAnimals.forEach(animal => {
-      if (animal.SPECIES) {
-        uniqueSpecies.add(animal.SPECIES);
-      }
-    });
-    
-    displayAnimals(allAnimals);
-  } catch (error) {
-    console.error('Error fetching animals:', error);
-    document.getElementById('animal-cards-container').innerHTML = 
-      '<div class="error">Failed to load animals. Please try again later.</div>';
-  }
 }
 
 // species filters
@@ -159,6 +77,35 @@ function filterAnimals() {
   displayAnimals(filteredAnimals);
 }
 
+async function fetchAnimals() {
+  try {
+    const response = await fetch(`${API_URL}/animals/all`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`
+      }
+    });
+    if (!response.ok) {
+      throw new Error('Failed to fetch animals');
+    }
+    allAnimals = await response.json();
+    
+    // Extract unique species
+    allAnimals.forEach(animal => {
+      if (animal.SPECIES) {
+        uniqueSpecies.add(animal.SPECIES);
+      }
+    });
+    
+    displayAnimals(allAnimals);
+  } catch (error) {
+    console.error('Error fetching animals:', error);
+    document.getElementById('animal-cards-container').innerHTML = 
+      '<div class="error">Failed to load animals. Please try again later.</div>';
+  }
+}
+
 function displayAnimals(animals) {
   const container = document.getElementById('animal-cards-container');
   container.innerHTML = ''; 
@@ -180,10 +127,8 @@ function displayAnimals(animals) {
       if (media.pipeUrl) {
         imageSource = `${API_URL}${media.pipeUrl}`;
       } else if (media.fileData && media.mimeType) {
-        // Fallback to base64 if available
         imageSource = `data:${media.mimeType};base64,${media.fileData}`;
       } else if (media.URL) {
-        // Last resort: direct URL
         imageSource = media.URL;
       }
     }
