@@ -286,6 +286,14 @@ export function showAnimalDetailsPopup(details) {
       restoreScrolling();
     }
   });
+
+  // Set up contact owner button
+  const contactButton = popupContent.querySelector('.contact-button');
+  if (contactButton && owner && owner.USERID) {
+    contactButton.addEventListener('click', () => {
+      window.location.href = `../Messages/Messages.html?userId=${owner.USERID}&name=${encodeURIComponent(ownerName)}`;
+    });
+  }
 }
 
 

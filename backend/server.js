@@ -10,6 +10,12 @@ const {
   deleteAnimal 
 } = require('./routes/AnimalRoute');
 const fileUtils = require('./utils/fileStorageUtils');
+const { 
+  sendMessage, 
+  getConversation, 
+  getConversations, 
+  markMessagesAsRead 
+} = require('./routes/MessageRoute');
 
 const port = 3000;
 
@@ -132,6 +138,23 @@ const server = http.createServer(async (req, res) => {
         }
         return;
       }
+    }
+
+    // Message routes
+    if (req.method === 'POST' && req.url.startsWith('/messages/send')) {
+      return withAuth(sendMessage)(req, res);
+    }
+
+    if (req.method === 'POST' && req.url.startsWith('/messages/conversation')) {
+      return withAuth(getConversation)(req, res);
+    }
+
+    if (req.method === 'GET' && req.url.startsWith('/messages/conversations')) {
+      return withAuth(getConversations)(req, res);
+    }
+
+    if (req.method === 'POST' && req.url.startsWith('/messages/read')) {
+      return withAuth(markMessagesAsRead)(req, res);
     }
 
     // Route not found
