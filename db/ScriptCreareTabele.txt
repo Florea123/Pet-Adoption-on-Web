@@ -17,7 +17,8 @@ DROP SEQUENCE seq_feeding;
 DROP SEQUENCE seq_multimedia;
 DROP SEQUENCE seq_relations;
 
-
+CREATE OR REPLACE TYPE feeding_time_array AS VARRAY(10) OF VARCHAR2(50);
+/
 
 CREATE TABLE Users (
     userID NUMBER PRIMARY KEY,
