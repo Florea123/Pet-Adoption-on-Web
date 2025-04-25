@@ -72,15 +72,16 @@ function displayConversations(conversations) {
   }
   
   container.innerHTML = conversations.map(conv => `
-    <div class="conversation-item ${conv.unreadCount > 0 ? 'unread' : ''}" data-user-id="${conv.OTHERUSERID}">
+    <div class="conversation-item ${conv.unreadCount > 0 ? 'unread' : ''} ${currentConversationUser && currentConversationUser.userId === conv.OTHERUSERID ? 'selected' : ''}" data-user-id="${conv.OTHERUSERID}">
       <div class="conversation-avatar">${getInitials(conv.OTHERUSERNAME)}</div>
       <div class="conversation-info">
         <div class="conversation-name">${conv.OTHERUSERNAME}</div>
         <div class="conversation-preview">
-          ${conv.unreadCount > 0 ? `<span class="unread-badge">${conv.UNREADCOUNT}</span>` : ''}
+          <span class="last-message-preview">${conv.LASTMESSAGECONTENT ? truncateMessage(conv.LASTMESSAGECONTENT) : ''}</span>
           <span class="last-message-time">${formatTimestamp(conv.LASTMESSAGETIME)}</span>
         </div>
       </div>
+      ${conv.unreadCount > 0 ? `<div class="unread-badge">${conv.unreadCount}</div>` : ''}
     </div>
   `).join('');
   
@@ -89,8 +90,20 @@ function displayConversations(conversations) {
     item.addEventListener('click', () => {
       const userId = parseInt(item.dataset.userId);
       loadConversation(userId);
+      
+      // Update sidebar unread count after opening a conversation
+      if (window.sidebarInstance) {
+        setTimeout(() => {
+          window.sidebarInstance.fetchUnreadMessageCount();
+        }, 500);
+      }
     });
   });
+}
+
+// Add this helper function to truncate long messages in the preview
+function truncateMessage(message) {
+  return message.length > 30 ? message.substring(0, 27) + '...' : message;
 }
 
 async function loadConversation(otherUserId) {
@@ -169,11 +182,22 @@ function displayMessages(messages, otherUserId) {
   
   container.innerHTML = messages.map(msg => {
     const isSentByMe = msg.SENDERID === user.id;
+    
+    // Add read status indicators (double checkmarks) for sent messages
+    
+    const readStatus = isSentByMe ? `
+      <span class="read-status ${msg.ISREAD ? 'read' : 'delivered'}">
+        <span class="checkmark">✓</span><span class="checkmark">✓</span>
+      </span>
+    ` : '';
+    
     return `
       <div class="message ${isSentByMe ? 'sent' : 'received'}">
         <div class="message-content">
           ${msg.CONTENT}
-          <span class="message-time">${formatTimestamp(msg.TIMESTAMP)}</span>
+          <span class="message-time">
+            ${formatTimestamp(msg.TIMESTAMP)} ${readStatus}
+          </span>
         </div>
       </div>
     `;

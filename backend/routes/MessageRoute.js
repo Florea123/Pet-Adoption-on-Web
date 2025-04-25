@@ -106,9 +106,25 @@ async function markMessagesAsRead(req, res) {
   }
 }
 
+async function getUnreadCount(req, res) {
+  try {
+    const userId = req.user.id;
+    
+    const unreadCount = await Message.countUnreadMessages(userId);
+    
+    res.writeHead(200, { 'Content-Type': 'application/json' });
+    res.end(JSON.stringify({ count: unreadCount }));
+  } catch (err) {
+    console.error('Error retrieving unread message count:', err);
+    res.writeHead(500, { 'Content-Type': 'application/json' });
+    res.end(JSON.stringify({ error: 'Internal Server Error' }));
+  }
+}
+
 module.exports = { 
   sendMessage, 
   getConversation, 
   getConversations, 
-  markMessagesAsRead 
+  markMessagesAsRead,
+  getUnreadCount,
 };

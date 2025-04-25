@@ -14,7 +14,8 @@ const {
   sendMessage, 
   getConversation, 
   getConversations, 
-  markMessagesAsRead 
+  markMessagesAsRead,
+  getUnreadCount
 } = require('./routes/MessageRoute');
 
 const port = 3000;
@@ -155,6 +156,10 @@ const server = http.createServer(async (req, res) => {
 
     if (req.method === 'POST' && req.url.startsWith('/messages/read')) {
       return withAuth(markMessagesAsRead)(req, res);
+    }
+
+    if(req.method === 'GET' && req.url.startsWith('/messages/unread-count')) {
+      return withAuth(getUnreadCount)(req, res);
     }
 
     // Route not found
