@@ -131,6 +131,8 @@ export default class Sidebar {
       <aside class="sidebar">
         <div class="sidebar-header">
           <h1>Pet Adoption</h1>
+          <button id="home-btn" class="btn ${activePage === 'home' ? 'active' : ''}" 
+                  onclick="location.href='../Home/Home.html'">Home</button>
           <button id="publish-btn" class="btn ${activePage === 'publish' ? 'active' : ''}" 
                   onclick="location.href='../Publish/Publish.html'">Publish</button>
           <button id="my-animals-btn" class="btn ${activePage === 'userAnimals' ? 'active' : ''}" 
@@ -140,8 +142,6 @@ export default class Sidebar {
                     onclick="location.href='../Messages/Messages.html'">Messages</button>
             <span id="messages-badge" class="messages-badge">0</span>
           </div>
-          <button id="home-btn" class="btn ${activePage === 'home' ? 'active' : ''}" 
-                  onclick="location.href='../Home/Home.html'">Home</button>
         </div>
         ${activePage === 'home' ? `
         <div class="filter-section">

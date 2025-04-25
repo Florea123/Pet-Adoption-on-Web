@@ -82,8 +82,29 @@
   color: #6c757d;
 }
 
+/* Read status indicators */
+.read-status {
+  font-size: 0.7rem;
+  margin-left: 4px;
+  display: inline-flex;
+  align-items: center;
+}
+
+.read-status .checkmark {
+  margin-right: -2px;
+}
+
+.read-status.delivered .checkmark {
+  color: #424344; /* Gray for delivered but not read */
+}
+
+.read-status.read .checkmark {
+  color: #1331f5; /* Green for read messages */
+}
+
+/* Unread badge */
 .unread-badge {
-  background-color: #3b82f6;
+  background-color: #ffbb00;
   color: white;
   border-radius: 50%;
   width: 20px;
@@ -127,15 +148,34 @@
 }
 
 .message {
-  max-width: 70%;
-  padding: 10px;
-  margin-bottom: 8px;
-  border-radius: 8px;
+  max-width: 80%; 
+  min-width: 10px;
+  padding: 15px; 
+  margin-bottom: 18px; 
+  border-radius: 10px; 
   position: relative;
+  word-wrap: break-word; 
+}
+
+.message-content {
+  word-break: break-word; 
+  padding-bottom: 15px; 
+  padding-right: 50px; 
+  position: relative; 
+}
+
+.message-time {
+  font-size: 0.8rem; 
+  opacity: 0.7;
+  position: absolute;
+  bottom: -3px; 
+  right: 8px;
+  white-space: nowrap;
+  background: transparent; 
 }
 
 .message.sent {
-  background-color: #3b82f6;
+  background-color: #64b9f1;
   color: white;
   align-self: flex-end;
   border-bottom-right-radius: 0;
@@ -153,10 +193,10 @@
 }
 
 .message-time {
-  font-size: 0.7rem;
+  font-size: 0.8rem; 
   opacity: 0.7;
   position: absolute;
-  bottom: 2px;
+  bottom: -7px;
   right: 8px;
 }
 
