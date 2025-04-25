@@ -5,17 +5,67 @@ export default class Sidebar {
   constructor(activePage) {
     this.activePage = activePage; 
     this.user = requireAuth();
+    this.unreadCount = 0;
     
-  
+    window.sidebarInstance = this;
+    
     if (!this.user) return;
     
     this.initialize();
   }
   
-  initialize() {
+  async initialize() {
     this.displayUserInfo();
+    
+
+    if (this.user) {
+      await this.fetchUnreadMessageCount();
+      
+      // Set up polling for unread messages every 30 seconds
+      this.unreadMessagesInterval = setInterval(() => {
+        this.fetchUnreadMessageCount();
+      }, 30000);
+    }
   }
   
+  async fetchUnreadMessageCount() {
+    try {
+      const token = localStorage.getItem('Token');
+      if (!token) return;
+      
+      const response = await fetch('http://localhost:3000/messages/unread-count', {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        }
+      });
+      
+      if (!response.ok) {
+        throw new Error('Failed to fetch unread message count');
+      }
+      
+      const data = await response.json();
+      this.unreadCount = data.count;
+      
+      // Update the badge in the DOM
+      this.updateUnreadBadge();
+    } catch (error) {
+      console.error('Error fetching unread message count:', error);
+    }
+  }
+  
+  updateUnreadBadge() {
+    const badge = document.getElementById('messages-badge');
+    if (badge) {
+      if (this.unreadCount > 0) {
+        badge.textContent = this.unreadCount > 99 ? '99+' : this.unreadCount;
+        badge.style.display = 'flex';
+      } else {
+        badge.style.display = 'none';
+      }
+    }
+  }
   
   getRandomColor() {
     const colors = [
@@ -65,6 +115,11 @@ export default class Sidebar {
   
   // Handle user disconnect
   disconnectUser() {
+    // Clear intervals before disconnecting
+    if (window.sidebarInstance && window.sidebarInstance.unreadMessagesInterval) {
+      clearInterval(window.sidebarInstance.unreadMessagesInterval);
+    }
+    
     userModel.clearUser();
     localStorage.removeItem('Token');
     window.location.href = '../Auth/SignIn.html';
@@ -80,8 +135,11 @@ export default class Sidebar {
                   onclick="location.href='../Publish/Publish.html'">Publish</button>
           <button id="my-animals-btn" class="btn ${activePage === 'userAnimals' ? 'active' : ''}" 
                   onclick="location.href='../User_Animals/User_Animals.html'">My Animals</button>
-          <button id="messages-btn" class="btn ${activePage === 'messages' ? 'active' : ''}" 
-                  onclick="location.href='../Messages/Messages.html'">Messages</button>
+          <div class="btn-container">
+            <button id="messages-btn" class="btn ${activePage === 'messages' ? 'active' : ''}" 
+                    onclick="location.href='../Messages/Messages.html'">Messages</button>
+            <span id="messages-badge" class="messages-badge">0</span>
+          </div>
           <button id="home-btn" class="btn ${activePage === 'home' ? 'active' : ''}" 
                   onclick="location.href='../Home/Home.html'">Home</button>
         </div>
