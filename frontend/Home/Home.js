@@ -1,5 +1,6 @@
 import userModel from '../models/User.js';
 import { requireAuth } from '../utils/authUtils.js';
+import { showAnimalDetailsPopup } from '../AnimalCard/AnimalCard.js'; 
 
 const API_URL = 'http://localhost:3000';
 const token = localStorage.getItem('Token');
@@ -74,7 +75,7 @@ function disconnectUser() {
   window.location.href = '../Auth/SignIn.html';
 }
 
-// Existing code for fetching animals
+// fetching animals
 async function fetchAnimals() {
   try {
     const response = await fetch(`${API_URL}/animals/all`, {
@@ -104,7 +105,7 @@ async function fetchAnimals() {
   }
 }
 
-// Existing code for species filters
+// species filters
 function renderSpeciesFilters() {
   const filtersContainer = document.getElementById('species-filters');
   filtersContainer.innerHTML = ''; // Clear loading message
@@ -130,7 +131,7 @@ function renderSpeciesFilters() {
   });
 }
 
-// Rest of your existing code for species filtering, animal display, etc.
+// species filtering, animal display, etc.
 function handleSpeciesFilterChange(event) {
   const species = event.target.value;
   
@@ -170,10 +171,25 @@ function displayAnimals(animals) {
   animals.forEach((animal) => {
     const card = document.createElement('div');
     card.className = 'card';
+    
+    // Check for piped media 
+    let imageSource = 'https://via.placeholder.com/300x200?text=No+Image';
+    
+    if (animal.multimedia && animal.multimedia.length > 0) {
+      const media = animal.multimedia[0];
+      if (media.pipeUrl) {
+        imageSource = `${API_URL}${media.pipeUrl}`;
+      } else if (media.fileData && media.mimeType) {
+        // Fallback to base64 if available
+        imageSource = `data:${media.mimeType};base64,${media.fileData}`;
+      } else if (media.URL) {
+        // Last resort: direct URL
+        imageSource = media.URL;
+      }
+    }
 
-    const imageUrl = animal.multimedia && animal.multimedia[0]?.URL || 'https://via.placeholder.com/300x200?text=No+Image';
     card.innerHTML = `
-      <img src="${imageUrl}" alt="${animal.NAME}">
+      <img src="${imageSource}" alt="${animal.NAME}">
       <div class="card-content">
         <h2>${animal.NAME}</h2>
         <p>Breed: ${animal.BREED}</p>
@@ -202,41 +218,11 @@ async function openAnimalDetailsPopup(animalId) {
     }
 
     const animalDetails = await response.json();
-    showPopup(animalDetails);
+    
+    showAnimalDetailsPopup(animalDetails);
   } catch (error) {
     console.error('Error fetching animal details:', error);
   }
-}
-
-function showPopup(details) {
-  const popup = document.createElement('div');
-  popup.className = 'popup';
-
-  const multimedia = details.multimedia.map(
-    (media) => `<img src="${media.URL}" alt="${media.DESCRIPTION}" />`
-  ).join('');
-
-  popup.innerHTML = `
-    <div class="popup-content">
-      <span class="close-btn">&times;</span>
-      <h2>${details.animal.NAME}</h2>
-      <p><strong>Breed:</strong> ${details.animal.BREED}</p>
-      <p><strong>Species:</strong> ${details.animal.SPECIES}</p>
-      <p><strong>Age:</strong> ${details.animal.AGE}</p>
-      <p><strong>Gender:</strong> ${details.animal.GENDER}</p>
-      <p><strong>Owner:</strong> ${details.owner.FIRSTNAME} ${details.owner.LASTNAME}</p>
-      <p><strong>Address:</strong> ${details.address[0]?.STREET}, ${details.address[0]?.CITY}, ${details.address[0]?.STATE}, ${details.address[0]?.COUNTRY}</p>
-      <h3>Multimedia</h3>
-      <div class="multimedia">${multimedia}</div>
-    </div>
-  `;
-
-  // Close popup on clicking the close button
-  popup.querySelector('.close-btn').addEventListener('click', () => {
-    popup.remove();
-  });
-
-  document.body.appendChild(popup);
 }
 
 // Initialize the page
