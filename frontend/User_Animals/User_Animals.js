@@ -1,25 +1,24 @@
-import userModel from '../models/User.js';
 import { requireAuth } from '../utils/authUtils.js';
+import Sidebar from '../SideBar/Sidebar.js';
 
 const API_URL = 'http://localhost:3000';
 const token = localStorage.getItem('Token');
 
-//const user = userModel.getUser();
 let user;
 let userAnimals = [];
 
 async function initialize() {
-
-    // Check if user is authenticated before loading page content
     user = requireAuth();
     if (!user) return; 
     
-    displayUserInfo();
+    // Render sidebar
+    document.getElementById('sidebar-container').innerHTML = Sidebar.render('userAnimals');
+    new Sidebar('userAnimals');
+    
     await fetchUserAnimals();
-  }
-  
+}
 
-// Function to fetch animals belonging to the current user
+
 async function fetchUserAnimals() {
     try {
         // Use the findByUserId endpoint to fetch all animals for the user
@@ -46,7 +45,7 @@ async function fetchUserAnimals() {
     }
 }
 
-// Function to display the user's animals
+// user's animals
 function displayUserAnimals(animals) {
     const container = document.getElementById('my-animals-container');
     container.innerHTML = '';
@@ -66,7 +65,7 @@ function displayUserAnimals(animals) {
         const card = document.createElement('div');
         card.className = 'card';
         
-        // Check for piped media URL first, then fallbacks
+        // Check for piped media URL 
         let imageSource = 'https://via.placeholder.com/300x200?text=No+Image';
         
         if (animal.multimedia && animal.multimedia.length > 0) {
@@ -98,13 +97,13 @@ function displayUserAnimals(animals) {
         container.appendChild(card);
     });
 
-    // Add event listeners to delete buttons
+    
     document.querySelectorAll('.delete-btn').forEach(button => {
         button.addEventListener('click', handleDeleteAnimal);
     });
 }
 
-// Function to handle animal deletion
+//  animal deletion
 async function handleDeleteAnimal(event) {
     const animalId = event.target.dataset.animalId;
     
@@ -123,7 +122,7 @@ async function handleDeleteAnimal(event) {
         });
 
         if (response.ok) {
-            // Remove the deleted animal from the UI
+            
             userAnimals = userAnimals.filter(animal => animal.ANIMALID !== parseInt(animalId));
             displayUserAnimals(userAnimals);
             alert('Animal deleted successfully');
@@ -135,60 +134,6 @@ async function handleDeleteAnimal(event) {
         console.error('Error deleting animal:', error);
         alert('An error occurred while deleting the animal');
     }
-}
-
-// Generate a random color for the profile circle
-function getRandomColor() {
-    const colors = [
-        '#3b82f6', '#ef4444', '#10b981', '#f59e0b', 
-        '#8b5cf6', '#ec4899', '#6366f1', '#14b8a6'
-    ];
-    return colors[Math.floor(Math.random() * colors.length)];
-}
-
-// Display user information in the sidebar
-function displayUserInfo() {
-    const userInfoContainer = document.getElementById('user-info');
-    
-    if (user && user.firstName && user.email) {
-        const firstInitial = user.firstName.charAt(0).toUpperCase();
-        const fullName = `${user.firstName} ${user.lastName}`;
-        const profileColor = getRandomColor();
-        
-        userInfoContainer.innerHTML = `
-            <div class="user-info-container">
-                <div class="user-profile">
-                    <div class="profile-info">
-                        <div class="profile-circle" style="background-color: ${profileColor}">
-                            ${firstInitial}
-                        </div>
-                        <div>
-                            <div class="user-name">${fullName}</div>
-                            <div class="user-email">${user.email}</div>
-                        </div>
-                    </div>
-                    <button id="disconnect-btn" class="disconnect-btn" title="Disconnect">D</button>
-                </div>
-            </div>
-        `;
-        
-        
-        document.getElementById('disconnect-btn').addEventListener('click', disconnectUser);
-    } else {
-        userInfoContainer.innerHTML = `
-            <div class="user-info-container">
-                <p>Not logged in</p>
-                <a href="../Auth/SignIn.html" class="btn">Sign In</a>
-            </div>
-        `;
-    }
-}
-
-// Handle user disconnect
-function disconnectUser() {
-    userModel.clearUser();
-    localStorage.removeItem('Token');
-    window.location.href = '../Auth/SignIn.html';
 }
 
 // Initialize the page

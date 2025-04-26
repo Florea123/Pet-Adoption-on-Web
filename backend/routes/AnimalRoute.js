@@ -103,7 +103,7 @@ async function findBySpecies(req, res) {
       return;
     }
 
-    // Add multimedia to each animal, just like in getAllAnimals
+    // Add multimedia to each animal
     const animalsWithMedia = await Promise.all(
       animals.map(async (animal) => {
         const multimedia = await MultiMedia.findByAnimalIdOnePhoto(
@@ -144,27 +144,17 @@ async function createAnimal(req, res) {
       return;
     }
 
-    // Create the animal
-    await Animal.create(userID, name, breed, species, age, gender);
+    // Create the animal and get the ID directly
+    console.log("Creating animal:", name, breed, species);
+    const animalId = await Animal.create(userID, name, breed, species, age, gender);
     
-    const animals = await Animal.findByUserId(userID);
-    const newAnimal = animals.find(
-      (animal) =>
-        animal.NAME === name &&
-        animal.BREED === breed &&
-        animal.SPECIES === species
-    );
-
-    if (!newAnimal) {
-      throw new Error("Failed to retrieve the newly created animal");
-    }
-
-    const animalId = newAnimal.ANIMALID;
-
+    console.log("Animal created with ID:", animalId);
+    
+    
     // Handle Feeding Schedule
     if (feedingSchedule) {
       if (Array.isArray(feedingSchedule)) {
-        // Extract feeding times from the array of objects
+      
         const feedingTimes = feedingSchedule.map((item) => item.feedingTime);
         const foodType = feedingSchedule
           .map((item) => item.foodType)
@@ -185,9 +175,10 @@ async function createAnimal(req, res) {
       console.log("Medical history:", medicalHistory);
       
       if (Array.isArray(medicalHistory)) {
-        // Handle array of medical records
+ 
         for (const record of medicalHistory) {
           const { vetNumber, recordDate, description, first_aid_noted } = record;
+
           // Convert recordDate to Oracle date format
           const formattedDate = new Date(recordDate);
           
@@ -200,9 +191,9 @@ async function createAnimal(req, res) {
           );
         }
       } else {
-        // Handle single record case
+        
         const { vetNumber, recordDate, description, first_aid_noted } = medicalHistory;
-        // Convert recordDate to Oracle date format
+
         const formattedDate = new Date(recordDate);
         
         await MedicalHistory.create(
@@ -219,10 +210,15 @@ async function createAnimal(req, res) {
     if (multimedia && multimedia.length > 0) {
       console.log("Multimedia:", multimedia);
       
-      // Multimedia is already an array, so we can simply iterate through it
       for (const media of multimedia) {
         const { mediaType, url, description } = media;
         const upload_date = new Date();
+        
+        // Check if the URL exists 
+        if (!url) {
+          console.warn("Warning: Missing URL for multimedia item");
+          continue;
+        }
         
         console.log(`Creating multimedia: ${mediaType}, ${url}`);
         

@@ -1,7 +1,4 @@
 const http = require('http');
-const fs = require('fs');
-const path = require('path');
-const multer = require('multer'); 
 const util = require('util');
 const { getUserByEmailAndPassword, insertUser } = require('./routes/UserRoute');
 const { authenticate } = require('./middleware/auth');
@@ -12,6 +9,14 @@ const {
   createAnimal,
   deleteAnimal 
 } = require('./routes/AnimalRoute');
+const fileUtils = require('./utils/fileStorageUtils');
+const { 
+  sendMessage, 
+  getConversation, 
+  getConversations, 
+  markMessagesAsRead,
+  getUnreadCount
+} = require('./routes/MessageRoute');
 
 const port = 3000;
 
@@ -19,27 +24,8 @@ function withAuth(handler) {
   return (req, res) => authenticate(req, res, () => handler(req, res));
 }
 
-// Set up multer storage
-const storage = multer.diskStorage({
-  destination: function (req, file, cb) {
-    const mediaType = req.body.mediaType || 'photo';
-    const dir = path.join(__dirname, '..', 'server', mediaType);
-    
-    // Ensure directory exists
-    if (!fs.existsSync(dir)) {
-      fs.mkdirSync(dir, { recursive: true });
-    }
-    
-    cb(null, dir);
-  },
-  filename: function (req, file, cb) {
-    // Use the filename provided in the request or generate a unique filename
-    const fileName = req.body.fileName || `${Date.now()}_${file.originalname.replace(/\s+/g, '_')}`;
-    cb(null, fileName);
-  }
-});
-
-const upload = multer({ storage: storage });
+// Get configured multer instance
+const upload = fileUtils.configureStorage();
 
 const server = http.createServer(async (req, res) => {
   res.setHeader('Access-Control-Allow-Origin', '*');
@@ -71,12 +57,10 @@ const server = http.createServer(async (req, res) => {
 
     if (req.method === 'POST' && req.url.startsWith('/animals/details')) {
       return withAuth(getAnimalDetailsById)(req, res);
-      return;
     }
 
     if (req.method === 'POST' && req.url.startsWith('/animals/species')) {
       return withAuth(findBySpecies)(req, res);
-      return;
     }
 
     if (req.method === 'POST' && req.url.startsWith('/animals/create')) {
@@ -89,7 +73,7 @@ const server = http.createServer(async (req, res) => {
 
     // File upload route
     if (req.method === 'POST' && req.url.startsWith('/upload')) {
-      // Use multer middleware through a wrapper for our http server
+
       const processUpload = util.promisify((req, res, next) => {
         upload.single('file')(req, res, (err) => {
           if (err) return next(err);
@@ -106,12 +90,21 @@ const server = http.createServer(async (req, res) => {
           return;
         }
         
-        // Generate the exact same path that will be stored in the database
+        // Debug info about the uploaded file
+        console.log('Uploaded file details:', {
+          originalname: req.file.originalname,
+          mimetype: req.file.mimetype,
+          filename: req.file.filename,
+          path: req.file.path,
+          size: req.file.size
+        });
+        
+        // Generate the URL 
         const mediaType = req.body.mediaType || 'photo';
         const fileName = req.file.filename;
-        const storagePath = `/server/${mediaType}/${fileName}`;
+        const storagePath = fileUtils.getPublicUrl(mediaType, fileName);
         
-        // Return the file path that was saved
+   
         res.writeHead(200, { 'Content-Type': 'application/json' });
         res.end(JSON.stringify({ 
           success: true,
@@ -137,7 +130,6 @@ const server = http.createServer(async (req, res) => {
         
         const MultiMedia = require('./models/MultiMedia');
         await MultiMedia.pipeMediaStream(mediaId, res);
-        // The response is handled within the pipeMediaStream method
         return;
       } catch (err) {
         console.error('Error serving media pipe:', err);
@@ -147,6 +139,27 @@ const server = http.createServer(async (req, res) => {
         }
         return;
       }
+    }
+
+    // Message routes
+    if (req.method === 'POST' && req.url.startsWith('/messages/send')) {
+      return withAuth(sendMessage)(req, res);
+    }
+
+    if (req.method === 'POST' && req.url.startsWith('/messages/conversation')) {
+      return withAuth(getConversation)(req, res);
+    }
+
+    if (req.method === 'GET' && req.url.startsWith('/messages/conversations')) {
+      return withAuth(getConversations)(req, res);
+    }
+
+    if (req.method === 'POST' && req.url.startsWith('/messages/read')) {
+      return withAuth(markMessagesAsRead)(req, res);
+    }
+
+    if(req.method === 'GET' && req.url.startsWith('/messages/unread-count')) {
+      return withAuth(getUnreadCount)(req, res);
     }
 
     // Route not found

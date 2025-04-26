@@ -5,13 +5,20 @@ class Animal {
   static async create(userID, name, breed, species, age, gender) {
     const connection = await getConnection();
     try {
+
       const result = await connection.execute(
         `INSERT INTO Animal (userID, name, breed, species, age, gender) 
-         VALUES (:userID, :name, :breed, :species, :age, :gender)`,
-        { userID, name, breed, species, age, gender },
+         VALUES (:userID, :name, :breed, :species, :age, :gender)
+         RETURNING animalID INTO :animalID`,
+        { 
+          userID, name, breed, species, age, gender,
+          animalID: { type: oracledb.NUMBER, dir: oracledb.BIND_OUT }
+        },
         { autoCommit: true }
       );
-      return result;
+      
+      
+      return result.outBinds.animalID[0];
     } finally {
       await connection.close();
     }
@@ -76,7 +83,7 @@ class Animal {
   static async deleteAnimalWithRelatedData(animalID) {
     const connection = await getConnection();
     try {
-      // Import required models first
+ 
       const Relations = require('./Relations');
       const MultiMedia = require('./MultiMedia');
       const FeedingSchedule = require('./FeedingSchedule');

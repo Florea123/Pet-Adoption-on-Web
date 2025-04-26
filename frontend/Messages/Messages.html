@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Messages</title>
+    <link rel="stylesheet" href="../Home/Home.css">
+    <link rel="stylesheet" href="../SideBar/Sidebar.css">
+    <link rel="stylesheet" href="Messages.css">
+</head>
+<body>
+    <div class="app-container">
+        <div id="sidebar-container"></div>
+        
+        <main class="main-content">
+            <h1 class="page-title">Messages</h1>
+            <div class="messages-interface">
+                <div class="conversations-list">
+                    <div class="conversations-header">
+                        <h2>Conversations</h2>
+                    </div>
+                    <div id="conversation-list" class="conversation-list">
+                        <div class="loader">Loading conversations...</div>
+                    </div>
+                </div>
+                
+                <div id="messages-container" class="messages-container">
+                    <div id="conversation-header" class="conversation-header">
+                        <!-- Conversation partner name will appear here -->
+                    </div>
+                    <div id="messages" class="messages">
+                        <!-- Messages will be loaded here -->
+                        <div class="empty-state">Select a conversation to view messages</div>
+                    </div>
+                    <form id="send-message-form" class="message-input-area">
+                        <input type="text" id="message-input" placeholder="Type a message..." autocomplete="off">
+                        <button type="submit">Send</button>
+                    </form>
+                </div>
+            </div>
+        </main>
+    </div>
+    
+    <script type="module" src="Messages.js"></script>
+</body>
+</html>
