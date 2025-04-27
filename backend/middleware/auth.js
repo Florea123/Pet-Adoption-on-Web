@@ -5,16 +5,21 @@ const secret = process.env.JWT_SECRET || 'your_jwt_secret';
 
 // Function to generate a JWT token for a user
 const generateToken = (user) => {
+  
+  const payload = {
+    id: user.USERID || user.adminId || user.id,
+    email: user.EMAIL || user.email,
+    firstName: user.FIRSTNAME || user.firstName,
+    lastName: user.LASTNAME || user.lastName,
+    phone: user.PHONE || user.phone,
+    createdAt: user.CREATEDAT || user.createdAt,
+    isAdmin: user.isAdmin || false
+  };
+
   return jwt.sign(
-    {
-      id: user.USERID, 
-      email: user.EMAIL,
-      firstName: user.FIRSTNAME,
-      lastName: user.LASTNAME,
-      phone: user.PHONE,
-    },
+    payload,
     secret,
-    { expiresIn: '1h' }
+    { expiresIn: '24h' } 
   );
 };
 
@@ -45,4 +50,16 @@ const authenticate = (req, res, next) => {
   }
 };
 
-module.exports = { generateToken, authenticate };
+// Admin authentication middleware
+const authenticateAdmin = (req, res, next) => {
+  authenticate(req, res, () => {
+    if (req.user && req.user.isAdmin) {
+      next();
+    } else {
+      res.writeHead(403, { 'Content-Type': 'application/json' });
+      res.end(JSON.stringify({ error: 'Admin access required' }));
+    }
+  });
+};
+
+module.exports = { generateToken, authenticate, authenticateAdmin };

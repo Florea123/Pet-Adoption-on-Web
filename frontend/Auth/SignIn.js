@@ -43,10 +43,11 @@ document
           email: decoded.email,
           firstName: decoded.firstName,
           lastName: decoded.lastName,
-          phone: decoded.phone
+          phone: decoded.phone,
+          createdAt: decoded.createdAt 
         });
         
-        console.log("User information saved to model");
+      
 
         // Redirect to the home page
         window.location.href = "../Home/Home.html";

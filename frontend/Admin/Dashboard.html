@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard</title>
+    <link rel="stylesheet" href="Dashbaord.css">
+    <script src="https://cdn.jsdelivr.net/npm/jwt-decode@3.1.2/build/jwt-decode.min.js"></script>
+</head>
+<body>
+    <div class="dashboard-container">
+        <aside class="sidebar">
+            <div class="logo">
+                <h2>Pet Adoption</h2>
+                <p>Admin Panel</p>
+            </div>
+            <nav class="nav-menu">
+                <ul>
+                    <li class="active"><a href="#" data-section="overview">Overview</a></li>
+                    <li><a href="#" data-section="users">Users</a></li>
+                    <li><a href="#" data-section="pets">Pets</a></li>
+                </ul>
+            </nav>
+            <div class="sidebar-footer">
+                <button id="logoutBtn" class="logout-btn">Logout</button>
+            </div>
+        </aside>
+        
+        <main class="main-content">
+            <header class="dashboard-header">
+                <h1>Admin Dashboard</h1>
+                <div class="header-actions">
+                    <button id="refreshData" class="refresh-btn" title="Refresh data">
+                        <i class="fas fa-sync-alt"></i> Refresh
+                    </button>
+                    <div class="admin-profile">
+                        <span id="adminEmail">admin@example.com</span>
+                    </div>
+                </div>
+            </header>
+            
+            <div class="content-sections">
+                <!-- Overview Section -->
+                <section id="overview" class="content-section active">
+                    <h2>Dashboard Overview</h2>
+                    <div class="stats-container">
+                        <div class="stat-card">
+                            <h3>Total Users</h3>
+                            <div class="stat-value" id="totalUsers">0</div>
+                        </div>
+                        <div class="stat-card">
+                            <h3>Total Pets</h3>
+                            <div class="stat-value" id="totalPets">0</div>
+                        </div>
+                    </div>
+                </section>
+                
+                <!-- Other sections will be implemented later -->
+                <section id="users" class="content-section">
+                    <h2>User Management</h2>
+                    <div class="table-container">
+                        <!-- User table will go here -->
+                        <p>User management content will be implemented soon.</p>
+                    </div>
+                </section>
+                
+                <section id="pets" class="content-section">
+                    <h2>Pet Management</h2>
+                    <div class="table-container">
+                        <!-- Pet table will go here -->
+                        <p>Pet management content will be implemented soon.</p>
+                    </div>
+                </section>
+            </div>
+        </main>
+    </div>
+
+    <script src="Dashboard.js"></script>
+</body>
+</html>

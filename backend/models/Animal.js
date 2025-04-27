@@ -1,5 +1,9 @@
 const { getConnection } = require('../db');
 const oracledb = require('oracledb'); 
+const Relations = require('./Relations');
+const MultiMedia = require('./MultiMedia');
+const FeedingSchedule = require('./FeedingSchedule');
+const MedicalHistory = require('./MedicalHistory');
 
 class Animal {
   static async create(userID, name, breed, species, age, gender) {
@@ -84,11 +88,6 @@ class Animal {
     const connection = await getConnection();
     try {
  
-      const Relations = require('./Relations');
-      const MultiMedia = require('./MultiMedia');
-      const FeedingSchedule = require('./FeedingSchedule');
-      const MedicalHistory = require('./MedicalHistory');
-      
       try {
         await Relations.deleteByAnimalId(animalID);
         console.log(`Relations deleted`);
@@ -135,6 +134,47 @@ class Animal {
           console.error('Error closing connection:', err);
         }
       }
+    }
+  }
+
+  static async getAnimalDetailsForUser(userID) {
+    const connection = await getConnection();
+    try {
+      // Get all animals for the user
+      const animals = await this.findByUserId(userID);
+      
+      if (!animals || animals.length === 0) {
+        return [];
+      }
+      
+      // For each animal, fetch related data
+      const detailedAnimals = await Promise.all(animals.map(async (animal) => {
+        const animalID = animal.ANIMALID;
+        
+        // Get multimedia data
+        const multimedia = await MultiMedia.findByAnimalId(animalID);
+        
+        // Get feeding schedule
+        const feedingSchedule = await FeedingSchedule.findByAnimalId(animalID);
+        
+        // Get medical history
+        const medicalHistory = await MedicalHistory.findByAnimalId(animalID);
+        
+        // Get relations
+        const relationsData = await Relations.findByAnimalId(animalID);
+        
+        return {
+          ...animal,
+          multimedia: multimedia || [],
+          feedingSchedule: feedingSchedule || [],
+          medicalHistory: medicalHistory || [],
+          relations: relationsData || []
+        };
+      }));
+      
+      return detailedAnimals;
+    } finally {
+      await connection.close();
     }
   }
 }

@@ -8,7 +8,6 @@ export function showAnimalDetailsPopup(details) {
   }
   
   // Extract data
-  console.log('Animal details:', details);
   const { animal, multimedia, owner, address, feedingSchedule, medicalHistory, relations } = details;
   
   // Create popup elements
