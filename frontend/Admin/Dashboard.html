@@ -4,7 +4,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Admin Dashboard</title>
-    <link rel="stylesheet" href="Dashbaord.css">
+    <link rel="stylesheet" href="Dashboard.css">
+    <link rel="stylesheet" href="Users.css">
+    <link rel="stylesheet" href="Pets.css">
     <script src="https://cdn.jsdelivr.net/npm/jwt-decode@3.1.2/build/jwt-decode.min.js"></script>
 </head>
 <body>
@@ -55,26 +57,35 @@
                     </div>
                 </section>
                 
-                <!-- Other sections will be implemented later -->
+                <!-- Users Section -->
                 <section id="users" class="content-section">
                     <h2>User Management</h2>
                     <div class="table-container">
-                        <!-- User table will go here -->
-                        <p>User management content will be implemented soon.</p>
+                        <!-- User table -->
                     </div>
                 </section>
                 
+                <!-- Pets Section -->
                 <section id="pets" class="content-section">
                     <h2>Pet Management</h2>
+                    <div class="section-controls">
+                        <div class="search-filter">
+                            <input type="text" id="petSearch" placeholder="Search pets..." class="search-input">
+                            <select id="petSpeciesFilter" class="filter-select">
+                                <option value="">All Species</option>
+                            </select>
+                        </div>
+                    </div>
                     <div class="table-container">
-                        <!-- Pet table will go here -->
-                        <p>Pet management content will be implemented soon.</p>
+                        <!-- Pet table -->
                     </div>
                 </section>
             </div>
         </main>
     </div>
 
+    <script src="Users.js"></script>
+    <script src="Pets.js"></script>
     <script src="Dashboard.js"></script>
 </body>
 </html>
