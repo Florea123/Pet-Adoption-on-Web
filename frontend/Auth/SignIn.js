@@ -46,7 +46,7 @@ document
           phone: decoded.phone
         });
         
-        console.log("User information saved to model");
+      
 
         // Redirect to the home page
         window.location.href = "../Home/Home.html";

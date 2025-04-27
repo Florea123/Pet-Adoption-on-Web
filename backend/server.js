@@ -17,7 +17,7 @@ const {
   markMessagesAsRead,
   getUnreadCount
 } = require('./routes/MessageRoute');
-
+const { adminLogin } = require('./routes/AdminRoute');
 const port = 3000;
 
 function withAuth(handler) {
@@ -49,6 +49,11 @@ const server = http.createServer(async (req, res) => {
       await insertUser(req, res);
       return;
     }
+
+    if(req.method ==='POST' && req.url.startsWith('/admin/login')) {
+      return adminLogin(req, res);
+    }
+
 
     // Animal routes
     if(req.method === 'GET' && req.url.startsWith('/animals/all')) {
