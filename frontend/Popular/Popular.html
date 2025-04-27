@@ -3,30 +3,29 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Pet Adoption Marketplace</title>
-  <link rel="stylesheet" href="Home.css">
+  <title>Popular Animals</title>
+  <link rel="stylesheet" href="Popular.css">
   <link rel="stylesheet" href="../SideBar/Sidebar.css">
-  <link rel="stylesheet" href="../AnimalCard/AnimalCard.css"> 
+  <link rel="stylesheet" href="../AnimalCard/AnimalCard.css">
 </head>
 <body>
   <div class="app-container">
     <div id="sidebar-container">
-      <button id="home-btn" class="btn" onclick="location.href='Home.html'">Home</button>
+      <button id="home-btn" class="btn" onclick="location.href='../Home/Home.html'">Home</button>
       <button id="publish-btn" class="btn" onclick="location.href='../Publish/Publish.html'">Publish</button>
       <button id="my-animals-btn" class="btn" onclick="location.href='../User_Animals/User_Animals.html'">My Animals</button>
       <button id="messages-btn" class="btn" onclick="location.href='../Messages/Messages.html'">Messages</button>
-      <button id="popular-btn" class="btn" onclick="location.href='../Popular/Popular.html'">Popular</button>
+      <button id="popular-btn" class="btn active" onclick="location.href='Popular.html'">Popular</button>
     </div>
     
     <main class="main-content">
-      <div id="species-filters">
-      </div>
+      <div id="species-filters"></div>
       <div id="animal-cards-container" class="cards-container">
         <div class="loader">Loading animals...</div>
       </div>
     </main>
   </div>
   
-  <script type="module" src="Home.js"></script>
+  <script type="module" src="Popular.js"></script>
 </body>
 </html>
