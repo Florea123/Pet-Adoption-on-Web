@@ -154,28 +154,33 @@ function processApiData(usersData) {
         totalUsers,
         totalPets,
         users: usersData, 
-        animals: allAnimals /
+        animals: allAnimals 
     };
 }
 
-// Update the dashboard UI
+// Update the dashboard UI with the data
 function updateDashboardUI(data) {
     // Update statistics
     document.getElementById('totalUsers').textContent = data.totalUsers;
     document.getElementById('totalPets').textContent = data.totalPets;
     
-   
+    // Initialize charts
+    if (window.chartModule && typeof window.chartModule.initCharts === 'function') {
+        window.chartModule.initCharts(data);
+    }
+    
+    // Initialize users view
     if (window.usersModule && typeof window.usersModule.initUsersView === 'function') {
         window.usersModule.initUsersView(data.users);
     }
     
-    
+    // Initialize pets view
     if (window.petsModule && typeof window.petsModule.initPetsView === 'function') {
         window.petsModule.initPetsView(data.animals);
     }
 }
 
-// Add a refresh button event handler
+
 document.addEventListener('DOMContentLoaded', function() {
     const refreshButton = document.getElementById('refreshData');
     if (refreshButton) {

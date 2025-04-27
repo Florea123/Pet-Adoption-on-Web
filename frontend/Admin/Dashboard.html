@@ -7,6 +7,7 @@
     <link rel="stylesheet" href="Dashboard.css">
     <link rel="stylesheet" href="Users.css">
     <link rel="stylesheet" href="Pets.css">
+    <link rel="stylesheet" href="Chart.css">
     <script src="https://cdn.jsdelivr.net/npm/jwt-decode@3.1.2/build/jwt-decode.min.js"></script>
 </head>
 <body>
@@ -55,13 +56,22 @@
                             <div class="stat-value" id="totalPets">0</div>
                         </div>
                     </div>
+                    
+                    <div class="charts-container">
+                        <div class="chart-box">
+                            <div id="users-chart"></div>
+                        </div>
+                        <div class="chart-box">
+                            <div id="pets-chart"></div>
+                        </div>
+                    </div>
                 </section>
                 
                 <!-- Users Section -->
                 <section id="users" class="content-section">
                     <h2>User Management</h2>
                     <div class="table-container">
-                        <!-- User table -->
+                        <!-- User table will go here -->
                     </div>
                 </section>
                 
@@ -77,13 +87,15 @@
                         </div>
                     </div>
                     <div class="table-container">
-                        <!-- Pet table -->
+                        <!-- Pet table will go here -->
                     </div>
                 </section>
             </div>
         </main>
     </div>
 
+    <!-- Load scripts in the correct order -->
+    <script src="Chart.js"></script>
     <script src="Users.js"></script>
     <script src="Pets.js"></script>
     <script src="Dashboard.js"></script>
