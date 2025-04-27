@@ -12,6 +12,7 @@ const generateToken = (user) => {
     firstName: user.FIRSTNAME || user.firstName,
     lastName: user.LASTNAME || user.lastName,
     phone: user.PHONE || user.phone,
+    createdAt: user.CREATEDAT || user.createdAt,
     isAdmin: user.isAdmin || false
   };
 

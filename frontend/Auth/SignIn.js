@@ -43,7 +43,8 @@ document
           email: decoded.email,
           firstName: decoded.firstName,
           lastName: decoded.lastName,
-          phone: decoded.phone
+          phone: decoded.phone,
+          createdAt: decoded.createdAt 
         });
         
       

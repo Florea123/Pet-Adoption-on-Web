@@ -1,16 +1,23 @@
 BEGIN
-    -- Inserare Users
-    INSERT INTO Users (firstName, lastName, email, password, phone)
-    VALUES ('Andrei', 'Popescu', 'andrei.popescu@example.com', 'hashed_password_123', '0755123456');
+    -- Inserare Admins 
+    INSERT INTO Admins (email, password, createdAt)
+    VALUES ('admin@petadoption.com', 'admin123', SYSDATE-60);
     
-    INSERT INTO Users (firstName, lastName, email, password, phone)
-    VALUES ('Maria', 'Ionescu', 'maria.ionescu@example.com', 'hashed_password_456', '0755987654');
+    INSERT INTO Admins (email, password, createdAt)
+    VALUES ('moderator@petadoption.com', 'mod456', SYSDATE-45);
 
-    INSERT INTO Users (firstName, lastName, email, password, phone)
-    VALUES ('George', 'Vasilescu', 'george.vasilescu@example.com', 'hashed_password_789', '0755123789');
+    -- Inserare Users 
+    INSERT INTO Users (firstName, lastName, email, password, phone, createdAt)
+    VALUES ('Andrei', 'Popescu', 'andrei.popescu@example.com', 'hashed_password_123', '0755123456', SYSDATE-30);
+    
+    INSERT INTO Users (firstName, lastName, email, password, phone, createdAt)
+    VALUES ('Maria', 'Ionescu', 'maria.ionescu@example.com', 'hashed_password_456', '0755987654', SYSDATE-25);
 
-    INSERT INTO Users (firstName, lastName, email, password, phone)
-    VALUES ('Ana', 'Marinescu', 'ana.marinescu@example.com', 'hashed_password_101', '0755987123');
+    INSERT INTO Users (firstName, lastName, email, password, phone, createdAt)
+    VALUES ('George', 'Vasilescu', 'george.vasilescu@example.com', 'hashed_password_789', '0755123789', SYSDATE-20);
+
+    INSERT INTO Users (firstName, lastName, email, password, phone, createdAt)
+    VALUES ('Ana', 'Marinescu', 'ana.marinescu@example.com', 'hashed_password_101', '0755987123', SYSDATE-15);
 
     -- Inserare Address
     INSERT INTO Address (userID, Street, City, State, ZipCode, Country)
@@ -25,18 +32,18 @@ BEGIN
     INSERT INTO Address (userID, Street, City, State, ZipCode, Country)
     VALUES (4, 'Str. Alba 7', 'Iasi', 'Iasi', 456789, 'Romania');
 
-    -- Inserare Animal
-    INSERT INTO Animal (userID, name, breed, species, age, gender)
-    VALUES (1, 'Rex', 'Ciobănesc', 'Câine', 5, 'male');
+    -- Inserare Animal 
+    INSERT INTO Animal (userID, name, breed, species, age, gender, createdAt)
+    VALUES (1, 'Rex', 'Ciobănesc', 'Câine', 5, 'male', SYSDATE-28);
     
-    INSERT INTO Animal (userID, name, breed, species, age, gender)
-    VALUES (2, 'Luna', 'Pisică', 'Pisică', 3, 'female');
+    INSERT INTO Animal (userID, name, breed, species, age, gender, createdAt)
+    VALUES (2, 'Luna', 'Pisică', 'Pisică', 3, 'female', SYSDATE-23);
 
-    INSERT INTO Animal (userID, name, breed, species, age, gender)
-    VALUES (3, 'Max', 'Golden Retriever', 'Câine', 2, 'male');
+    INSERT INTO Animal (userID, name, breed, species, age, gender, createdAt)
+    VALUES (3, 'Max', 'Golden Retriever', 'Câine', 2, 'male', SYSDATE-18);
 
-    INSERT INTO Animal (userID, name, breed, species, age, gender)
-    VALUES (4, 'Bella', 'Siameză', 'Pisică', 4, 'female');
+    INSERT INTO Animal (userID, name, breed, species, age, gender, createdAt)
+    VALUES (4, 'Bella', 'Siameză', 'Pisică', 4, 'female', SYSDATE-13);
 
     -- Inserare MedicalHistory
     INSERT INTO MedicalHistory (animalID, vetNumber, recordDate, description, first_aid_noted)

@@ -19,8 +19,6 @@
                     <li class="active"><a href="#" data-section="overview">Overview</a></li>
                     <li><a href="#" data-section="users">Users</a></li>
                     <li><a href="#" data-section="pets">Pets</a></li>
-                    <li><a href="#" data-section="adoptions">Adoptions</a></li>
-                    <li><a href="#" data-section="donations">Donations</a></li>
                 </ul>
             </nav>
             <div class="sidebar-footer">
@@ -31,8 +29,13 @@
         <main class="main-content">
             <header class="dashboard-header">
                 <h1>Admin Dashboard</h1>
-                <div class="admin-profile">
-                    <span id="adminEmail">admin@example.com</span>
+                <div class="header-actions">
+                    <button id="refreshData" class="refresh-btn" title="Refresh data">
+                        <i class="fas fa-sync-alt"></i> Refresh
+                    </button>
+                    <div class="admin-profile">
+                        <span id="adminEmail">admin@example.com</span>
+                    </div>
                 </div>
             </header>
             
@@ -48,14 +51,6 @@
                         <div class="stat-card">
                             <h3>Total Pets</h3>
                             <div class="stat-value" id="totalPets">0</div>
-                        </div>
-                        <div class="stat-card">
-                            <h3>Adoptions</h3>
-                            <div class="stat-value" id="totalAdoptions">0</div>
-                        </div>
-                        <div class="stat-card">
-                            <h3>Donations</h3>
-                            <div class="stat-value" id="totalDonations">0</div>
                         </div>
                     </div>
                 </section>
@@ -74,22 +69,6 @@
                     <div class="table-container">
                         <!-- Pet table will go here -->
                         <p>Pet management content will be implemented soon.</p>
-                    </div>
-                </section>
-                
-                <section id="adoptions" class="content-section">
-                    <h2>Adoption Requests</h2>
-                    <div class="table-container">
-                        <!-- Adoptions table will go here -->
-                        <p>Adoption management content will be implemented soon.</p>
-                    </div>
-                </section>
-                
-                <section id="donations" class="content-section">
-                    <h2>Donation History</h2>
-                    <div class="table-container">
-                        <!-- Donations table will go here -->
-                        <p>Donation records will be implemented soon.</p>
                     </div>
                 </section>
             </div>

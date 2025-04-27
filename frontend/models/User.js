@@ -6,15 +6,14 @@ class User {
     }
   
     setUser(userDetails) {
-      
       this.user = {
         id: userDetails.id,          
         email: userDetails.email,    
         firstName: userDetails.firstName,  
         lastName: userDetails.lastName,    
-        phone: userDetails.phone     
+        phone: userDetails.phone,
+        createdAt: userDetails.createdAt || null 
       };
-      
       
       this.saveToStorage();
     }

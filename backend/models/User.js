@@ -58,7 +58,56 @@ class User {
       await connection.close();
     }
   }
-  
+
+  static async getAllUsersWithDetails() {
+    const connection = await getConnection();
+    try {
+      // Query users with their addresses using JOIN
+      const result = await connection.execute(
+        `SELECT u.*, a.addressID, a.Street, a.City, a.State, a.ZipCode, a.Country
+         FROM Users u
+         LEFT JOIN Address a ON u.userID = a.userID`,
+        {},
+        { outFormat: oracledb.OUT_FORMAT_OBJECT }
+      );
+
+      // Transform the flat results into a nested structure
+      const users = {};
+      
+      result.rows.forEach(row => {
+        const userId = row.USERID;
+        
+        if (!users[userId]) {
+          // Create the user object
+          users[userId] = {
+            USERID: row.USERID,
+            FIRSTNAME: row.FIRSTNAME,
+            LASTNAME: row.LASTNAME,
+            EMAIL: row.EMAIL,
+            PHONE: row.PHONE,
+            CREATEDAT: row.CREATEDAT,
+            address: null
+          };
+        }
+        
+        // Add address if it exists
+        if (row.ADDRESSID) {
+          users[userId].address = {
+            ADDRESSID: row.ADDRESSID,
+            STREET: row.STREET,
+            CITY: row.CITY,
+            STATE: row.STATE,
+            ZIPCODE: row.ZIPCODE,
+            COUNTRY: row.COUNTRY
+          };
+        }
+      });
+      
+      return Object.values(users);
+    } finally {
+      await connection.close();
+    }
+  }
 }
 
 module.exports = User;

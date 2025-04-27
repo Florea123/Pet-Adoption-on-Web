@@ -3,7 +3,7 @@ const User = require('../models/User');
 const { generateToken } = require('../middleware/auth');
 const Address = require('../models/Address');
 const { parseRequestBody } = require('../utils/requestUtils');
-
+const Animal = require('../models/Animal');
 // Function to authenticate a user by email
 async function getUserByEmailAndPassword(req, res) {
   try {
@@ -75,4 +75,33 @@ async function insertUser(req, res) {
   }
 }
 
-module.exports = { getUserByEmailAndPassword, insertUser };
+async function getAllUsersWithDetails(req, res) {
+  try {
+    
+    // Get all users with their addresses
+    const users = await User.getAllUsersWithDetails();
+    
+    // For each user, get their animals with details
+    const usersWithAllDetails = await Promise.all(users.map(async (user) => {
+      const animals = await Animal.getAnimalDetailsForUser(user.USERID);
+      
+      return {
+        ...user,
+        animals: animals || []
+      };
+    }));
+    
+    res.writeHead(200, { "Content-Type": "application/json" });
+    res.end(JSON.stringify(usersWithAllDetails));
+  } catch (err) {
+    console.error("Error retrieving users with details:", err);
+    res.writeHead(500, { "Content-Type": "application/json" });
+    res.end(JSON.stringify({ error: "Internal Server Error" }));
+  }
+}
+
+module.exports = { 
+  getUserByEmailAndPassword, 
+  insertUser,
+  getAllUsersWithDetails 
+};

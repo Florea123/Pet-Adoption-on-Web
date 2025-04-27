@@ -1,6 +1,10 @@
 const http = require('http');
 const util = require('util');
-const { getUserByEmailAndPassword, insertUser } = require('./routes/UserRoute');
+const { 
+  getUserByEmailAndPassword, 
+  insertUser, 
+  getAllUsersWithDetails 
+} = require('./routes/UserRoute');
 const { authenticate } = require('./middleware/auth');
 const { 
   getAllAnimals, 
@@ -52,6 +56,23 @@ const server = http.createServer(async (req, res) => {
 
     if(req.method ==='POST' && req.url.startsWith('/admin/login')) {
       return adminLogin(req, res);
+    }
+
+    if (req.method === 'GET' && req.url.startsWith('/users/all/details')) {
+      authenticate(req, res, () => {
+        // Verify admin role before allowing access
+        const decodedToken = req.user;
+        
+        if (!decodedToken.isAdmin) {
+          res.writeHead(403, { 'Content-Type': 'application/json' });
+          res.end(JSON.stringify({ error: 'Access denied. Admin privileges required.' }));
+          return;
+        }
+        
+        // If admin, proceed with fetching all users with details
+        getAllUsersWithDetails(req, res);
+      });
+      return; // Add return to prevent further route processing
     }
 
 
