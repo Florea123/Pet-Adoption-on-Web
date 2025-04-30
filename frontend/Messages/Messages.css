@@ -99,7 +99,7 @@
 }
 
 .read-status.read .checkmark {
-  color: #1331f5; /* Green for read messages */
+  color: #1331f5; /* Blue for read messages */
 }
 
 /* Unread badge */
@@ -147,31 +147,36 @@
   flex-direction: column;
 }
 
+/* Message bubble styling */
 .message {
   max-width: 80%; 
-  min-width: 10px;
-  padding: 15px; 
-  margin-bottom: 18px; 
+  min-width: 80px; 
+  padding: 10px; 
+  margin-bottom: 22px;
   border-radius: 10px; 
   position: relative;
   word-wrap: break-word; 
 }
 
+
 .message-content {
   word-break: break-word; 
   padding-bottom: 15px; 
-  padding-right: 50px; 
-  position: relative; 
+  padding-right: 60px; 
+  position: relative;
+  min-width: 40px; 
 }
+
 
 .message-time {
   font-size: 0.8rem; 
   opacity: 0.7;
   position: absolute;
-  bottom: -3px; 
-  right: 8px;
+  bottom: -7px;
+  right: 10px; 
   white-space: nowrap;
-  background: transparent; 
+  background: transparent;
+  z-index: 1; 
 }
 
 .message.sent {
@@ -179,6 +184,8 @@
   color: white;
   align-self: flex-end;
   border-bottom-right-radius: 0;
+  margin-left: 25px;
+  padding-right: 15px;
 }
 
 .message.received {
@@ -186,6 +193,7 @@
   color: #343a40;
   align-self: flex-start;
   border-bottom-left-radius: 0;
+  padding-right: 15px;
 }
 
 .message-content {
