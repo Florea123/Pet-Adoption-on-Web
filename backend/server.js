@@ -3,7 +3,8 @@ const util = require('util');
 const { 
   getUserByEmailAndPassword, 
   insertUser, 
-  getAllUsersWithDetails 
+  getAllUsersWithDetails,
+  deleteUser  // Add this import
 } = require('./routes/UserRoute');
 const { authenticate } = require('./middleware/auth');
 const { 
@@ -75,6 +76,23 @@ const server = http.createServer(async (req, res) => {
       return; // Add return to prevent further route processing
     }
 
+    // Add user delete route with admin authentication
+    if (req.method === 'DELETE' && req.url.startsWith('/users/delete')) {
+      authenticate(req, res, () => {
+        // Verify admin role before allowing deletion
+        const decodedToken = req.user;
+        
+        if (!decodedToken.isAdmin) {
+          res.writeHead(403, { 'Content-Type': 'application/json' });
+          res.end(JSON.stringify({ error: 'Access denied. Admin privileges required.' }));
+          return;
+        }
+        
+        // If admin, proceed with user deletion
+        deleteUser(req, res);
+      });
+      return;
+    }
 
     // Animal routes
     if(req.method === 'GET' && req.url.startsWith('/animals/all')) {

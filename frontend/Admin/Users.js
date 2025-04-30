@@ -1,4 +1,3 @@
-
 function initUsersView(users) {
     const usersSection = document.getElementById('users');
     if (usersSection && users) {
@@ -10,7 +9,6 @@ function initUsersView(users) {
 function populateUsersTable(users, container) {
     const tableContainer = container.querySelector('.table-container');
     if (!tableContainer) return;
-    
     
     let table = tableContainer.querySelector('table');
     if (!table) {
@@ -44,6 +42,7 @@ function populateUsersTable(users, container) {
                     <td>${user.animals ? user.animals.length : 0}</td>
                     <td>
                         <button class="view-btn" data-user-id="${user.USERID}">View</button>
+                        <button class="delete-btn" data-user-id="${user.USERID}">Delete</button>
                     </td>
                 </tr>
             `).join('')}
@@ -57,6 +56,77 @@ function populateUsersTable(users, container) {
             showUserDetails(users.find(u => u.USERID == userId));
         });
     });
+
+
+    table.querySelectorAll('.delete-btn').forEach(button => {
+        button.addEventListener('click', function() {
+            const userId = this.getAttribute('data-user-id');
+            handleDeleteUser(userId, users);
+        });
+    });
+}
+
+// Handle user deletion
+async function handleDeleteUser(userId, users) {
+    if (!confirm('WARNING: Deleting this user will also delete all their pets, addresses, and messages. This action cannot be undone. Are you sure?')) {
+        return;
+    }
+    
+    try {
+        const token = localStorage.getItem('adminToken');
+        if (!token) {
+            alert('Authentication required');
+            return;
+        }
+        
+        const response = await fetch('http://localhost:3000/users/delete', {
+            method: 'DELETE',
+            headers: { 
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`
+            },
+            body: JSON.stringify({ userId: parseInt(userId) })
+        });
+
+        if (response.ok) {
+            // Update cached data
+            const cachedData = localStorage.getItem('adminDashboardData');
+            if (cachedData) {
+                const dashboardData = JSON.parse(cachedData);
+                
+                // Remove user from users list
+                dashboardData.users = dashboardData.users.filter(user => 
+                    user.USERID !== parseInt(userId)
+                );
+                
+                // Remove animals associated with this user
+                if (dashboardData.animals) {
+                    dashboardData.animals = dashboardData.animals.filter(animal => 
+                        animal.USERID !== parseInt(userId)
+                    );
+                }
+                
+                
+                dashboardData.totalUsers = dashboardData.users.length;
+                dashboardData.totalPets = dashboardData.animals ? dashboardData.animals.length : 0;
+                
+               
+                window.updateDashboardUI(dashboardData);
+                localStorage.setItem('adminDashboardData', JSON.stringify(dashboardData));
+            } else {
+             
+                window.loadDashboardDataWithCache(true);
+            }
+            
+            alert('User deleted successfully');
+        } else {
+            const error = await response.json();
+            alert(`Error: ${error.error || 'Failed to delete user'}`);
+        }
+    } catch (error) {
+        console.error('Error deleting user:', error);
+        alert('An error occurred while deleting the user');
+    }
 }
 
 // Show user details in a modal 
