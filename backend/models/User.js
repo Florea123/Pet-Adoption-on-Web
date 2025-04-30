@@ -1,4 +1,5 @@
 const { getConnection } = require('../db');
+const Animal = require('./Animal');
 const oracledb = require('oracledb'); 
 
 class User {
@@ -62,7 +63,7 @@ class User {
   static async getAllUsersWithDetails() {
     const connection = await getConnection();
     try {
-      // Query users with their addresses using JOIN
+     
       const result = await connection.execute(
         `SELECT u.*, a.addressID, a.Street, a.City, a.State, a.ZipCode, a.Country
          FROM Users u
@@ -71,14 +72,13 @@ class User {
         { outFormat: oracledb.OUT_FORMAT_OBJECT }
       );
 
-      // Transform the flat results into a nested structure
+     
       const users = {};
       
       result.rows.forEach(row => {
         const userId = row.USERID;
         
         if (!users[userId]) {
-          // Create the user object
           users[userId] = {
             USERID: row.USERID,
             FIRSTNAME: row.FIRSTNAME,
@@ -90,7 +90,7 @@ class User {
           };
         }
         
-        // Add address if it exists
+        
         if (row.ADDRESSID) {
           users[userId].address = {
             ADDRESSID: row.ADDRESSID,
@@ -106,6 +106,71 @@ class User {
       return Object.values(users);
     } finally {
       await connection.close();
+    }
+  }
+
+  static async deleteUserWithRelatedData(userID) {
+    const connection = await getConnection();
+    try {
+      // get all animals for this user to delete their related records
+      const animalResult = await connection.execute(
+        `SELECT animalID FROM Animal WHERE userID = :userID`,
+        { userID },
+        { outFormat: oracledb.OUT_FORMAT_OBJECT }
+      );
+      
+      const animals = animalResult.rows;
+      
+  
+      for (const animal of animals) {
+        const animalID = animal.ANIMALID;
+        
+        await Animal.deleteAnimalWithRelatedData(animalID);
+      }
+      
+      // delete address data
+      try {
+        await connection.execute(
+          `DELETE FROM Address WHERE userID = :userID`,
+          { userID },
+          { autoCommit: true }
+        );
+        console.log(`Address deleted for user ${userID}`);
+      } catch (err) {
+        console.error('Error deleting address:', err);
+      }
+      
+      // delete messages data
+      try {
+        await connection.execute(
+          `DELETE FROM Messages WHERE senderId = :userID OR receiverId = :userID`,
+          { userID },
+          { autoCommit: true }
+        );
+        console.log(`Messages deleted for user ${userID}`);
+      } catch (err) {
+        console.error('Error deleting messages:', err);
+      }
+      
+      // delete the user
+      const userResult = await connection.execute(
+        `DELETE FROM Users WHERE userID = :userID`,
+        { userID },
+        { autoCommit: true }
+      );
+      
+      return userResult.rowsAffected > 0;
+    } catch (error) {
+      console.error('Error in deleteUserWithRelatedData:', error);
+      throw error;
+    } finally {
+      if (connection) {
+        try {
+          await connection.close();
+        } catch (err) {
+          console.error('Error closing connection:', err);
+        }
+      }
     }
   }
 }
