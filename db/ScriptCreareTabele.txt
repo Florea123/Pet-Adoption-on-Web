@@ -7,6 +7,7 @@ DROP TABLE MedicalHistory CASCADE CONSTRAINTS;
 DROP TABLE Animal CASCADE CONSTRAINTS;
 DROP TABLE Address CASCADE CONSTRAINTS;
 DROP TABLE Users CASCADE CONSTRAINTS;
+DROP TABLE Admins CASCADE CONSTRAINTS;
 
 DROP SEQUENCE seq_messages;
 DROP SEQUENCE seq_users;
@@ -16,6 +17,7 @@ DROP SEQUENCE seq_medical;
 DROP SEQUENCE seq_feeding;
 DROP SEQUENCE seq_multimedia;
 DROP SEQUENCE seq_relations;
+DROP SEQUENCE seq_admins;
 
 CREATE OR REPLACE TYPE feeding_time_array AS VARRAY(10) OF VARCHAR2(50);
 /
@@ -26,7 +28,15 @@ CREATE TABLE Users (
     lastName VARCHAR2(100),
     email VARCHAR2(255) UNIQUE,
     password VARCHAR2(255),
-    phone VARCHAR2(20)
+    phone VARCHAR2(20),
+    createdAt DATE DEFAULT SYSDATE
+);
+
+CREATE TABLE Admins (
+    adminId NUMBER PRIMARY KEY,
+    email VARCHAR2(255) NOT NULL UNIQUE,
+    password VARCHAR2(100) NOT NULL,
+    createdAt DATE DEFAULT SYSDATE
 );
 
 CREATE TABLE Address (
@@ -49,6 +59,7 @@ CREATE TABLE Animal (
     age NUMBER,
     views NUMBER DEFAULT 0,
     gender VARCHAR2(10) CHECK (gender IN ('male', 'female')),
+    createdAt DATE DEFAULT SYSDATE,
     CONSTRAINT fk_animal_user FOREIGN KEY (userID) REFERENCES Users(userID)
 );
 
@@ -99,8 +110,8 @@ CREATE TABLE Messages (
     CONSTRAINT fk_messages_receiver FOREIGN KEY (receiverId) REFERENCES Users(userID)
 );
 
--- Recreating sequences
 CREATE SEQUENCE seq_users START WITH 1 INCREMENT BY 1;
+CREATE SEQUENCE seq_admins START WITH 1 INCREMENT BY 1;
 CREATE SEQUENCE seq_address START WITH 1 INCREMENT BY 1;
 CREATE SEQUENCE seq_animal START WITH 1 INCREMENT BY 1;
 CREATE SEQUENCE seq_medical START WITH 1 INCREMENT BY 1;
@@ -109,12 +120,19 @@ CREATE SEQUENCE seq_multimedia START WITH 1 INCREMENT BY 1;
 CREATE SEQUENCE seq_relations START WITH 1 INCREMENT BY 1;
 CREATE SEQUENCE seq_messages START WITH 1 INCREMENT BY 1;
 
--- Recreating triggers
 CREATE OR REPLACE TRIGGER trg_users
 BEFORE INSERT ON Users
 FOR EACH ROW
 BEGIN
     :NEW.userID := seq_users.NEXTVAL;
+END;
+/
+
+CREATE OR REPLACE TRIGGER trg_admins
+BEFORE INSERT ON Admins
+FOR EACH ROW
+BEGIN
+    :NEW.adminId := seq_admins.NEXTVAL;
 END;
 /
 

@@ -1,6 +1,11 @@
 const http = require('http');
 const util = require('util');
-const { getUserByEmailAndPassword, insertUser } = require('./routes/UserRoute');
+const { 
+  getUserByEmailAndPassword, 
+  insertUser, 
+  getAllUsersWithDetails,
+  deleteUser  // Add this import
+} = require('./routes/UserRoute');
 const { authenticate } = require('./middleware/auth');
 const { 
   getAllAnimals, 
@@ -18,7 +23,7 @@ const {
   markMessagesAsRead,
   getUnreadCount
 } = require('./routes/MessageRoute');
-
+const { adminLogin } = require('./routes/AdminRoute');
 const port = 3000;
 
 function withAuth(handler) {
@@ -48,6 +53,45 @@ const server = http.createServer(async (req, res) => {
 
     if (req.method === 'POST' && req.url.startsWith('/users/signup')) {
       await insertUser(req, res);
+      return;
+    }
+
+    if(req.method ==='POST' && req.url.startsWith('/admin/login')) {
+      return adminLogin(req, res);
+    }
+
+    if (req.method === 'GET' && req.url.startsWith('/users/all/details')) {
+      authenticate(req, res, () => {
+        // Verify admin role before allowing access
+        const decodedToken = req.user;
+        
+        if (!decodedToken.isAdmin) {
+          res.writeHead(403, { 'Content-Type': 'application/json' });
+          res.end(JSON.stringify({ error: 'Access denied. Admin privileges required.' }));
+          return;
+        }
+        
+        // If admin, proceed with fetching all users with details
+        getAllUsersWithDetails(req, res);
+      });
+      return; // Add return to prevent further route processing
+    }
+
+    // Add user delete route with admin authentication
+    if (req.method === 'DELETE' && req.url.startsWith('/users/delete')) {
+      authenticate(req, res, () => {
+        // Verify admin role before allowing deletion
+        const decodedToken = req.user;
+        
+        if (!decodedToken.isAdmin) {
+          res.writeHead(403, { 'Content-Type': 'application/json' });
+          res.end(JSON.stringify({ error: 'Access denied. Admin privileges required.' }));
+          return;
+        }
+        
+        // If admin, proceed with user deletion
+        deleteUser(req, res);
+      });
       return;
     }
 
