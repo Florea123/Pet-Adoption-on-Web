@@ -51,6 +51,8 @@ async function getAnimalDetailsById(req, res) {
       return;
     }
 
+    await Animal.incrementViews(animalId);
+
     const multimedia = await MultiMedia.findByAnimalId(animalId);
     const feedingSchedule = await FeedingSchedule.findByAnimalId(animalId);
     const medicalHistory = await MedicalHistory.findByAnimalId(animalId);
@@ -288,10 +290,34 @@ async function deleteAnimal(req, res) {
   }
 }
 
+async function getTopAnimalsByCity(req, res) {
+  try {
+    // Parse the URL to extract query parameters
+    const url = new URL(req.url, `http://${req.headers.host}`);
+    const userId = url.searchParams.get('userId');
+
+    if (!userId) {
+      res.writeHead(400, { "Content-Type": "application/json" });
+      res.end(JSON.stringify({ error: "User ID is required" }));
+      return;
+    }
+
+    const topAnimals = await Animal.getTopAnimalsByCity(userId);
+
+    res.writeHead(200, { "Content-Type": "application/json" });
+    res.end(JSON.stringify(topAnimals));
+  } catch (error) {
+    console.error("Error fetching top animals by city:", error);
+    res.writeHead(500, { "Content-Type": "application/json" });
+    res.end(JSON.stringify({ error: "Internal Server Error" }));
+  }
+}
+
 module.exports = {
   getAllAnimals,
   getAnimalDetailsById,
   findBySpecies,
   createAnimal,
   deleteAnimal,
+  getTopAnimalsByCity,
 };

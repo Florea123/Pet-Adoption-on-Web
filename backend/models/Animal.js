@@ -84,6 +84,8 @@ class Animal {
     }
   }
 
+
+
   static async deleteAnimalWithRelatedData(animalID) {
     const connection = await getConnection();
     try {

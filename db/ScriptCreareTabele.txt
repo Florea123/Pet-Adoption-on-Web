@@ -57,6 +57,7 @@ CREATE TABLE Animal (
     breed VARCHAR2(100),
     species VARCHAR2(100),
     age NUMBER,
+    views NUMBER DEFAULT 0,
     gender VARCHAR2(10) CHECK (gender IN ('male', 'female')),
     createdAt DATE DEFAULT SYSDATE,
     CONSTRAINT fk_animal_user FOREIGN KEY (userID) REFERENCES Users(userID)
