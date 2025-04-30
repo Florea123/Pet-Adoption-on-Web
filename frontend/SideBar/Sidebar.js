@@ -142,6 +142,8 @@ export default class Sidebar {
                     onclick="location.href='../Messages/Messages.html'">Messages</button>
             <span id="messages-badge" class="messages-badge">0</span>
           </div>
+                <button id="popular-btn" class="btn ${activePage === 'popular' ? 'active' : ''}"
+                     onclick="location.href='../Popular/Popular.html'">Popular</button>
         </div>
         ${activePage === 'home' ? `
         <div class="filter-section">

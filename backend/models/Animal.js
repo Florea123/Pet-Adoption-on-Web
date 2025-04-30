@@ -1,5 +1,5 @@
 const { getConnection } = require('../db');
-const oracledb = require('oracledb'); 
+const oracledb = require('oracledb');
 const Relations = require('./Relations');
 const MultiMedia = require('./MultiMedia');
 const FeedingSchedule = require('./FeedingSchedule');
@@ -134,6 +134,39 @@ class Animal {
           console.error('Error closing connection:', err);
         }
       }
+    }
+  }
+
+  static async incrementViews(animalID) {
+    const connection = await getConnection();
+    try {
+      await connection.execute(
+        `UPDATE Animal SET views = views + 1 WHERE animalID = :animalID`,
+        { animalID },
+        { autoCommit: true }
+      );
+    } finally {
+      await connection.close();
+    }
+  }
+  
+  static async getTopAnimalsByCity(userId) {
+    const connection = await getConnection();
+    try {
+      const result = await connection.execute(
+        `SELECT a.*, ad.city, ad.state, ad.country
+         FROM Animal a
+         JOIN Users u ON a.userId = u.userId
+         JOIN Address ad ON u.userId = ad.userId
+         WHERE ad.city = (SELECT city FROM Address WHERE userId = :userId)
+         ORDER BY a.views DESC
+         FETCH FIRST 10 ROWS ONLY`,
+        { userId },
+        { outFormat: oracledb.OUT_FORMAT_OBJECT }
+      );
+      return result.rows;
+    } finally {
+      await connection.close();
     }
   }
 

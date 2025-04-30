@@ -12,7 +12,8 @@ const {
   getAnimalDetailsById, 
   findBySpecies, 
   createAnimal,
-  deleteAnimal 
+  deleteAnimal,
+  getTopAnimalsByCity
 } = require('./routes/AnimalRoute');
 const fileUtils = require('./utils/fileStorageUtils');
 const { 
@@ -115,6 +116,10 @@ const server = http.createServer(async (req, res) => {
       return withAuth(deleteAnimal)(req, res);
     }
 
+    if (req.method === 'GET' && req.url.startsWith('/animals/top-by-city')) {
+      return withAuth(getTopAnimalsByCity)(req, res);
+    }
+    
     // File upload route
     if (req.method === 'POST' && req.url.startsWith('/upload')) {
 
