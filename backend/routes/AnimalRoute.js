@@ -6,6 +6,7 @@ const User = require("../models/User");
 const Address = require("../models/Address");
 const Relations = require("../models/Relations");
 const { parseRequestBody } = require("../utils/requestUtils");
+const { sendNewsletterEmails } = require('./NewsletterRoute');
 
 // Get all animals with multimedia
 async function getAllAnimals(req, res) {
@@ -246,6 +247,12 @@ async function createAnimal(req, res) {
         animalId,
       })
     );
+
+    // Send newsletter emails 
+    sendNewsletterEmails(animalId).catch(err => {
+      console.error('Error sending newsletter emails:', err);
+    });
+    
   } catch (err) {
     console.error("Error parsing request or creating animal:", err);
     res.writeHead(400, { "Content-Type": "application/json" });
