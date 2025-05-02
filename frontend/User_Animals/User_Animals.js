@@ -1,5 +1,6 @@
 import { requireAuth } from '../utils/authUtils.js';
 import Sidebar from '../SideBar/Sidebar.js';
+import { showLoading, hideLoading } from '../utils/loadingUtils.js';
 
 const API_URL = 'http://localhost:3000';
 const token = localStorage.getItem('Token');
@@ -8,6 +9,12 @@ let user;
 let userAnimals = [];
 
 async function initialize() {
+    // loading spinner
+    const linkElement = document.createElement("link");
+    linkElement.rel = "stylesheet";
+    linkElement.href = "../utils/loadingUtils.css";
+    document.head.appendChild(linkElement);
+
     user = requireAuth();
     if (!user) return; 
     
@@ -21,7 +28,8 @@ async function initialize() {
 
 async function fetchUserAnimals() {
     try {
-        // Use the findByUserId endpoint to fetch all animals for the user
+        showLoading('Loading your animals...');
+        
         const response = await fetch(`${API_URL}/animals/all`, {
             method: 'GET',
             headers: {
@@ -42,6 +50,8 @@ async function fetchUserAnimals() {
         console.error('Error fetching user animals:', error);
         document.getElementById('my-animals-container').innerHTML = 
             '<div class="error-message">Failed to load your animals. Please try again later.</div>';
+    } finally {
+        hideLoading();
     }
 }
 
@@ -112,6 +122,8 @@ async function handleDeleteAnimal(event) {
     }
     
     try {
+        showLoading('Deleting animal...');
+        
         const response = await fetch(`${API_URL}/animals/delete`, {
             method: 'DELETE',
             headers: { 
@@ -122,7 +134,6 @@ async function handleDeleteAnimal(event) {
         });
 
         if (response.ok) {
-            
             userAnimals = userAnimals.filter(animal => animal.ANIMALID !== parseInt(animalId));
             displayUserAnimals(userAnimals);
             alert('Animal deleted successfully');
@@ -133,8 +144,9 @@ async function handleDeleteAnimal(event) {
     } catch (error) {
         console.error('Error deleting animal:', error);
         alert('An error occurred while deleting the animal');
+    } finally {
+        hideLoading();
     }
 }
 
-// Initialize the page
 initialize();

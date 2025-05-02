@@ -1,17 +1,22 @@
-import userModel from '../models/User.js';
-import { requireAuth } from '../utils/authUtils.js';
-import { showAnimalDetailsPopup } from '../AnimalCard/AnimalCard.js'; 
 import Sidebar from '../SideBar/Sidebar.js';
+import { showAnimalDetailsPopup } from '../AnimalCard/AnimalCard.js';
+import { requireAuth } from '../utils/authUtils.js';
+import { showLoading, hideLoading } from '../utils/loadingUtils.js';
 
 const API_URL = 'http://localhost:3000';
 const token = localStorage.getItem('Token');
-
+let animals = [];
+const uniqueSpecies = [];
+let filteredAnimals = [];
 let user;
-let allAnimals = [];
-let uniqueSpecies = new Set();
-let selectedSpecies = new Set();
 
 async function initialize() {
+  // loading spinner
+  const linkElement = document.createElement("link");
+  linkElement.rel = "stylesheet";
+  linkElement.href = "../utils/loadingUtils.css";
+  document.head.appendChild(linkElement);
+
   user = requireAuth();
   if (!user) return;
   
@@ -23,10 +28,48 @@ async function initialize() {
   renderSpeciesFilters();
 }
 
-// species filters
+async function fetchAnimals() {
+  try {
+    showLoading('Loading animals...');
+    
+    // Clear the static loader
+    const container = document.getElementById('animal-cards-container');
+    container.innerHTML = '';
+    
+    const response = await fetch(`${API_URL}/animals/all`, {
+      headers: {
+        'Authorization': `Bearer ${token}`
+      }
+    });
+    
+    if (!response.ok) {
+      throw new Error('Failed to fetch animals');
+    }
+    
+    animals = await response.json();
+    
+    // Extract unique species for filters
+    animals.forEach(animal => {
+      if (animal.SPECIES && !uniqueSpecies.includes(animal.SPECIES)) {
+        uniqueSpecies.push(animal.SPECIES);
+      }
+    });
+    
+    filteredAnimals = [...animals];
+    displayAnimals(filteredAnimals);
+  } catch (error) {
+    console.error('Error fetching animals:', error);
+    document.getElementById('animal-cards-container').innerHTML = `
+      <div class="error-message">Failed to load animals. Please try again later.</div>
+    `;
+  } finally {
+    hideLoading();
+  }
+}
+
 function renderSpeciesFilters() {
   const filtersContainer = document.getElementById('species-filters');
-  filtersContainer.innerHTML = ''; // Clear loading message
+  filtersContainer.innerHTML = ''; 
   
   // Create checkboxes for each species
   uniqueSpecies.forEach(species => {
@@ -49,61 +92,16 @@ function renderSpeciesFilters() {
   });
 }
 
-// species filtering, animal display, etc.
 function handleSpeciesFilterChange(event) {
   const species = event.target.value;
   
   if (event.target.checked) {
-    selectedSpecies.add(species);
+    filteredAnimals = animals.filter(animal => animal.SPECIES === species);
   } else {
-    selectedSpecies.delete(species);
+    filteredAnimals = [...animals];
   }
-  
-  filterAnimals();
-}
-
-function filterAnimals() {
-  // If no filters selected, show all animals
-  if (selectedSpecies.size === 0) {
-    displayAnimals(allAnimals);
-    return;
-  }
-  
-  // Filter animals by selected species
-  const filteredAnimals = allAnimals.filter(animal => 
-    selectedSpecies.has(animal.SPECIES)
-  );
   
   displayAnimals(filteredAnimals);
-}
-
-async function fetchAnimals() {
-  try {
-    const response = await fetch(`${API_URL}/animals/all`, {
-      method: 'GET',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${token}`
-      }
-    });
-    if (!response.ok) {
-      throw new Error('Failed to fetch animals');
-    }
-    allAnimals = await response.json();
-    
-    // Extract unique species
-    allAnimals.forEach(animal => {
-      if (animal.SPECIES) {
-        uniqueSpecies.add(animal.SPECIES);
-      }
-    });
-    
-    displayAnimals(allAnimals);
-  } catch (error) {
-    console.error('Error fetching animals:', error);
-    document.getElementById('animal-cards-container').innerHTML = 
-      '<div class="error">Failed to load animals. Please try again later.</div>';
-  }
 }
 
 function displayAnimals(animals) {
@@ -170,5 +168,4 @@ async function openAnimalDetailsPopup(animalId) {
   }
 }
 
-// Initialize the page
 initialize();

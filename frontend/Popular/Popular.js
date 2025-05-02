@@ -1,10 +1,17 @@
 import Sidebar from '../SideBar/Sidebar.js';
 import { showAnimalDetailsPopup } from '../AnimalCard/AnimalCard.js';
+import { showLoading, hideLoading } from '../utils/loadingUtils.js';
 
 const API_URL = 'http://localhost:3000';
 const token = localStorage.getItem('Token');
 
 async function initialize() {
+  // loading spinner
+  const linkElement = document.createElement("link");
+  linkElement.rel = "stylesheet";
+  linkElement.href = "../utils/loadingUtils.css";
+  document.head.appendChild(linkElement);
+
   // Render sidebar
   document.getElementById('sidebar-container').innerHTML = Sidebar.render('popular');
   new Sidebar('popular');
@@ -15,6 +22,8 @@ async function initialize() {
 
 async function fetchTopAnimals() {
   try {
+    showLoading('Loading popular animals...');
+    
     const userString = localStorage.getItem('User');
     if (!userString) {
       throw new Error('User is missing. Please log in again.');
@@ -40,6 +49,8 @@ async function fetchTopAnimals() {
     console.error('Error fetching top animals:', error);
     document.getElementById('animal-cards-container').innerHTML =
       '<div class="error">Failed to load top animals. Please try again later.</div>';
+  } finally {
+    hideLoading();
   }
 }
 
@@ -84,6 +95,8 @@ function displayAnimals(animals) {
 
 async function openAnimalDetailsPopup(animalId) {
   try {
+    showLoading('Loading animal details...');
+    
     const response = await fetch(`${API_URL}/animals/details`, {
       method: 'POST',
       headers: {
@@ -101,8 +114,9 @@ async function openAnimalDetailsPopup(animalId) {
     showAnimalDetailsPopup(animalDetails);
   } catch (error) {
     console.error('Error fetching animal details:', error);
+  } finally {
+    hideLoading();
   }
 }
 
-// Initialize the page
 initialize();

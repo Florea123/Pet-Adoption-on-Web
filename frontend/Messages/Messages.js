@@ -1,6 +1,7 @@
 import userModel from '../models/User.js';
 import { requireAuth } from '../utils/authUtils.js';
 import Sidebar from '../SideBar/Sidebar.js';
+import { showLoading, hideLoading } from '../utils/loadingUtils.js';
 
 const API_URL = 'http://localhost:3000';
 const token = localStorage.getItem('Token');
@@ -11,6 +12,12 @@ let currentMessages = [];
 let pollingInterval;
 
 async function initialize() {
+  // loading spinner
+  const linkElement = document.createElement("link");
+  linkElement.rel = "stylesheet";
+  linkElement.href = "../utils/loadingUtils.css";
+  document.head.appendChild(linkElement);
+
   user = requireAuth();
   if (!user) return;
   
@@ -29,10 +36,8 @@ async function initialize() {
     await loadConversations();
   }, 5000);
   
-  // Load conversations
   await loadConversations();
   
-  // Clean up polling when page is unloaded
   window.addEventListener('beforeunload', () => {
     if (pollingInterval) {
       clearInterval(pollingInterval);
@@ -42,6 +47,8 @@ async function initialize() {
 
 async function loadConversations() {
   try {
+    showLoading('Loading conversations...');
+    
     const response = await fetch(`${API_URL}/messages/conversations`, {
       method: 'GET',
       headers: {
@@ -60,6 +67,8 @@ async function loadConversations() {
     console.error('Error loading conversations:', error);
     document.getElementById('conversation-list').innerHTML = 
       '<div class="error-message">Failed to load conversations</div>';
+  } finally {
+    hideLoading();
   }
 }
 
@@ -108,6 +117,8 @@ function truncateMessage(message) {
 
 async function loadConversation(otherUserId) {
   try {
+    showLoading('Loading messages...');
+    
     // Mark messages as read when opening conversation
     await fetch(`${API_URL}/messages/read`, {
       method: 'POST',
@@ -169,6 +180,8 @@ async function loadConversation(otherUserId) {
     console.error('Error loading conversation:', error);
     document.getElementById('messages').innerHTML = 
       '<div class="error-message">Failed to load messages</div>';
+  } finally {
+    hideLoading();
   }
 }
 
@@ -182,8 +195,6 @@ function displayMessages(messages, otherUserId) {
   
   container.innerHTML = messages.map(msg => {
     const isSentByMe = msg.SENDERID === user.id;
-    
-    // Add read status indicators (double checkmarks) for sent messages
     
     const readStatus = isSentByMe ? `
       <span class="read-status ${msg.ISREAD ? 'read' : 'delivered'}">
@@ -228,7 +239,6 @@ async function handleSendMessage(event) {
     // Reload conversation to show new message
     await loadConversation(currentConversationUser.userId);
     
-    // Also refresh conversations list to update last message time
     await loadConversations();
   } catch (error) {
     console.error('Error sending message:', error);

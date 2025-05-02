@@ -1,4 +1,12 @@
+import { showLoading, hideLoading } from '../utils/loadingUtils.js';
+
 document.addEventListener('DOMContentLoaded', function() {
+    // loading spinner
+    const linkElement = document.createElement("link");
+    linkElement.rel = "stylesheet";
+    linkElement.href = "../utils/loadingUtils.css";
+    document.head.appendChild(linkElement);
+    
     const token = localStorage.getItem('adminToken');
     if (!token) {
         window.location.href = 'Admin.html';
@@ -6,10 +14,8 @@ document.addEventListener('DOMContentLoaded', function() {
     }
     
     try {
-        
         const decodedToken = jwt_decode(token);
         
-       
         if (!decodedToken.isAdmin) {
             console.error('Token does not contain admin privileges');
             localStorage.removeItem('adminToken');
@@ -17,7 +23,6 @@ document.addEventListener('DOMContentLoaded', function() {
             return;
         }
         
-       
         document.getElementById('adminEmail').textContent = decodedToken.email || 'Admin';
         
         // Navigation between sections
@@ -41,16 +46,14 @@ document.addEventListener('DOMContentLoaded', function() {
             });
         });
         
-       
         document.getElementById('logoutBtn').addEventListener('click', function() {
-            
             localStorage.removeItem('adminToken');
             localStorage.removeItem('adminDashboardData');
             localStorage.removeItem('adminDashboardLastFetch');
             window.location.href = 'Admin.html';
         });
         
-        // Load dashboard data with caching
+        
         loadDashboardDataWithCache();
         
     } catch (error) {
@@ -70,13 +73,14 @@ async function loadDashboardDataWithCache(forceRefresh = false) {
         const lastFetch = localStorage.getItem('adminDashboardLastFetch');
         const cachedData = localStorage.getItem('adminDashboardData');
         
-        
         if (!forceRefresh && cachedData && lastFetch && (now - parseInt(lastFetch) < cacheMaxAge)) {
             console.log('Using cached dashboard data');
             const dashboardData = JSON.parse(cachedData);
             updateDashboardUI(dashboardData);
             return;
         }
+        
+        showLoading('Loading dashboard data...');
         
         const token = localStorage.getItem('adminToken');
         if (!token) {
@@ -100,7 +104,6 @@ async function loadDashboardDataWithCache(forceRefresh = false) {
         // Process the data to get summary information
         const dashboardData = processApiData(usersData);
         
-        // Update the UI
         updateDashboardUI(dashboardData);
         
         localStorage.setItem('adminDashboardData', JSON.stringify(dashboardData));
@@ -122,6 +125,8 @@ async function loadDashboardDataWithCache(forceRefresh = false) {
                 users: []
             });
         }
+    } finally {
+        hideLoading();
     }
 }
 
@@ -179,7 +184,6 @@ function updateDashboardUI(data) {
         window.petsModule.initPetsView(data.animals);
     }
 }
-
 
 document.addEventListener('DOMContentLoaded', function() {
     const refreshButton = document.getElementById('refreshData');
