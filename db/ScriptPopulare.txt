@@ -129,7 +129,6 @@ BEGIN
     INSERT INTO Relations (animalID, friendWith)
     VALUES (4, 'Max');
 
-    -- Commit pentru a salva datele
     COMMIT;
 END;
 /

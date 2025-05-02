@@ -4,7 +4,7 @@ const {
   getUserByEmailAndPassword, 
   insertUser, 
   getAllUsersWithDetails,
-  deleteUser  // Add this import
+  deleteUser
 } = require('./routes/UserRoute');
 const { authenticate } = require('./middleware/auth');
 const { 
@@ -24,7 +24,43 @@ const {
   getUnreadCount
 } = require('./routes/MessageRoute');
 const { adminLogin } = require('./routes/AdminRoute');
+const {
+  getSubscriptions,
+  updateSubscriptions
+} = require('./routes/NewsletterRoute');
+const nodemailer = require('nodemailer');
+require('dotenv').config();
 const port = 3000;
+
+let emailConfigValid = false;
+const emailAddress = process.env.EMAIL_ADDRESS;
+const emailPassword = process.env.EMAIL_PASSWORD;
+
+async function validateEmailConfig() {
+  if (!emailAddress || !emailPassword) {
+    console.error('Email configuration missing. Check your .env file for EMAIL_ADDRESS and EMAIL_PASSWORD.');
+    return false;
+  }
+
+  try {
+    console.log(`Testing email connection for ${emailAddress}...`);
+    const transporter = nodemailer.createTransport({
+      service: 'gmail',
+      auth: {
+        user: emailAddress,
+        pass: emailPassword
+      }
+    });
+
+    await transporter.verify();
+    console.log('✅ Email configuration is valid and connected to Gmail successfully!');
+    return true;
+  } catch (error) {
+    console.error('❌ Email configuration error:', error.message);
+    console.error('Newsletter emails will not be sent until this is resolved.');
+    return false;
+  }
+}
 
 function withAuth(handler) {
   return (req, res) => authenticate(req, res, () => handler(req, res));
@@ -62,7 +98,6 @@ const server = http.createServer(async (req, res) => {
 
     if (req.method === 'GET' && req.url.startsWith('/users/all/details')) {
       authenticate(req, res, () => {
-        // Verify admin role before allowing access
         const decodedToken = req.user;
         
         if (!decodedToken.isAdmin) {
@@ -71,16 +106,14 @@ const server = http.createServer(async (req, res) => {
           return;
         }
         
-        // If admin, proceed with fetching all users with details
         getAllUsersWithDetails(req, res);
       });
-      return; // Add return to prevent further route processing
+      return; 
     }
 
-    // Add user delete route with admin authentication
+    // Add user delete route 
     if (req.method === 'DELETE' && req.url.startsWith('/users/delete')) {
       authenticate(req, res, () => {
-        // Verify admin role before allowing deletion
         const decodedToken = req.user;
         
         if (!decodedToken.isAdmin) {
@@ -89,7 +122,6 @@ const server = http.createServer(async (req, res) => {
           return;
         }
         
-        // If admin, proceed with user deletion
         deleteUser(req, res);
       });
       return;
@@ -211,6 +243,15 @@ const server = http.createServer(async (req, res) => {
       return withAuth(getUnreadCount)(req, res);
     }
 
+    // Newsletter routes
+    if (req.method === 'GET' && req.url.startsWith('/newsletter/subscriptions')) {
+      return withAuth(getSubscriptions)(req, res);
+    }
+
+    if (req.method === 'POST' && req.url.startsWith('/newsletter/update')) {
+      return withAuth(updateSubscriptions)(req, res);
+    }
+
     // Route not found
     res.writeHead(404, { 'Content-Type': 'application/json' });
     res.end(JSON.stringify({ error: 'Route not found' }));
@@ -224,6 +265,15 @@ const server = http.createServer(async (req, res) => {
   }
 });
 
-server.listen(port, () => {
-  console.log(`Server is running on http://localhost:${port}`);
-});
+async function startServer() {
+
+  emailConfigValid = await validateEmailConfig();
+
+  global.emailConfigValid = emailConfigValid;
+  
+  server.listen(port, () => {
+    console.log(`Server is running on http://localhost:${port}`);
+  });
+}
+
+startServer();
