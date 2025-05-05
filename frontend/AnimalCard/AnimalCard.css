@@ -471,3 +471,10 @@
 .relation-breed {
   color: #555;
 }
+
+/* Map error styling */
+.map-error {
+  color: #d32f2f;
+  text-align: center;
+  padding: 20px;
+}

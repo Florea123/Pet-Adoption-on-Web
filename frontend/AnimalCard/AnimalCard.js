@@ -1,13 +1,57 @@
-const API_URL = 'http://localhost:3000';
+import config from '../config.js';
+
+const API_URL = config.API_URL;
+
+let currentMapInstance = null;
+
+// Google Maps API 
+function loadGoogleMapsScript() {
+  if (window.google && window.google.maps) return Promise.resolve();
+  
+  const existingScript = document.querySelector('script[src*="maps.googleapis.com/maps/api/js"]');
+  if (existingScript) {
+    return new Promise(resolve => {
+      if (window.initMap) {
+        const originalInitMap = window.initMap;
+        window.initMap = () => {
+          originalInitMap();
+          resolve();
+        };
+      } else {
+        window.initMap = () => resolve();
+      }
+    });
+  }
+  
+  return new Promise(resolve => {
+    window.initMap = () => resolve();
+    const script = document.createElement('script');
+    script.src = `https://maps.googleapis.com/maps/api/js?key=${config.GOOGLE_MAPS_API_KEY}&callback=initMap&loading=async`;
+    script.async = true;
+    script.defer = true;
+    document.head.appendChild(script);
+  });
+}
+
+const mapStyles = `
+  .map-error {
+    color: #d32f2f;
+    text-align: center;
+    padding: 20px;
+  }
+`;
 
 export function showAnimalDetailsPopup(details) {
-  // Remove any existing popups
+  
   const existingPopup = document.getElementById('animal-detail-popup');
   if (existingPopup) {
     existingPopup.remove();
   }
+
+  if (currentMapInstance) {
+    currentMapInstance = null;
+  }
   
-  // Extract data
   const { animal, multimedia, owner, address, feedingSchedule, medicalHistory, relations } = details;
   
   // Create popup elements
@@ -80,7 +124,7 @@ export function showAnimalDetailsPopup(details) {
     `;
   }
   
-  // Generate relations HTML - update to handle simple text values
+  // Generate relations HTML
   let relationsHtml = '<p>No relations available.</p>';
   if (relations && relations.length > 0) {
     relationsHtml = `
@@ -146,6 +190,7 @@ export function showAnimalDetailsPopup(details) {
         <h3>Owner Information</h3>
         <p><strong>Name:</strong> ${ownerName}</p>
         <p><strong>Location:</strong> ${location}</p>
+        <div id="owner-location-map" style="height: 300px; width: 100%; margin-top: 15px; border-radius: 8px;"></div>
       </div>
       
       <button class="contact-button">Contact Owner</button>
@@ -155,6 +200,8 @@ export function showAnimalDetailsPopup(details) {
   // Append content to backdrop
   popupBackdrop.appendChild(popupContent);
   document.body.appendChild(popupBackdrop);
+  
+  initializeOwnerLocationMap(address);
   
   // Set up slideshow functionality 
   if (media.length > 0) {
@@ -262,12 +309,14 @@ export function showAnimalDetailsPopup(details) {
   const closeButton = popupContent.querySelector('.popup-close-button');
   closeButton.addEventListener('click', () => {
     popupBackdrop.remove();
+    cleanupMap(); 
   });
   
   // Close when clicking outside
   popupBackdrop.addEventListener('click', (e) => {
     if (e.target === popupBackdrop) {
       popupBackdrop.remove();
+      cleanupMap(); 
     }
   });
   
@@ -295,6 +344,11 @@ export function showAnimalDetailsPopup(details) {
   }
 }
 
+function cleanupMap() {
+  if (currentMapInstance) {
+    currentMapInstance = null;
+  }
+}
 
 //Detect media type 
 function detectMediaType(mediaItem) {
@@ -385,5 +439,72 @@ function formatTime(timeValue) {
   } catch (e) {
     console.error('Error formatting time:', e);
     return timeValue.toString();
+  }
+}
+
+async function initializeOwnerLocationMap(address) {
+  if (!address || address.length === 0) return;
+  
+  try {
+    await loadGoogleMapsScript();
+    
+    const mapElement = document.getElementById('owner-location-map');
+    if (!mapElement) return;
+    
+    // Get address components
+    const addr = address[0];
+    const city = addr.CITY || '';
+    const state = addr.STATE || '';
+    const country = addr.COUNTRY || '';
+    const street = addr.STREET || '';
+    
+    // Create a full address string for geocoding
+    const fullAddress = [street, city, state, country].filter(Boolean).join(', ');
+    
+    // Default to city center if we have at least a city
+    const geocoder = new google.maps.Geocoder();
+    
+    geocoder.geocode({ address: fullAddress }, (results, status) => {
+      if (status === 'OK' && results[0]) {
+        const location = results[0].geometry.location;
+        
+        // Create map centered on the location
+        const mapInstance = new google.maps.Map(mapElement, {
+          center: location,
+          zoom: 12,
+          mapTypeId: 'roadmap',
+          mapTypeControl: false,
+          streetViewControl: false,
+          fullscreenControl: false
+        });
+        
+        // Store the map instance for cleanup
+        currentMapInstance = mapInstance;
+        
+        // Add a circle overlay
+        const circle = new google.maps.Circle({
+          strokeColor: '#4285F4',
+          strokeOpacity: 0.8,
+          strokeWeight: 2,
+          fillColor: '#4285F4',
+          fillOpacity: 0.2,
+          map: mapInstance,
+          center: location,
+          radius: 5000 // 5km radius
+        });
+        
+        // Add a marker at the center
+        new google.maps.Marker({
+          position: location,
+          map: mapInstance,
+          title: city
+        });
+      } else {
+        console.error('Geocode was not successful:', status);
+        mapElement.innerHTML = '<p class="map-error">Could not load location map</p>';
+      }
+    });
+  } catch (error) {
+    console.error('Error initializing map:', error);
   }
 }
