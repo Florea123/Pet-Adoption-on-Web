@@ -21,6 +21,13 @@ DROP SEQUENCE seq_relations;
 DROP SEQUENCE seq_admins;
 DROP SEQUENCE seq_newsletter;
 
+CREATE OR REPLACE TYPE AdminObject AS OBJECT (
+    adminId NUMBER,
+    email VARCHAR2(255),
+    password VARCHAR2(100),
+    createdAt DATE
+);
+/
 CREATE OR REPLACE TYPE feeding_time_array AS VARRAY(10) OF VARCHAR2(50);
 /
 
@@ -35,10 +42,7 @@ CREATE TABLE Users (
 );
 
 CREATE TABLE Admins (
-    adminId NUMBER PRIMARY KEY,
-    email VARCHAR2(255) NOT NULL UNIQUE,
-    password VARCHAR2(100) NOT NULL,
-    createdAt DATE DEFAULT SYSDATE
+    adminData AdminObject
 );
 
 CREATE TABLE Address (
@@ -145,7 +149,7 @@ CREATE OR REPLACE TRIGGER trg_admins
 BEFORE INSERT ON Admins
 FOR EACH ROW
 BEGIN
-    :NEW.adminId := seq_admins.NEXTVAL;
+    :NEW.adminData.adminId := seq_admins.NEXTVAL;
 END;
 /
 

@@ -1,10 +1,10 @@
 BEGIN
     -- Inserare Admins 
-    INSERT INTO Admins (email, password, createdAt)
-    VALUES ('admin@petadoption.com', 'admin123', SYSDATE-60);
+    INSERT INTO Admins (adminData)
+    VALUES (AdminObject(1, 'admin@petadoption.com', 'admin123', SYSDATE-60));
     
-    INSERT INTO Admins (email, password, createdAt)
-    VALUES ('moderator@petadoption.com', 'mod456', SYSDATE-45);
+    INSERT INTO Admins (adminData)
+    VALUES (AdminObject(2, 'moderator@petadoption.com', 'mod456', SYSDATE-45));
 
     -- Inserare Users 
     INSERT INTO Users (firstName, lastName, email, password, phone, createdAt)

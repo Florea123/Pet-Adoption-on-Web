@@ -6,16 +6,18 @@ class Admin {
     const connection = await getConnection();
     try {
       const result = await connection.execute(
-        `SELECT * FROM Admins WHERE email = :email AND password = :password`,
+        `SELECT a.adminData.adminId AS adminId, 
+                a.adminData.email AS email, 
+                a.adminData.password AS password, 
+                a.adminData.createdAt AS createdAt
+         FROM Admins a
+         WHERE a.adminData.email = :email AND a.adminData.password = :password`,
         { email, password },
         { outFormat: oracledb.OUT_FORMAT_OBJECT }
       );
-      
-    
+
       if (result.rows && result.rows.length > 0) {
-        const admin = result.rows[0];
-        admin.isAdmin = true; 
-        return admin;
+        return result.rows[0]; // Returnăm obiectul complet
       }
       return null;
     } finally {
@@ -27,15 +29,18 @@ class Admin {
     const connection = await getConnection();
     try {
       const result = await connection.execute(
-        `SELECT adminId, email FROM Admins WHERE email = :email`,
+        `SELECT a.adminData.adminId AS adminId, 
+                a.adminData.email AS email, 
+                a.adminData.password AS password, 
+                a.adminData.createdAt AS createdAt
+         FROM Admins a
+         WHERE a.adminData.email = :email`,
         { email },
         { outFormat: oracledb.OUT_FORMAT_OBJECT }
       );
-      
+
       if (result.rows && result.rows.length > 0) {
-        const admin = result.rows[0];
-        admin.isAdmin = true;
-        return admin;
+        return result.rows[0]; // Returnăm obiectul complet
       }
       return null;
     } finally {
