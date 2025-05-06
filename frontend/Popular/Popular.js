@@ -6,17 +6,11 @@ const API_URL = 'http://localhost:3000';
 const token = localStorage.getItem('Token');
 
 async function initialize() {
-  // loading spinner
-  const linkElement = document.createElement("link");
-  linkElement.rel = "stylesheet";
-  linkElement.href = "../utils/loadingUtils.css";
-  document.head.appendChild(linkElement);
-
+  
   // Render sidebar
   document.getElementById('sidebar-container').innerHTML = Sidebar.render('popular');
   new Sidebar('popular');
 
-  // Fetch and display top animals
   await fetchTopAnimals();
 }
 
@@ -59,38 +53,79 @@ function displayAnimals(animals) {
   container.innerHTML = '';
 
   if (animals.length === 0) {
-    container.innerHTML = '<div class="no-results">No popular animals found in your city.</div>';
+    container.innerHTML = '<div class="no-results">No popular animals found in your area.</div>';
     return;
   }
 
-  animals.forEach((animal) => {
-    const card = document.createElement('div');
-    card.className = 'card';
+  const initialBatch = animals.slice(0, 6);
+  const remainingBatch = animals.slice(6);
+  
+  // Render first batch immediately
+  initialBatch.forEach(animal => renderAnimalCard(animal, container));
+  
+  // Render remaining animals after a slight delay
+  if (remainingBatch.length > 0) {
+    setTimeout(() => {
+      remainingBatch.forEach(animal => renderAnimalCard(animal, container));
+    }, 50);
+  }
+}
 
-    let imageSource = 'https://via.placeholder.com/300x200?text=No+Image';
-    if (animal.multimedia && animal.multimedia.length > 0) {
-      const media = animal.multimedia[0];
-      if (media.pipeUrl) {
-        imageSource = `${API_URL}${media.pipeUrl}`;
-      } else if (media.fileData && media.mimeType) {
-        imageSource = `data:${media.mimeType};base64,${media.fileData}`;
-      } else if (media.URL) {
-        imageSource = media.URL;
-      }
+function renderAnimalCard(animal, container) {
+  const card = document.createElement('div');
+  card.className = 'card';
+  
+  // Choose loading strategy based on likely viewport position
+  const lazyLoad = container.children.length > 6;
+  
+  let imageSource = 'https://via.placeholder.com/300x200?text=No+Image';
+  
+  if (animal.multimedia && animal.multimedia.length > 0) {
+    const media = animal.multimedia[0];
+    if (media.pipeUrl) {
+      imageSource = `${API_URL}${media.pipeUrl}`;
+    } else if (media.fileData && media.mimeType) {
+      imageSource = `data:${media.mimeType};base64,${media.fileData}`;
+    } else if (media.URL) {
+      imageSource = media.URL;
     }
+  }
 
-    card.innerHTML = `
-      <img src="${imageSource}" alt="${animal.NAME}">
-      <div class="card-content">
-        <h2>${animal.NAME}</h2>
-        <p>Breed: ${animal.BREED}</p>
-        <p>Species: ${animal.SPECIES}</p>
-      </div>
-    `;
+  card.innerHTML = `
+    <img src="${lazyLoad ? 'data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==' : imageSource}" 
+         ${lazyLoad ? `data-src="${imageSource}"` : ''}
+         class="${lazyLoad ? 'lazy' : ''}"
+         alt="${animal.NAME}">
+    <div class="card-content">
+      <h2>${animal.NAME}</h2>
+      <p>Breed: ${animal.BREED}</p>
+      <p>Species: ${animal.SPECIES}</p>
+    </div>
+  `;
 
-    card.addEventListener('click', () => openAnimalDetailsPopup(animal.ANIMALID));
-    container.appendChild(card);
+  card.addEventListener('click', () => openAnimalDetailsPopup(animal.ANIMALID));
+  container.appendChild(card);
+  
+  // Initialize lazy 
+  if (lazyLoad) {
+    observeImage(card.querySelector('img.lazy'));
+  }
+}
+
+// Set up intersection observer for lazy loading
+const imageObserver = new IntersectionObserver((entries, observer) => {
+  entries.forEach(entry => {
+    if (entry.isIntersecting) {
+      const img = entry.target;
+      img.src = img.dataset.src;
+      img.classList.remove('lazy');
+      imageObserver.unobserve(img);
+    }
   });
+});
+
+function observeImage(img) {
+  imageObserver.observe(img);
 }
 
 async function openAnimalDetailsPopup(animalId) {

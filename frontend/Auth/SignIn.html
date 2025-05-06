@@ -3,13 +3,93 @@
 <head>
   <meta charset="UTF-8">
   <title>Sign In Page</title>
-  <link rel="stylesheet" href="SignIn.css">
-  <!-- Add JWT decode library -->
-  <script src="https://cdn.jsdelivr.net/npm/jwt-decode@3.1.2/build/jwt-decode.min.js"></script>
+  
+  <!-- Inline critical CSS -->
+  <style>
+    body, html {
+      height: 100%;
+      margin: 0;
+      padding: 0;
+      font-family: Arial, sans-serif;
+      background-color: #f9fafb;
+    }
+    
+    .container {
+      display: flex;
+      height: 100vh;
+    }
+    
+    .signin-section {
+      flex: 1;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 20px;
+    }
+    
+    .card {
+      background-color: white;
+      border-radius: 10px;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+      width: 100%;
+      max-width: 400px;
+      padding: 30px;
+    }
+    
+    h1 {
+      color: #333;
+      margin-top: 0;
+      margin-bottom: 20px;
+      text-align: center;
+    }
+    
+    .form-group {
+      margin-bottom: 20px;
+    }
+    
+    label {
+      display: block;
+      margin-bottom: 8px;
+      font-weight: 500;
+      color: #444;
+    }
+    
+    input {
+      width: 100%;
+      padding: 10px;
+      border: 1px solid #ddd;
+      border-radius: 5px;
+      font-size: 16px;
+      box-sizing: border-box;
+    }
+    
+    .btn {
+      display: block;
+      width: 100%;
+      padding: 12px;
+      background-color: #fca311;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background-color 0.3s;
+      margin-top: 10px;
+    }
+  </style>
+  
+  <!-- Non-critical CSS loaded asynchronously -->
+  <link rel="preload" href="SignIn.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+  <noscript><link rel="stylesheet" href="SignIn.css"></noscript>
+  
+  
+  <link rel="preload" href="https://cdn.jsdelivr.net/npm/jwt-decode@3.1.2/build/jwt-decode.min.js" as="script">
+  <script src="https://cdn.jsdelivr.net/npm/jwt-decode@3.1.2/build/jwt-decode.min.js" defer></script>
 </head>
 <body>
   <div class="container">
-    <!-- Slider de imagini -->
+    <!-- Slider de imagini - loaded with JavaScript to avoid blocking render -->
     <div class="photo-section" id="imageSlider">
       <div class="welcome-text">Adoptă. Iubește. Schimbă o viață.</div>
     </div>
@@ -33,6 +113,7 @@
       </div>
     </div>
   </div>
+  
   <script type="module" src="SignIn.js"></script>
 </body>
 </html>

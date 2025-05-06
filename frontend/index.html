@@ -4,8 +4,28 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Pet Adoption - Redirecting</title>
-  <script type="text/javascript">
-    window.location.href = './Home/Home.html';
+  
+  
+  <!-- Inline critical CSS -->
+  <style>
+    body, html {
+      height: 100%;
+      margin: 0;
+      padding: 0;
+      font-family: Arial, sans-serif;
+    }
+    p {
+      text-align: center;
+      margin-top: 50px;
+      font-size: 18px;
+    }
+  </style>
+  
+  <!-- Defer JavaScript -->
+  <script type="text/javascript" defer>
+    window.addEventListener('DOMContentLoaded', function() {
+      window.location.href = './Home/Home.html';
+    });
   </script>
 </head>
 <body>

@@ -1,6 +1,7 @@
 import { requireAuth } from '../utils/authUtils.js';
 import Sidebar from '../SideBar/Sidebar.js';
 import { showLoading, hideLoading } from '../utils/loadingUtils.js';
+import { setupLazyLoading, addPreconnect, addDnsPrefetch } from '../utils/performanceUtils.js';
 
 const API_URL = 'http://localhost:3000';
 const token = localStorage.getItem('Token');
@@ -9,12 +10,8 @@ let user;
 let userAnimals = [];
 
 async function initialize() {
-    // loading spinner
-    const linkElement = document.createElement("link");
-    linkElement.rel = "stylesheet";
-    linkElement.href = "../utils/loadingUtils.css";
-    document.head.appendChild(linkElement);
-
+    addDnsPrefetch('http://localhost:3000');
+    
     user = requireAuth();
     if (!user) return; 
     
@@ -23,8 +20,9 @@ async function initialize() {
     new Sidebar('userAnimals');
     
     await fetchUserAnimals();
+    
+    setupLazyLoading();
 }
-
 
 async function fetchUserAnimals() {
     try {
@@ -36,10 +34,12 @@ async function fetchUserAnimals() {
               'Content-Type': 'application/json',
               'Authorization': `Bearer ${token}`
             }
-          });
+        });
+        
         if (!response.ok) {
             throw new Error('Failed to fetch animals');
         }
+        
         const allAnimals = await response.json();
         
         // Filter to only show animals belonging to the current user
@@ -55,7 +55,7 @@ async function fetchUserAnimals() {
     }
 }
 
-// user's animals
+// Display user's animals 
 function displayUserAnimals(animals) {
     const container = document.getElementById('my-animals-container');
     container.innerHTML = '';
@@ -70,50 +70,67 @@ function displayUserAnimals(animals) {
         `;
         return;
     }
-
-    animals.forEach((animal) => {
-        const card = document.createElement('div');
-        card.className = 'card';
-        
-        // Check for piped media URL 
-        let imageSource = 'https://via.placeholder.com/300x200?text=No+Image';
-        
-        if (animal.multimedia && animal.multimedia.length > 0) {
-            const media = animal.multimedia[0];
-            if (media.pipeUrl) {
-                // Use the media pipe URL
-                imageSource = `${API_URL}${media.pipeUrl}`;
-            } else if (media.fileData && media.mimeType) {
-                // Fallback to base64 if available
-                imageSource = `data:${media.mimeType};base64,${media.fileData}`;
-            } else if (media.URL) {
-                // Last resort: direct URL
-                imageSource = media.URL;
-            }
-        }
-        
-        card.innerHTML = `
-            <img src="${imageSource}" alt="${animal.NAME}">
-            <div class="card-content">
-                <h2>${animal.NAME}</h2>
-                <p>Breed: ${animal.BREED}</p>
-                <p>Species: ${animal.SPECIES}</p>
-                <p>Age: ${animal.AGE}</p>
-                <p>Gender: ${animal.GENDER === 'male' ? 'Male' : 'Female'}</p>
-                <button class="delete-btn" data-animal-id="${animal.ANIMALID}">Delete Animal</button>
-            </div>
-        `;
-
-        container.appendChild(card);
-    });
-
     
+    // Split rendering 
+    const initialBatch = animals.slice(0, 6);
+    const remainingBatch = animals.slice(6);
+    
+    initialBatch.forEach(animal => renderAnimalCard(animal, container, false));
+    
+    if (remainingBatch.length > 0) {
+        setTimeout(() => {
+            remainingBatch.forEach(animal => renderAnimalCard(animal, container, true));
+        }, 50);
+    }
+    
+    // Add event listeners for delete buttons
     document.querySelectorAll('.delete-btn').forEach(button => {
         button.addEventListener('click', handleDeleteAnimal);
     });
 }
 
-//  animal deletion
+// Separate card rendering function
+function renderAnimalCard(animal, container, lazyLoad = false) {
+    const card = document.createElement('div');
+    card.className = 'card';
+    
+    // Check for piped media URL 
+    let imageSource = 'https://via.placeholder.com/300x200?text=No+Image';
+    
+    if (animal.multimedia && animal.multimedia.length > 0) {
+        const media = animal.multimedia[0];
+        if (media.pipeUrl) {
+            // Use the media pipe URL
+            imageSource = `${API_URL}${media.pipeUrl}`;
+        } else if (media.fileData && media.mimeType) {
+            // Fallback to base64 if available
+            imageSource = `data:${media.mimeType};base64,${media.fileData}`;
+        } else if (media.URL) {
+            // Last resort: direct URL
+            imageSource = media.URL;
+        }
+    }
+    
+    const imgHtml = lazyLoad ? 
+        `<img src="data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==" data-src="${imageSource}" class="lazy" alt="${animal.NAME}">` :
+        `<img src="${imageSource}" alt="${animal.NAME}">`;
+    
+    card.innerHTML = `
+        ${imgHtml}
+        <div class="card-content">
+            <h2>${animal.NAME}</h2>
+            <p>Breed: ${animal.BREED}</p>
+            <p>Species: ${animal.SPECIES}</p>
+            <p>Age: ${animal.AGE}</p>
+            <p>Gender: ${animal.GENDER === 'male' ? 'Male' : 'Female'}</p>
+            <button class="delete-btn" data-animal-id="${animal.ANIMALID}">Delete Animal</button>
+        </div>
+    `;
+
+    container.appendChild(card);
+}
+
+// Animal deletion handler
 async function handleDeleteAnimal(event) {
     const animalId = event.target.dataset.animalId;
     
@@ -129,7 +146,7 @@ async function handleDeleteAnimal(event) {
             headers: { 
                 'Content-Type': 'application/json',
                 'Authorization': `Bearer ${token}`
-             },
+            },
             body: JSON.stringify({ animalId: parseInt(animalId) })
         });
 
