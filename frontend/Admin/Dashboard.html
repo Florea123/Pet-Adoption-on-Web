@@ -4,11 +4,69 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Admin Dashboard</title>
-    <link rel="stylesheet" href="Dashboard.css">
-    <link rel="stylesheet" href="Users.css">
-    <link rel="stylesheet" href="Pets.css">
-    <link rel="stylesheet" href="Chart.css">
-    <script src="https://cdn.jsdelivr.net/npm/jwt-decode@3.1.2/build/jwt-decode.min.js"></script>
+    
+    <!-- Preconnect to important domains -->
+    <link rel="dns-prefetch" href="http://localhost:3000">
+    
+    <!-- Inline critical CSS -->
+    <style>
+      /* Critical dashboard styles */
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+      
+      body {
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        background-color: #f5f5f5;
+        color: #333;
+      }
+      
+      .dashboard-container {
+        display: flex;
+        min-height: 100vh;
+      }
+      
+      .sidebar {
+        width: 250px;
+        background-color: #2c3e50;
+        color: #fff;
+        padding: 20px 0;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        position: fixed;
+        height: 100vh;
+      }
+      
+      .main-content {
+        flex: 1;
+        margin-left: 250px;
+        padding: 20px;
+      }
+      
+      .content-section {
+        display: none;
+      }
+      
+      .content-section.active {
+        display: block;
+      }
+    </style>
+    
+    <!-- Preload non-critical CSS and scripts -->
+    <link rel="preload" href="Dashboard.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+    <noscript><link rel="stylesheet" href="Dashboard.css"></noscript>
+    <link rel="preload" href="Users.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+    <noscript><link rel="stylesheet" href="Users.css"></noscript>
+    <link rel="preload" href="Pets.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+    <noscript><link rel="stylesheet" href="Pets.css"></noscript>
+    <link rel="preload" href="Chart.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+    <noscript><link rel="stylesheet" href="Chart.css"></noscript>
+    
+    <link rel="preload" href="https://cdn.jsdelivr.net/npm/jwt-decode@3.1.2/build/jwt-decode.min.js" as="script">
+    <script src="https://cdn.jsdelivr.net/npm/jwt-decode@3.1.2/build/jwt-decode.min.js" defer></script>
 </head>
 <body>
     <div class="dashboard-container">
@@ -94,10 +152,32 @@
         </main>
     </div>
 
-    <!-- Load scripts in the correct order -->
-    <script src="Chart.js"></script>
-    <script src="Users.js"></script>
-    <script src="Pets.js"></script>
-    <script src="Dashboard.js"></script>
+    <!-- CSS loading helper -->
+    <script>
+      (function() {
+        var loadCSS = function(href) {
+          var link = document.createElement('link');
+          link.rel = 'stylesheet';
+          link.href = href;
+          document.head.appendChild(link);
+        };
+        
+        if (!window.loadCSS) {
+          var links = document.getElementsByTagName('link');
+          for (var i = 0; i < links.length; i++) {
+            var link = links[i];
+            if (link.rel === 'preload' && link.getAttribute('as') === 'style') {
+              loadCSS(link.href);
+              link.rel = 'stylesheet';
+            }
+          }
+        }
+      })();
+    </script>
+
+    <script type="module" src="Chart.js" defer></script>
+    <script type="module" src="Users.js" defer></script>
+    <script type="module" src="Pets.js" defer></script>
+    <script type="module" src="Dashboard.js" defer></script>
 </body>
 </html>

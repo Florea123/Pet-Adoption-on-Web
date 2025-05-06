@@ -1,0 +1,40 @@
+/* Critical styles needed for above-the-fold content across the app */
+body, html {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  font-family: Arial, sans-serif;
+}
+
+.app-container {
+  display: flex;
+  min-height: 100vh;
+  background-color: rgba(255, 255, 255, 0.8);
+}
+
+.main-content {
+  margin-left: 290px;
+  flex: 1;
+  padding: 30px;
+}
+
+/* Essential sidebar styles */
+.sidebar {
+  width: 250px;
+  height: 100vh;
+  background-color: white;
+  box-shadow: 4px 0 10px rgba(0, 0, 0, 0.05);
+  padding: 20px;
+  position: fixed;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Basic card styles */
+.card {
+  background-color: white;
+  border-radius: 10px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}

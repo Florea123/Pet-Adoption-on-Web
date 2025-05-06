@@ -8,11 +8,6 @@ let user;
 
 // Initialize the page
 document.addEventListener("DOMContentLoaded", function () {
-  // Add link to CSS for loading spinner
-  const linkElement = document.createElement("link");
-  linkElement.rel = "stylesheet";
-  linkElement.href = "../utils/loadingUtils.css"; 
-  document.head.appendChild(linkElement);
 
   user = requireAuth();
   if (!user) return;
@@ -33,10 +28,31 @@ document.addEventListener("DOMContentLoaded", function () {
   // Set up photo input handler
   const photoInput = document.getElementById("photo");
   if (photoInput) {
-    photoInput.addEventListener("change", function (event) {
-      const file = event.target.files[0];
+    photoInput.addEventListener("change", function () {
+      if (this.files && this.files[0]) {
+        // Optimize image preview to prevent layout shifts
+        const reader = new FileReader();
+        reader.onload = function (e) {
+          const img = document.createElement('img');
+          img.onload = function() {
+            const previewContainer = document.getElementById("photo-preview");
+            if (previewContainer) {
+              previewContainer.innerHTML = '';
+              previewContainer.appendChild(img);
+              previewContainer.style.display = "block";
+            }
+          };
+          img.style.maxWidth = "100%";
+          img.style.maxHeight = "200px";
+          img.src = e.target.result;
+        };
+        reader.readAsDataURL(this.files[0]);
+      }
     });
   }
+
+  // Add multimedia entry by default
+  addMultimediaEntry();
 });
 
 // Add initial feeding entry
