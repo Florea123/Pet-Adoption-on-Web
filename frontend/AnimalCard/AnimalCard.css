@@ -5,36 +5,42 @@
   left: 0;
   width: 100%;
   height: 100%;
-  background-color: rgba(0, 0, 0, 0.75);
+  background-color: rgba(0, 0, 0, 0.85);
   display: flex;
   justify-content: center;
   align-items: center;
   z-index: 1000;
-  padding: 20px;
   box-sizing: border-box;
   overflow-y: auto;
+  padding: 0;
+  overscroll-behavior: contain; /* Prevent background scrolling on iOS */
 }
 
 .animal-popup-content {
   background-color: white;
-  border-radius: 8px;
-  box-shadow: 0 5px 20px rgba(0, 0, 0, 0.25);
-  width: 95%;
-  max-width: 1200px;
-  height: auto;
-  max-height: 90vh;
+  border-radius: 0;
+  width: 100%;
+  height: 100%;
+  max-width: 100%;
+  max-height: 100%;
   display: flex;
   flex-direction: column;
   position: relative;
-  overflow: hidden; /* Prevent content overflow */
+  overflow: hidden;
 }
 
 @media (min-width: 768px) {
+  .animal-popup-backdrop {
+    padding: 20px;
+  }
+  
   .animal-popup-content {
     flex-direction: row;
+    width: 95%;
+    max-width: 1200px;
     height: auto;
-    min-height: 60vh;
     max-height: 85vh;
+    border-radius: 8px;
   }
 }
 
@@ -42,17 +48,22 @@
 .popup-close-button {
   position: absolute;
   top: 10px;
-  right: 15px;
+  right: 10px;
   background-color: rgba(0, 0, 0, 0.5);
   color: white;
   border: none;
   border-radius: 50%;
-  width: 32px;
-  height: 32px;
-  font-size: 20px;
-  line-height: 28px;
+  width: 44px; 
+  height: 44px; 
+  font-size: 24px;
+  line-height: 44px; 
   cursor: pointer;
   z-index: 10;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   transition: background-color 0.2s;
 }
 
@@ -62,20 +73,18 @@
 
 /* Image Container and Slideshow */
 .popup-image-container {
-  flex: 0 0 50%;
-  background-color: #f0f0f0;
+  flex: 0 0 auto;
+  height: 40vh;
+  background-color: #000;
   position: relative;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  min-height: 300px;
-  max-height: 500px;
+  width: 100%;
 }
 
 @media (min-width: 768px) {
   .popup-image-container {
-    max-height: none;
+    flex: 0 0 50%;
     height: auto;
+    max-height: none;
   }
 }
 
@@ -175,6 +184,10 @@
   font-size: 18px;
   cursor: pointer;
   z-index: 5; 
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   transition: background-color 0.2s;
 }
 
@@ -188,6 +201,29 @@
 
 .slideshow-nav.next {
   right: 15px;
+}
+
+/* Improved touch targets for slide navigation */
+@media (max-width: 767px) {
+  .slideshow-nav {
+    width: 44px;
+    height: 44px;
+  }
+  
+  .slideshow-nav.prev {
+    left: 8px;
+  }
+  
+  .slideshow-nav.next {
+    right: 8px;
+  }
+  
+  /* Improve dot indicators for touch */
+  .dot {
+    width: 12px; 
+    height: 12px;
+    margin: 0 6px;
+  }
 }
 
 /* Slideshow Dots */
@@ -217,7 +253,7 @@
 
 /* Details Section */
 .popup-details {
-  flex: 0 0 50%;
+  flex: 1;
   padding: 20px;
   overflow-y: auto;
   display: flex;
@@ -330,7 +366,7 @@
   justify-content: space-between;
   margin-bottom: 5px;
   font-weight: 500;
-  flex-wrap: wrap; /* Allow wrapping for small screens */
+  flex-wrap: wrap; 
 }
 
 .vet-number {
@@ -362,12 +398,13 @@
   background-color: #d97706;
   color: white;
   border: none;
-  padding: 12px 15px;
+  padding: 14px 16px;
   border-radius: 8px;
   font-size: 16px;
   font-weight: 600;
   cursor: pointer;
-  margin-top: auto;
+  margin-top: 15px;
+  margin-bottom: 10px;
   transition: background-color 0.2s;
   width: 100%;
   max-width: 300px;
@@ -392,19 +429,41 @@
   }
   
   .popup-details {
-    max-height: none;
-    overflow-y: visible;
-    width: 100%;
-    padding: 15px; /* Reduce padding on mobile */
+    padding: 15px;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    flex: 1;
+  }
+  
+  .popup-details h2 {
+    font-size: 20px;
+    margin-bottom: 10px;
+  }
+  
+  .popup-details h3 {
+    font-size: 16px;
+    margin-top: 15px;
+    margin-bottom: 8px;
   }
   
   .feeding-schedule-list, .medical-history-list {
-    max-height: none;
+    -webkit-overflow-scrolling: touch;
+  }
+  
+  .animal-specs {
+    padding: 12px;
   }
   
   .animal-feeding-schedule, .animal-medical-history, 
   .animal-specs, .animal-owner {
     padding: 12px;
+  }
+  
+  .contact-button {
+    padding: 14px 16px;
+    margin-top: 15px;
+    margin-bottom: 10px;
+    width: 100%;
   }
 }
 
@@ -441,7 +500,7 @@
   gap: 10px;
   max-height: 200px;
   overflow-y: auto;
-  padding-right: 5px; /* Space for scrollbar */
+  padding-right: 5px;
 }
 
 .relation-item {

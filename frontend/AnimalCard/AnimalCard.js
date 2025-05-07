@@ -1,4 +1,5 @@
 import config from '../config.js';
+import { getResponsiveImageUrl, generatePlaceholder, getOptimalImageSize, generateSrcSet } from '../utils/imageOptimizer.js';
 
 const API_URL = config.API_URL;
 
@@ -41,6 +42,26 @@ const mapStyles = `
   }
 `;
 
+// Optimized image helper function
+function getOptimizedImageUrl(media, apiUrl, width = null) {
+  if (!width) {
+    width = getOptimalImageSize();
+  }
+  
+  let imageSource = 'https://via.placeholder.com/400x300?text=No+Image';
+  
+  if (media && media.pipeUrl) {
+    // Get properly sized image based on viewport
+    return getResponsiveImageUrl(`${apiUrl}${media.pipeUrl}`, width);
+  } else if (media && media.fileData && media.mimeType) {
+    return `data:${media.mimeType};base64,${media.fileData}`;
+  } else if (media && media.URL) {
+    return media.URL;
+  }
+  
+  return imageSource;
+}
+
 export function showAnimalDetailsPopup(details) {
   
   const existingPopup = document.getElementById('animal-detail-popup');
@@ -54,6 +75,9 @@ export function showAnimalDetailsPopup(details) {
   
   const { animal, multimedia, owner, address, feedingSchedule, medicalHistory, relations } = details;
   
+  // Check if we're on mobile
+  const isMobile = window.innerWidth < 768;
+
   // Create popup elements
   const popupBackdrop = document.createElement('div');
   popupBackdrop.id = 'animal-detail-popup';
@@ -66,6 +90,16 @@ export function showAnimalDetailsPopup(details) {
       ) 
     : [];
   
+  // Preload the first image to improve LCP
+  if (media.length > 0) {
+    const firstMediaItem = media[0];
+    const preloadImage = new Image();
+    if (firstMediaItem.pipeUrl) {
+      const optimizedUrl = getOptimizedImageUrl(firstMediaItem, API_URL, isMobile ? 600 : 1200);
+      preloadImage.src = optimizedUrl;
+    }
+  }
+
   // Set up HTML structure
   const popupContent = document.createElement('div');
   popupContent.className = 'animal-popup-content';
@@ -220,7 +254,7 @@ export function showAnimalDetailsPopup(details) {
       // Determine media source
       let mediaSource;
       if (mediaItem.pipeUrl) {
-        mediaSource = `${API_URL}${mediaItem.pipeUrl}`;
+        mediaSource = getOptimizedImageUrl(mediaItem, API_URL, isMobile ? 600 : 1200);
       } else if (mediaItem.fileData && mediaItem.mimeType) {
         mediaSource = `data:${mediaItem.mimeType};base64,${mediaItem.fileData}`;
       } else if (mediaItem.URL) {

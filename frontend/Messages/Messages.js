@@ -25,18 +25,21 @@ async function initialize() {
   document.getElementById('sidebar-container').innerHTML = Sidebar.render('messages');
   new Sidebar('messages');
   
-  // Set up event listeners
   document.getElementById('send-message-form').addEventListener('submit', handleSendMessage);
   
-  // Set up polling for new messages (every 5 seconds)
+  initializeMobileView();
+  
+  setupMobileNavigation();
+  
+  await loadConversations(true);
+  
+  // Set up polling for new messages (every 30 seconds)
   pollingInterval = setInterval(async () => {
     if (currentConversationUser) {
-      await loadConversation(currentConversationUser.userId);
+      await loadConversation(currentConversationUser.userId, false);
     }
-    await loadConversations();
-  }, 5000);
-  
-  await loadConversations();
+    await loadConversations(false);
+  }, 30000); 
   
   window.addEventListener('beforeunload', () => {
     if (pollingInterval) {
@@ -45,9 +48,30 @@ async function initialize() {
   });
 }
 
-async function loadConversations() {
+// Initialize mobile view state
+function initializeMobileView() {
+  const isMobile = window.innerWidth <= 768;
+  const conversationsList = document.querySelector('.conversations-list');
+  const messagesContainer = document.querySelector('.messages-container');
+  
+  if (isMobile) {
+    conversationsList.classList.add('active');
+    messagesContainer.classList.remove('active');
+    
+
+    conversationsList.style.transform = 'translateX(0)';
+    messagesContainer.style.transform = 'translateX(100%)';
+  } else {
+  
+    messagesContainer.classList.add('active');
+  }
+}
+
+async function loadConversations(showLoader = true) {
   try {
-    showLoading('Loading conversations...');
+    if (showLoader) {
+      showLoading('Loading conversations...');
+    }
     
     const response = await fetch(`${API_URL}/messages/conversations`, {
       method: 'GET',
@@ -65,10 +89,15 @@ async function loadConversations() {
     displayConversations(conversations);
   } catch (error) {
     console.error('Error loading conversations:', error);
-    document.getElementById('conversation-list').innerHTML = 
-      '<div class="error-message">Failed to load conversations</div>';
+
+    if (showLoader) {
+      document.getElementById('conversation-list').innerHTML = 
+        '<div class="error-message">Failed to load conversations</div>';
+    }
   } finally {
-    hideLoading();
+    if (showLoader) {
+      hideLoading();
+    }
   }
 }
 
@@ -115,9 +144,50 @@ function truncateMessage(message) {
   return message.length > 30 ? message.substring(0, 27) + '...' : message;
 }
 
-async function loadConversation(otherUserId) {
+// Add mobile navigation setup
+function setupMobileNavigation() {
+  const backButton = document.querySelector('.back-button');
+  const conversationsList = document.querySelector('.conversations-list');
+  const messagesContainer = document.querySelector('.messages-container');
+  
+  // Make conversations list visible by default on mobile
+  if (window.innerWidth <= 768) {
+    conversationsList.classList.add('active');
+    messagesContainer.classList.remove('active');
+  }
+  
+  backButton.addEventListener('click', (e) => {
+    e.preventDefault();
+    conversationsList.classList.add('active');
+    messagesContainer.classList.remove('active');
+  });
+  
+  document.addEventListener('click', (e) => {
+    const conversationItem = e.target.closest('.conversation-item');
+    if (conversationItem && window.innerWidth <= 768) {
+      conversationsList.classList.remove('active');
+      messagesContainer.classList.add('active');
+    }
+  });
+  
+  // Handle window resize
+  window.addEventListener('resize', () => {
+    if (window.innerWidth <= 768) {
+      if (!currentConversationUser) {
+        conversationsList.classList.add('active');
+        messagesContainer.classList.remove('active');
+      }
+    } else {
+      messagesContainer.classList.add('active');
+    }
+  });
+}
+
+async function loadConversation(otherUserId, showLoader = true) {
   try {
-    showLoading('Loading messages...');
+    if (showLoader) {
+      showLoading('Loading messages...');
+    }
     
     // Mark messages as read when opening conversation
     await fetch(`${API_URL}/messages/read`, {
@@ -164,9 +234,21 @@ async function loadConversation(otherUserId) {
     displayMessages(currentMessages, otherUserId);
     
     // Update conversation UI
-    document.getElementById('conversation-header').innerHTML = currentConversationUser ? 
-      `<h2>${currentConversationUser.name}</h2>` : '';
-    document.getElementById('messages-container').classList.add('active');
+    document.getElementById('conversation-title').textContent = currentConversationUser ? 
+      currentConversationUser.name : 'Messages';
+    
+    const messagesContainer = document.querySelector('.messages-container');
+    const conversationsList = document.querySelector('.conversations-list');
+    
+    if (window.innerWidth <= 768) {
+      conversationsList.classList.remove('active');
+      messagesContainer.classList.add('active');
+      
+      conversationsList.style.transform = 'translateX(-100%)';
+      messagesContainer.style.transform = 'translateX(0)';
+    } else {
+      messagesContainer.classList.add('active');
+    }
     
     // Mark the selected conversation in the list
     document.querySelectorAll('.conversation-item').forEach(item => {
@@ -178,13 +260,18 @@ async function loadConversation(otherUserId) {
     messagesDiv.scrollTop = messagesDiv.scrollHeight;
   } catch (error) {
     console.error('Error loading conversation:', error);
-    document.getElementById('messages').innerHTML = 
-      '<div class="error-message">Failed to load messages</div>';
+    if (showLoader) {
+      document.getElementById('messages').innerHTML = 
+        '<div class="error-message">Failed to load messages</div>';
+    }
   } finally {
-    hideLoading();
+    if (showLoader) {
+      hideLoading();
+    }
   }
 }
 
+// Update displayMessages function to ensure message visibility
 function displayMessages(messages, otherUserId) {
   const container = document.getElementById('messages');
   
@@ -213,6 +300,11 @@ function displayMessages(messages, otherUserId) {
       </div>
     `;
   }).join('');
+  
+  setTimeout(() => {
+    const messagesDiv = document.getElementById('messages');
+    messagesDiv.scrollTop = messagesDiv.scrollHeight;
+  }, 100);
 }
 
 async function handleSendMessage(event) {
@@ -233,13 +325,12 @@ async function handleSendMessage(event) {
   try {
     await sendMessage(currentConversationUser.userId, content);
     
-    // Clear input
     messageInput.value = '';
     
     // Reload conversation to show new message
-    await loadConversation(currentConversationUser.userId);
+    await loadConversation(currentConversationUser.userId, true);
     
-    await loadConversations();
+    await loadConversations(false);
   } catch (error) {
     console.error('Error sending message:', error);
     alert('Failed to send message. Please try again.');
@@ -335,10 +426,9 @@ function checkUrlForDirectMessage() {
   }
 }
 
-
 document.addEventListener('DOMContentLoaded', () => {
   initialize();
   
   // Check for direct message parameter in URL
-  setTimeout(checkUrlForDirectMessage, 500); 
+  setTimeout(checkUrlForDirectMessage, 500);
 });
