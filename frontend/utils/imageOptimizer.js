@@ -15,7 +15,7 @@ export function getResponsiveImageUrl(originalUrl, options = {}) {
     const matches = originalUrl.match(/\/media\/pipe\/(\d+)/);
     if (matches && matches[1]) {
       const id = matches[1];
-      let url = `${API_URL}/media/pipe/${id}?width=${settings.width}`; // Use full API URL
+      let url = `${API_URL}/media/pipe/${id}?width=${settings.width}`;
       
       //quality parameter
       if (settings.quality !== 'auto') {
@@ -83,8 +83,7 @@ export function getOptimalImageSize() {
 // Create placeholder for images while they load
 export function generatePlaceholder(animal) {
   const initial = animal && animal.NAME ? animal.NAME.charAt(0).toUpperCase() : '?';
-  const color = getColorForAnimal(animal);
-  
+
   const svg = `
     <svg xmlns="http://www.w3.org/2000/svg" width="400" height="300" viewBox="0 0 400 300">
       <rect width="400" height="300" fill="#cccccc" />

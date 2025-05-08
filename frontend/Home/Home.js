@@ -34,8 +34,35 @@ async function initialize() {
   user = requireAuth();
   if (!user) return;
   
-  document.getElementById('sidebar-container').innerHTML = Sidebar.render('home');
-  new Sidebar('home');
+  const sidebarContainer = document.getElementById('sidebar-container');
+  if (sidebarContainer) {
+    sidebarContainer.innerHTML = Sidebar.render('home');
+    
+    // Use requestAnimationFrame for proper timing
+    requestAnimationFrame(() => {
+      const sidebar = new Sidebar('home');
+      window.sidebarInstance = sidebar;
+        
+      setTimeout(() => {
+        if (window.sidebarInstance && !window.sidebarInstance.isMobile) {
+          window.sidebarInstance.enforceSidebarBehavior();
+        }
+      }, 100);
+    });
+  }
+  
+  // Fix scrolling issues globally
+  document.body.style.overflow = '';
+  document.body.style.position = '';
+  document.documentElement.style.overflow = '';
+  document.documentElement.style.position = '';
+  
+  // Ensure main content scrolls
+  const mainContent = document.querySelector('.main-content');
+  if (mainContent) {
+    mainContent.style.overflowY = 'auto';
+    mainContent.style.height = 'auto';
+  }
   
   await fetchAnimals();
   
@@ -66,12 +93,18 @@ function setupMobileFilters() {
       filterDrawer.classList.remove('open');
       filterBackdrop.classList.remove('open');
       document.body.style.overflow = '';
+      document.body.style.overflowY = 'auto';
+      document.documentElement.style.overflow = '';
+      document.documentElement.style.overflowY = 'auto';
     });
     
     filterBackdrop.addEventListener('click', () => {
       filterDrawer.classList.remove('open');
       filterBackdrop.classList.remove('open');
       document.body.style.overflow = ''; 
+      document.body.style.overflowY = 'auto';
+      document.documentElement.style.overflow = '';
+      document.documentElement.style.overflowY = 'auto';
     });
   }
 }

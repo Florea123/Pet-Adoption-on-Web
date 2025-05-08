@@ -25,42 +25,124 @@ export default class Sidebar {
       }
     });
     
+    window.addEventListener('load', () => {
+      this.updateNavigation();
+    }, { once: true });
+    
+    // Monitor scrolling with higher priority
     if (!this.isMobile) {
-      this.enforceSidebarBehavior();
+      let lastScrollY = window.scrollY;
+      let ticking = false;
+      
+      const scrollHandler = () => {
+        const currentScrollY = window.scrollY;
+        if (!ticking) {
+          window.requestAnimationFrame(() => {
+            this.enforceSidebarBehavior();
+            lastScrollY = currentScrollY;
+            ticking = false;
+          });
+          ticking = true;
+        }
+      };
+      
+      window.addEventListener('scroll', scrollHandler, { passive: true });
+      
+      // Check periodically to ensure sidebar stays fixed
+      this.fixedCheckInterval = setInterval(() => {
+        this.enforceSidebarBehavior();
+      }, 1000); // Check more frequently
+      
+      // Store for cleanup if needed
+      this.scrollHandler = scrollHandler;
     }
   }
   
   enforceSidebarBehavior() {
-    const sidebar = document.querySelector('.sidebar');
-    if (sidebar) {
-      sidebar.style.position = 'fixed';
-      sidebar.style.top = '0';
-      sidebar.style.left = '0';
-      sidebar.style.bottom = '0';
-      sidebar.style.height = '100%';
-      sidebar.style.overflowY = 'hidden';
-      sidebar.style.zIndex = '1001';
-      
-      const sidebarContent = document.querySelector('.sidebar-content');
-      if (sidebarContent) {
-        sidebarContent.style.overflowY = 'auto';
-        sidebarContent.style.maxHeight = 'calc(100vh - 290px)';
+    const sidebarContainer = document.getElementById('sidebar-container');
+    if (!sidebarContainer) return;
+    
+    // Get the sidebar, either from the container or from the body
+    let sidebar = document.querySelector('.sidebar');
+    if (!sidebar) return;
+    
+    if (!this.isMobile) {
+
+      if (document.body.contains(sidebar) && sidebar.parentElement !== document.body) {
+        sidebar.remove();
       }
       
-      // Prevent body scrolling
-      document.body.style.overflow = 'hidden';
+      if (!document.querySelector('body > .sidebar')) {
+    
+        const bodySidebar = document.createElement('aside');
+        bodySidebar.className = 'sidebar fixed-sidebar';
+        bodySidebar.innerHTML = sidebar.innerHTML;
+        
+  
+        document.body.appendChild(bodySidebar);
+        sidebar = bodySidebar;
+      } else {
+        sidebar = document.querySelector('body > .sidebar');
+      }
       
-      // Make main content scrollable
+      // Apply critical styles with direct property assignment
+      Object.assign(sidebar.style, {
+        position: 'fixed',
+        top: '0',
+        left: '0',
+        bottom: '0',
+        height: '100%',
+        maxHeight: '100vh',
+        overflow: 'hidden',
+        overflowY: 'hidden',
+        overflowX: 'hidden',
+        zIndex: '1001',
+        transform: 'translateZ(0)'
+      });
+      
+      const sidebarContent = sidebar.querySelector('.sidebar-content');
+      if (sidebarContent) {
+        Object.assign(sidebarContent.style, {
+          overflowY: 'auto',
+          overflowX: 'hidden',
+          maxHeight: 'calc(100vh - 290px)',
+          flex: '1',
+          minHeight: '0'
+        });
+      }
+      
+      // Properly configure main content
       const mainContent = document.querySelector('.main-content');
       if (mainContent) {
-        mainContent.style.overflowY = 'auto';
-        mainContent.style.height = '100vh';
+        Object.assign(mainContent.style, {
+          marginLeft: '290px',
+          width: 'calc(100% - 290px)',
+          overflowY: 'auto',
+          height: 'auto',
+          minHeight: '100vh'
+        });
+      }
+      
+      const appContainer = document.querySelector('.app-container');
+      if (appContainer) {
+        Object.assign(appContainer.style, {
+          overflow: 'visible',
+          height: 'auto'
+        });
+      }
+      
+      // Re-apply user info and listeners
+      this.displayUserInfo();
+      
+      // Make sure disconnect button works
+      const disconnectBtn = sidebar.querySelector('#disconnect-btn');
+      if (disconnectBtn) {
+        disconnectBtn.addEventListener('click', this.disconnectUser);
       }
     }
   }
   
   async initialize() {
-    this.displayUserInfo();
     this.updateNavigation();
 
     if (this.user) {
@@ -71,11 +153,23 @@ export default class Sidebar {
         this.fetchUnreadMessageCount();
       }, 30000);
     }
+
+    if (!this.isMobile) {
+      requestAnimationFrame(() => {
+        this.enforceSidebarBehavior();
+      });
+    }
   }
   
   // Update navigation based on viewport
   updateNavigation() {
     const sidebarContainer = document.getElementById('sidebar-container');
+    if (!sidebarContainer) return;
+    
+    const existingSidebar = document.querySelector('.sidebar');
+    if (existingSidebar) {
+      existingSidebar.remove();
+    }
     
     sidebarContainer.innerHTML = Sidebar.render(this.activePage);
     
@@ -133,18 +227,8 @@ export default class Sidebar {
         
         sidebar.appendChild(mobileNav);
         
-        // If sidebarContainer is inside appContainer, move sidebar to body
-        if (appContainer) {
-          const placeholder = document.createElement('div');
-          placeholder.style.display = 'none';
-          sidebarContainer.appendChild(placeholder);
-          
-          // Move the sidebar to the body
-          document.body.appendChild(sidebar);
-          
-          // Store reference to restore on desktop
-          sidebarContainer._mobileSidebar = sidebar;
-        }
+        // Move the sidebar to the body for mobile
+        document.body.appendChild(sidebar);
         
         // Adjust main content for mobile
         const mainContent = document.querySelector('.main-content');
@@ -155,17 +239,19 @@ export default class Sidebar {
         }
       }
     } else {
-      // On desktop, ensure sidebar is back in its container
-      const mobileSidebar = sidebarContainer._mobileSidebar;
-      if (mobileSidebar && document.body.contains(mobileSidebar)) {
-        sidebarContainer.appendChild(mobileSidebar);
-        sidebarContainer._mobileSidebar = null;
+
+      const sidebar = sidebarContainer.querySelector('.sidebar');
+      if (sidebar) {
+
+        const bodySidebar = sidebar.cloneNode(true);
+        bodySidebar.classList.add('fixed-sidebar');
+        
+        document.body.appendChild(bodySidebar);
+      
+        this.enforceSidebarBehavior();
+
+        sidebarContainer.innerHTML = '';
       }
-      
-      // Display user info for desktop
-      this.displayUserInfo();
-      
-      this.enforceSidebarBehavior();
     }
   }
   
