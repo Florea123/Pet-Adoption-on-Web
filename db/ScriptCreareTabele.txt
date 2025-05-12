@@ -25,8 +25,45 @@ CREATE OR REPLACE TYPE AdminObject AS OBJECT (
     adminId NUMBER,
     email VARCHAR2(255),
     password VARCHAR2(100),
-    createdAt DATE
+    createdAt DATE,
+    
+    CONSTRUCTOR FUNCTION AdminObject(
+        p_email VARCHAR2, 
+        p_password VARCHAR2, 
+        p_createdAt DATE DEFAULT SYSDATE
+    ) RETURN SELF AS RESULT
 );
+/
+
+CREATE OR REPLACE TYPE BODY AdminObject AS
+    CONSTRUCTOR FUNCTION AdminObject(
+        p_email VARCHAR2, 
+        p_password VARCHAR2, 
+        p_createdAt DATE DEFAULT SYSDATE
+    ) RETURN SELF AS RESULT IS
+    BEGIN
+        IF p_email IS NULL THEN
+            RAISE_APPLICATION_ERROR(-20001, 'Email cannot be null');
+        END IF;
+        
+        IF p_password IS NULL THEN
+            RAISE_APPLICATION_ERROR(-20002, 'Password cannot be null');
+        ELSIF LENGTH(p_password) < 6 THEN
+            RAISE_APPLICATION_ERROR(-20003, 'Password must be at least 6 characters long');
+        END IF;
+        
+        self.adminId := NULL; 
+        self.email := p_email;
+        self.password := p_password;
+        self.createdAt := p_createdAt;
+        
+        RETURN;
+    EXCEPTION
+        WHEN OTHERS THEN
+            DBMS_OUTPUT.PUT_LINE('Error creating AdminObject: ' || SQLERRM);
+            RAISE;
+    END;
+END;
 /
 CREATE OR REPLACE TYPE feeding_time_array AS VARRAY(10) OF VARCHAR2(50);
 /
