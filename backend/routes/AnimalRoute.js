@@ -45,13 +45,14 @@ async function getAnimalDetailsById(req, res) {
       return;
     }
 
-    const animal = await Animal.findById(animalId);
-    if (!animal) {
+    const exists = await Animal.animalExists(animalId);
+    if (!exists) {
       res.writeHead(404, { "Content-Type": "application/json" });
       res.end(JSON.stringify({ error: "Animal not found" }));
       return;
     }
 
+    const animal = await Animal.findById(animalId);
     await Animal.incrementViews(animalId);
 
     const multimedia = await MultiMedia.findByAnimalId(animalId);
@@ -98,11 +99,20 @@ async function findBySpecies(req, res) {
       res.end(JSON.stringify({ error: "Species is required" }));
       return;
     }
-  
+    
+    // Get animals for this species
     const animals = await Animal.findBySpecies(species);
+    
+    // Get popular breeds for this species using PL/SQL
+    const popularBreeds = await Animal.getPopularBreedsBySpecies(species);
+
     if (!animals || animals.length === 0) {
+      // Still return popular breeds even when no animals are found
       res.writeHead(404, { "Content-Type": "application/json" });
-      res.end(JSON.stringify({ error: "No animals found for this species" }));
+      res.end(JSON.stringify({ 
+        error: "No animals found for this species",
+        popularBreeds: popularBreeds || []
+      }));
       return;
     }
 
@@ -116,8 +126,12 @@ async function findBySpecies(req, res) {
       })
     );
 
+    // Return both animals and popular breeds
     res.writeHead(200, { "Content-Type": "application/json" });
-    res.end(JSON.stringify(animalsWithMedia));
+    res.end(JSON.stringify({
+      animals: animalsWithMedia,
+      popularBreeds: popularBreeds || []
+    }));
   } catch (err) {
     console.error("Error fetching animals by species:", err);
     res.writeHead(500, { "Content-Type": "application/json" });
@@ -273,15 +287,15 @@ async function deleteAnimal(req, res) {
       return;
     }
 
-    // Check if animal exists
-    const animal = await Animal.findById(animalId);
-    if (!animal) {
+    // Check if animal exists using PL/SQL function
+    const exists = await Animal.animalExists(animalId);
+    if (!exists) {
       res.writeHead(404, { "Content-Type": "application/json" });
       res.end(JSON.stringify({ error: "Animal not found" }));
       return;
     }
 
-    // Delete the animal and all related data
+    // Delete the animal and all related data using PL/SQL package
     await Animal.deleteAnimalWithRelatedData(animalId);
 
     res.writeHead(200, { "Content-Type": "application/json" });

@@ -253,3 +253,113 @@ BEGIN
     :NEW.id := seq_newsletter.NEXTVAL;
 END;
 /
+CREATE OR REPLACE PACKAGE pet_adoption_utils AS
+    e_invalid_animal_id EXCEPTION;
+    PRAGMA EXCEPTION_INIT(e_invalid_animal_id, -20100);
+    e_invalid_user_id EXCEPTION;
+    PRAGMA EXCEPTION_INIT(e_invalid_user_id, -20101);
+    e_duplicate_subscription EXCEPTION;
+    PRAGMA EXCEPTION_INIT(e_duplicate_subscription, -20102);
+    
+    FUNCTION animal_exists(p_animal_id IN NUMBER) RETURN BOOLEAN;
+    
+    FUNCTION user_exists(p_user_id IN NUMBER) RETURN BOOLEAN;
+    
+    PROCEDURE delete_animal_safe(p_animal_id IN NUMBER);
+
+    FUNCTION get_popular_breeds(p_species IN VARCHAR2) RETURN SYS_REFCURSOR;
+    
+    FUNCTION is_subscribed(p_user_id IN NUMBER, p_species IN VARCHAR2) RETURN BOOLEAN;
+END pet_adoption_utils;
+/
+
+CREATE OR REPLACE PACKAGE BODY pet_adoption_utils AS
+    FUNCTION animal_exists(p_animal_id IN NUMBER) RETURN BOOLEAN IS
+        v_count NUMBER;
+    BEGIN
+        SELECT COUNT(*) INTO v_count 
+        FROM Animal 
+        WHERE animalID = p_animal_id;
+        
+        RETURN v_count > 0;
+    EXCEPTION
+        WHEN OTHERS THEN
+            DBMS_OUTPUT.PUT_LINE('Error checking animal existence: ' || SQLERRM);
+            RETURN FALSE;
+    END animal_exists;
+    
+    FUNCTION user_exists(p_user_id IN NUMBER) RETURN BOOLEAN IS
+        v_count NUMBER;
+    BEGIN
+        SELECT COUNT(*) INTO v_count 
+        FROM Users 
+        WHERE userID = p_user_id;
+        
+        RETURN v_count > 0;
+    EXCEPTION
+        WHEN OTHERS THEN
+            DBMS_OUTPUT.PUT_LINE('Error checking user existence: ' || SQLERRM);
+            RETURN FALSE;
+    END user_exists;
+    
+    PROCEDURE delete_animal_safe(p_animal_id IN NUMBER) IS
+    BEGIN
+        IF NOT animal_exists(p_animal_id) THEN
+            RAISE_APPLICATION_ERROR(-20100, 'Invalid animal ID: ' || p_animal_id);
+        END IF;
+        
+        DELETE FROM Relations WHERE animalID = p_animal_id;
+        DELETE FROM MultiMedia WHERE animalID = p_animal_id;
+        DELETE FROM FeedingSchedule WHERE animalID = p_animal_id;
+        DELETE FROM MedicalHistory WHERE animalID = p_animal_id;
+        
+        DELETE FROM Animal WHERE animalID = p_animal_id;
+        
+        COMMIT;
+        DBMS_OUTPUT.PUT_LINE('Animal with ID ' || p_animal_id || ' and all related data deleted successfully');
+    EXCEPTION
+        WHEN OTHERS THEN
+            ROLLBACK;
+            DBMS_OUTPUT.PUT_LINE('Error deleting animal: ' || SQLERRM);
+            RAISE;
+    END delete_animal_safe;
+    
+    FUNCTION get_popular_breeds(p_species IN VARCHAR2) RETURN SYS_REFCURSOR IS
+        v_cursor SYS_REFCURSOR;
+    BEGIN
+        OPEN v_cursor FOR
+            SELECT breed, COUNT(*) as breed_count
+            FROM Animal
+            WHERE species = p_species
+            GROUP BY breed
+            ORDER BY breed_count DESC;
+            
+        RETURN v_cursor;
+    EXCEPTION
+        WHEN OTHERS THEN
+            DBMS_OUTPUT.PUT_LINE('Error getting popular breeds: ' || SQLERRM);
+            RAISE;
+    END get_popular_breeds;
+    
+    FUNCTION is_subscribed(p_user_id IN NUMBER, p_species IN VARCHAR2) RETURN BOOLEAN IS
+        v_count NUMBER;
+    BEGIN
+        IF NOT user_exists(p_user_id) THEN
+            RAISE_APPLICATION_ERROR(-20101, 'Invalid user ID: ' || p_user_id);
+        END IF;
+        
+        SELECT COUNT(*) INTO v_count
+        FROM Newsletter
+        WHERE userID = p_user_id
+        AND species = p_species
+        AND isActive = 1;
+        
+        RETURN v_count > 0;
+    EXCEPTION
+        WHEN OTHERS THEN
+            DBMS_OUTPUT.PUT_LINE('Error checking subscription: ' || SQLERRM);
+            RETURN FALSE;
+    END is_subscribed;
+    
+END pet_adoption_utils;
+/
