@@ -199,18 +199,29 @@ const server = http.createServer(async (req, res) => {
       return;
     }
 
-    // Add media pipe route
+    // Add media pipe route with query parameter support for optimizing mobile requests
     if (req.method === 'GET' && req.url.startsWith('/media/pipe/')) {
       try {
-        const mediaId = parseInt(req.url.split('/media/pipe/')[1]);
+        // Parse the URL to extract ID and query parameters
+        const url = new URL(req.url, `http://${req.headers.host}`);
+        const pathParts = url.pathname.split('/media/pipe/');
+        const mediaId = parseInt(pathParts[1]);
+        
         if (isNaN(mediaId)) {
           res.writeHead(400, { 'Content-Type': 'application/json' });
           res.end(JSON.stringify({ error: 'Invalid media ID' }));
           return;
         }
         
+        // Parse options from query parameters
+        const options = {};
+        
+        if (url.searchParams.has('width')) {
+          options.width = url.searchParams.get('width');
+        }
+        
         const MultiMedia = require('./models/MultiMedia');
-        await MultiMedia.pipeMediaStream(mediaId, res);
+        await MultiMedia.pipeMediaStream(mediaId, res, options, req);
         return;
       } catch (err) {
         console.error('Error serving media pipe:', err);

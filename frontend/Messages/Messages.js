@@ -25,18 +25,24 @@ async function initialize() {
   document.getElementById('sidebar-container').innerHTML = Sidebar.render('messages');
   new Sidebar('messages');
   
-  // Set up event listeners
   document.getElementById('send-message-form').addEventListener('submit', handleSendMessage);
   
-  // Set up polling for new messages (every 5 seconds)
+  initializeMobileView();
+  
+  setupMobileNavigation();
+  
+  // Set up mutation observer to detect when messages are added and scroll to bottom
+  setupScrollObserver();
+  
+  await loadConversations(true);
+  
+  // Set up polling for new messages (every 30 seconds)
   pollingInterval = setInterval(async () => {
     if (currentConversationUser) {
-      await loadConversation(currentConversationUser.userId);
+      await loadConversation(currentConversationUser.userId, false);
     }
-    await loadConversations();
-  }, 5000);
-  
-  await loadConversations();
+    await loadConversations(false);
+  }, 30000); 
   
   window.addEventListener('beforeunload', () => {
     if (pollingInterval) {
@@ -45,9 +51,53 @@ async function initialize() {
   });
 }
 
-async function loadConversations() {
+// Initialize mobile view state
+function initializeMobileView() {
+  const isMobile = window.innerWidth <= 768;
+  const conversationsList = document.querySelector('.conversations-list');
+  const messagesContainer = document.querySelector('.messages-container');
+  
+  // Define preventScroll function outside the if-block so it's accessible everywhere
+  const preventScroll = (e) => {
+    if (!e.target.closest('.messages') && !e.target.closest('#message-input')) {
+      e.preventDefault();
+    }
+  };
+  
+  if (isMobile) {
+    // Start with conversation list visible
+    conversationsList.classList.add('active');
+    messagesContainer.classList.remove('active');
+    
+    // Reset any transform styling to ensure proper display
+    conversationsList.style.transform = 'translateX(0)';
+    messagesContainer.style.transform = 'translateX(100%)';
+    
+    // Fix scrolling - only message box should scroll
+    document.body.style.overflow = 'hidden';
+    document.querySelector('.main-content').style.overflow = 'hidden';
+    
+    // Make sure the messages div is scrollable
+    const messagesDiv = document.querySelector('.messages');
+    if (messagesDiv) {
+      messagesDiv.style.overflowY = 'auto';
+    }
+    
+    // Prevent other elements from scrolling
+    document.addEventListener('touchmove', preventScroll, { passive: false });
+  } else {
+    // On desktop, both should be visible
+    messagesContainer.classList.add('active');
+    document.body.style.overflow = '';
+    document.removeEventListener('touchmove', preventScroll);
+  }
+}
+
+async function loadConversations(showLoader = true) {
   try {
-    showLoading('Loading conversations...');
+    if (showLoader) {
+      showLoading('Loading conversations...');
+    }
     
     const response = await fetch(`${API_URL}/messages/conversations`, {
       method: 'GET',
@@ -65,10 +115,15 @@ async function loadConversations() {
     displayConversations(conversations);
   } catch (error) {
     console.error('Error loading conversations:', error);
-    document.getElementById('conversation-list').innerHTML = 
-      '<div class="error-message">Failed to load conversations</div>';
+
+    if (showLoader) {
+      document.getElementById('conversation-list').innerHTML = 
+        '<div class="error-message">Failed to load conversations</div>';
+    }
   } finally {
-    hideLoading();
+    if (showLoader) {
+      hideLoading();
+    }
   }
 }
 
@@ -115,9 +170,69 @@ function truncateMessage(message) {
   return message.length > 30 ? message.substring(0, 27) + '...' : message;
 }
 
-async function loadConversation(otherUserId) {
+// Add mobile navigation setup
+function setupMobileNavigation() {
+  const backButton = document.querySelector('.back-button');
+  const conversationsList = document.querySelector('.conversations-list');
+  const messagesContainer = document.querySelector('.messages-container');
+  
+  // Make conversations list visible by default on mobile
+  if (window.innerWidth <= 768) {
+    conversationsList.classList.add('active');
+    messagesContainer.classList.remove('active');
+    
+    // Set transforms explicitly
+    conversationsList.style.transform = 'translateX(0)';
+    messagesContainer.style.transform = 'translateX(100%)';
+  }
+  
+  backButton.addEventListener('click', (e) => {
+    e.preventDefault();
+    conversationsList.classList.add('active');
+    messagesContainer.classList.remove('active');
+    
+    // Set transforms explicitly
+    conversationsList.style.transform = 'translateX(0)';
+    messagesContainer.style.transform = 'translateX(100%)';
+    
+    // Reset conversation state
+    currentConversationUser = null;
+  });
+  
+  document.addEventListener('click', (e) => {
+    const conversationItem = e.target.closest('.conversation-item');
+    if (conversationItem && window.innerWidth <= 768) {
+      conversationsList.classList.remove('active');
+      messagesContainer.classList.add('active');
+      
+      // Set transforms explicitly
+      conversationsList.style.transform = 'translateX(-100%)';
+      messagesContainer.style.transform = 'translateX(0)';
+    }
+  });
+  
+  // Adjust UI when keyboard appears on mobile
+  if (window.visualViewport) {
+    window.visualViewport.addEventListener('resize', () => {
+      if (window.innerWidth <= 768) {
+        const keyboardHeight = window.innerHeight - window.visualViewport.height;
+        
+        // If keyboard is visible
+        if (keyboardHeight > 100) {
+          document.querySelector('.message-input-area').style.bottom = '0px';
+        } else {
+          document.querySelector('.message-input-area').style.bottom = '60px';
+        }
+      }
+    });
+  }
+}
+
+async function loadConversation(otherUserId, showLoader = true) {
   try {
-    showLoading('Loading messages...');
+    if (showLoader) {
+      showLoading('Loading messages...');
+    }
     
     // Mark messages as read when opening conversation
     await fetch(`${API_URL}/messages/read`, {
@@ -164,27 +279,47 @@ async function loadConversation(otherUserId) {
     displayMessages(currentMessages, otherUserId);
     
     // Update conversation UI
-    document.getElementById('conversation-header').innerHTML = currentConversationUser ? 
-      `<h2>${currentConversationUser.name}</h2>` : '';
-    document.getElementById('messages-container').classList.add('active');
+    document.getElementById('conversation-title').textContent = currentConversationUser ? 
+      currentConversationUser.name : 'Messages';
+    
+    const messagesContainer = document.querySelector('.messages-container');
+    const conversationsList = document.querySelector('.conversations-list');
+    
+    if (window.innerWidth <= 768) {
+      conversationsList.classList.remove('active');
+      messagesContainer.classList.add('active');
+      
+      conversationsList.style.transform = 'translateX(-100%)';
+      messagesContainer.style.transform = 'translateX(0)';
+    } else {
+      messagesContainer.classList.add('active');
+    }
     
     // Mark the selected conversation in the list
     document.querySelectorAll('.conversation-item').forEach(item => {
       item.classList.toggle('selected', parseInt(item.dataset.userId) === otherUserId);
     });
     
-    // Scroll to bottom of messages
-    const messagesDiv = document.getElementById('messages');
-    messagesDiv.scrollTop = messagesDiv.scrollHeight;
+    // Scroll to bottom of messages to ensure the last message is visible
+    scrollToBottom();
+    
+    // Add an extra scroll after a delay to handle any layout shifts
+    setTimeout(scrollToBottom, 500);
+    
   } catch (error) {
     console.error('Error loading conversation:', error);
-    document.getElementById('messages').innerHTML = 
-      '<div class="error-message">Failed to load messages</div>';
+    if (showLoader) {
+      document.getElementById('messages').innerHTML = 
+        '<div class="error-message">Failed to load messages</div>';
+    }
   } finally {
-    hideLoading();
+    if (showLoader) {
+      hideLoading();
+    }
   }
 }
 
+// Update displayMessages function to ensure message visibility
 function displayMessages(messages, otherUserId) {
   const container = document.getElementById('messages');
   
@@ -207,42 +342,117 @@ function displayMessages(messages, otherUserId) {
         <div class="message-content">
           ${msg.CONTENT}
           <span class="message-time">
-            ${formatTimestamp(msg.TIMESTAMP)} ${readStatus}
+            ${formatTimeOnly(msg.TIMESTAMP)} ${readStatus}
           </span>
         </div>
       </div>
     `;
   }).join('');
+  
+  // Ensure proper scrolling to the bottom with a small delay
+  setTimeout(() => {
+    scrollToBottom();
+  }, 100);
 }
 
+// Set up an observer to detect content changes and scroll to bottom
+function setupScrollObserver() {
+  const messagesContainer = document.getElementById('messages');
+  if (messagesContainer) {
+    // Create a MutationObserver to watch for changes in the messages container
+    const observer = new MutationObserver((mutations) => {
+      // If content changed (messages added/removed), scroll to bottom
+      scrollToBottom();
+    });
+    
+    // Start observing the container for changes in its children
+    observer.observe(messagesContainer, { 
+      childList: true,
+      subtree: true
+    });
+  }
+}
+
+// Improved scroll to bottom function with extra offset for mobile
+function scrollToBottom() {
+  const messagesDiv = document.getElementById('messages');
+  if (messagesDiv) {
+    const isMobile = window.innerWidth <= 768;
+    const extraOffset = isMobile ? 2000 : 1000; // Extra padding on mobile
+    messagesDiv.scrollTop = messagesDiv.scrollHeight + extraOffset;
+    
+    // Try again after a slight delay to handle any rendering delays
+    setTimeout(() => {
+      messagesDiv.scrollTop = messagesDiv.scrollHeight + extraOffset;
+    }, 50);
+  }
+}
+
+// Add a function to format time in a simpler way for message bubbles
+function formatTimeOnly(timestamp) {
+  if (!timestamp) return '';
+  
+  const date = new Date(timestamp);
+  return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+}
+
+// Handle sending messages
 async function handleSendMessage(event) {
   event.preventDefault();
-  
-  if (!currentConversationUser) {
-    alert('Please select a conversation first');
-    return;
-  }
   
   const messageInput = document.getElementById('message-input');
   const content = messageInput.value.trim();
   
-  if (!content) {
+  if (!content || !currentConversationUser) {
     return;
   }
   
+  // Clear input immediately for better UX
+  messageInput.value = '';
+  
   try {
+    // Add message to UI immediately (optimistic UI)
+    const tempId = `temp-${Date.now()}`;
+    const messagesContainer = document.querySelector('.messages');
+    const tempMessage = document.createElement('div');
+    tempMessage.id = tempId;
+    tempMessage.className = 'message sent';
+    
+    // Format current time
+    const now = new Date();
+    const timeString = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    
+    tempMessage.innerHTML = `
+      <div class="message-content">
+        ${content}
+        <span class="message-time">
+          ${timeString} <span class="read-status delivered"><span class="checkmark">✓</span><span class="checkmark">✓</span></span>
+        </span>
+      </div>
+    `;
+    messagesContainer.appendChild(tempMessage);
+    
+    // Scroll to bottom with extra assurance for mobile
+    scrollToBottom();
+    
+    // Send message to server
     await sendMessage(currentConversationUser.userId, content);
     
-    // Clear input
-    messageInput.value = '';
+    // Update the conversation list to show the latest message
+    await loadConversations(false);
     
-    // Reload conversation to show new message
-    await loadConversation(currentConversationUser.userId);
+    // Reload the conversation to show the sent message with server timestamp
+    await loadConversation(currentConversationUser.userId, false);
     
-    await loadConversations();
+    // Focus the input field again
+    messageInput.focus();
   } catch (error) {
     console.error('Error sending message:', error);
-    alert('Failed to send message. Please try again.');
+    const tempMessage = document.getElementById(tempId);
+    if (tempMessage) {
+      tempMessage.querySelector('.message-time').textContent = 'Failed to send';
+      tempMessage.style.opacity = '0.7';
+    }
   }
 }
 
@@ -335,10 +545,9 @@ function checkUrlForDirectMessage() {
   }
 }
 
-
 document.addEventListener('DOMContentLoaded', () => {
   initialize();
   
   // Check for direct message parameter in URL
-  setTimeout(checkUrlForDirectMessage, 500); 
+  setTimeout(checkUrlForDirectMessage, 500);
 });

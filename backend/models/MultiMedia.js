@@ -1,6 +1,8 @@
 const { getConnection } = require("../db");
 const oracledb = require("oracledb");
 const fileUtils = require("../utils/fileStorageUtils");
+const fs = require("fs");
+const sharp = require("sharp");
 
 class MultiMedia {
   static async create(animalID, media, url, description, upload_date) {
@@ -109,9 +111,9 @@ class MultiMedia {
     }
   }
 
-  static async pipeMediaStream(id, res) {
+  static async pipeMediaStream(id, res, options = {}, req = null) {
     try {
-      // Get media record
+      // Find the media in the database
       const mediaRecord = await this.findById(id);
 
       if (!mediaRecord) {
@@ -128,10 +130,86 @@ class MultiMedia {
         return;
       }
 
-      // Use the utility function to resolve the file path and stream it
+      // Check if file exists
       const filePath = fileUtils.resolveFilePath(urlPath);
-      await fileUtils.streamFile(filePath, res);
-      
+      const fileExists = await fs.promises
+        .access(filePath, fs.constants.F_OK)
+        .then(() => true)
+        .catch(() => false);
+
+      if (!fileExists) {
+        res.writeHead(404, { "Content-Type": "application/json" });
+        res.end(JSON.stringify({ error: "Media file not found on disk" }));
+        return;
+      }
+
+      // Determine content type
+      const contentType = mediaRecord.MIMETYPE || "application/octet-stream";
+
+      // Add cache control headers for all responses - great for mobile optimization
+      const cacheHeaders = {
+        "Cache-Control": "public, max-age=86400", // Cache for 24 hours
+        "ETag": `"${mediaRecord.ID}-${options.width || 'orig'}"`, // Simple ETag
+      };
+
+      // Check if resizing is requested and supported
+      const shouldResize =
+        options.width &&
+        contentType.startsWith("image/") &&
+        contentType !== "image/gif";
+
+      if (!shouldResize) {
+        // Stream the file directly without modification
+        const fileStream = fs.createReadStream(filePath);
+        res.writeHead(200, { 
+          "Content-Type": contentType,
+          ...cacheHeaders
+        });
+        fileStream.pipe(res);
+      } else {
+        // Use sharp to resize the image
+
+        // Get requested width
+        const width = Math.min(2000, Math.max(50, parseInt(options.width, 10)));
+
+        // Detect if client supports WebP
+        let outputFormat = 'jpeg';
+        let outputContentType = "image/jpeg";
+        const acceptHeader = req && req.headers && req.headers.accept;
+        
+        if (acceptHeader && acceptHeader.includes('image/webp')) {
+          outputFormat = 'webp';
+          outputContentType = "image/webp";
+        }
+        
+        // Process the image
+        let transformer = sharp(filePath).resize({ 
+          width, 
+          withoutEnlargement: true,
+          kernel: width < 300 ? 'lanczos3' : 'mitchell'  
+        });
+        
+        // Apply format and quality
+        if (outputFormat === 'webp') {
+          transformer = transformer.webp({ 
+            quality: 80, 
+            effort: 4 
+          });
+        } else {
+          transformer = transformer.jpeg({ 
+            quality: 80, 
+            progressive: true,
+            optimizeScans: true
+          });
+        }
+
+        res.writeHead(200, {
+          "Content-Type": outputContentType,
+          ...cacheHeaders
+        });
+
+        transformer.pipe(res);
+      }
     } catch (error) {
       console.error("Error in pipeMediaStream:", error);
       if (!res.headersSent) {
