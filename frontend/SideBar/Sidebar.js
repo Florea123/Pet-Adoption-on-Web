@@ -315,7 +315,7 @@ export default class Sidebar {
         <div class="user-info-container">
           <div class="user-profile">
             <div class="profile-info">
-              <div class="profile-circle" style="background-color: ${profileColor}">
+              <div class="profile-circle" style="background-color: #ec4899">
                 ${firstInitial}
               </div>
               <div>

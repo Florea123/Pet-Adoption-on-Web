@@ -153,18 +153,41 @@ class Animal {
   static async getTopAnimalsByCity(userId) {
     const connection = await getConnection();
     try {
-      const result = await connection.execute(
-        `SELECT a.*, ad.city, ad.state, ad.country
-         FROM Animal a
-         JOIN Users u ON a.userId = u.userId
-         JOIN Address ad ON u.userId = ad.userId
-         WHERE ad.city = (SELECT city FROM Address WHERE userId = :userId)
-         ORDER BY a.views DESC
-         FETCH FIRST 10 ROWS ONLY`,
+      // First, get the user's city
+      const userResult = await connection.execute(
+        `SELECT a.CITY FROM ADDRESS a
+         WHERE a.USERID = :userId`,
         { userId },
         { outFormat: oracledb.OUT_FORMAT_OBJECT }
       );
-      return result.rows;
+      
+      if (userResult.rows.length === 0 || !userResult.rows[0].CITY) {
+        return [];
+      }
+      
+      const city = userResult.rows[0].CITY;
+      
+      // Get animals in same city
+      const result = await connection.execute(
+        `SELECT a.* 
+         FROM ANIMAL a
+         JOIN USERS u ON a.USERID = u.USERID
+         JOIN ADDRESS ad ON u.USERID = ad.USERID
+         WHERE ad.CITY = :city
+         ORDER BY a.VIEWS DESC, a.CREATEDAT DESC`,
+        { city },
+        { outFormat: oracledb.OUT_FORMAT_OBJECT }
+      );
+      
+      // Add multimedia data to each animal
+      const animalsWithMedia = await Promise.all(
+        result.rows.map(async (animal) => {
+          const multimedia = await MultiMedia.findByAnimalIdOnePhoto(animal.ANIMALID);
+          return { ...animal, multimedia };
+        })
+      );
+      
+      return animalsWithMedia;
     } finally {
       await connection.close();
     }
@@ -191,7 +214,7 @@ class Animal {
         const feedingSchedule = await FeedingSchedule.findByAnimalId(animalID);
         
         // Get medical history
-        const medicalHistory = await MedicalHistory.findByAnimalId(animalID);
+        const medicalHistory = await MedicalHistory.findByAnimalId(ananimalID);
         
         // Get relations
         const relationsData = await Relations.findByAnimalId(animalID);
