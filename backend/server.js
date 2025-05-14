@@ -31,6 +31,43 @@ const {
 const nodemailer = require('nodemailer');
 require('dotenv').config();
 const port = 3000;
+const fs = require('fs');
+const path = require('path');
+
+const OpenAPIRequestValidator = require('openapi-request-validator').default;
+const jsYaml = require('js-yaml');
+
+// Load the OpenAPI specification
+const openApiDocument = jsYaml.load(fs.readFileSync('./openapi.yaml', 'utf8'));
+
+// Create validators for your paths
+const validators = {};
+Object.keys(openApiDocument.paths).forEach(path => {
+  const pathObj = openApiDocument.paths[path];
+  validators[path] = {};
+  
+  Object.keys(pathObj).forEach(method => {
+    validators[path][method] = new OpenAPIRequestValidator({
+      parameters: pathObj[method].parameters,
+      requestBody: pathObj[method].requestBody,
+      schemas: openApiDocument.components.schemas
+    });
+  });
+});
+
+// Use in your route handler
+function validateRequest(req, pathKey, method) {
+  if (validators[pathKey] && validators[pathKey][method]) {
+    const errors = validators[pathKey][method].validate({
+      headers: req.headers,
+      params: {}, 
+      query: {}, 
+      body: req.body 
+    });
+    return errors;
+  }
+  return null;
+}
 
 let emailConfigValid = false;
 const emailAddress = process.env.EMAIL_ADDRESS;
@@ -263,6 +300,42 @@ const server = http.createServer(async (req, res) => {
       return withAuth(updateSubscriptions)(req, res);
     }
 
+    // API documentation routes
+    if (req.method === 'GET' && req.url.startsWith('/api-docs')) {
+      try {
+        // Serve Swagger UI files
+        if (req.url === '/api-docs' || req.url === '/api-docs/') {
+          const html = fs.readFileSync(path.join(__dirname, 'swagger-ui', 'index.html'));
+          res.writeHead(200, { 'Content-Type': 'text/html' });
+          res.end(html);
+          return;
+        }
+        
+        // Serve OpenAPI spec
+        if (req.url === '/api-docs/openapi.yaml') {
+          const yaml = fs.readFileSync(path.join(__dirname, 'openapi.yaml'));
+          res.writeHead(200, { 'Content-Type': 'text/yaml' });
+          res.end(yaml);
+          return;
+        }
+        
+        // Serve other static files for Swagger UI
+        const filePath = path.join(__dirname, 'swagger-ui', req.url.replace('/api-docs/', ''));
+        if (fs.existsSync(filePath)) {
+          const contentType = getContentType(filePath);
+          const content = fs.readFileSync(filePath);
+          res.writeHead(200, { 'Content-Type': contentType });
+          res.end(content);
+          return;
+        }
+      } catch (err) {
+        console.error('Error serving API docs:', err);
+        res.writeHead(500, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({ error: 'Error serving API documentation' }));
+        return;
+      }
+    }
+
     // Route not found
     res.writeHead(404, { 'Content-Type': 'application/json' });
     res.end(JSON.stringify({ error: 'Route not found' }));
@@ -288,3 +361,33 @@ async function startServer() {
 }
 
 startServer();
+
+function getContentType(filePath) {
+  const extname = String(path.extname(filePath)).toLowerCase();
+  switch (extname) {
+    case '.html':
+      return 'text/html';
+    case '.js':
+      return 'text/javascript';
+    case '.css':
+      return 'text/css';
+    case '.json':
+      return 'application/json';
+    case '.yaml':
+    case '.yml':
+      return 'text/yaml';
+    case '.png':
+      return 'image/png';
+    case '.jpg':
+    case '.jpeg':
+      return 'image/jpeg';
+    case '.gif':
+      return 'image/gif';
+    case '.svg':
+      return 'image/svg+xml';
+    case '.ico':
+      return 'image/x-icon';
+    default:
+      return 'application/octet-stream';
+  }
+}
