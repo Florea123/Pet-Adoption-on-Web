@@ -1,3 +1,5 @@
+const MESSAGE_API_URL = 'http://localhost:3003';
+
 import userModel from '../models/User.js';
 import { requireAuth } from '../utils/authUtils.js';
 
@@ -260,7 +262,8 @@ export default class Sidebar {
       const token = localStorage.getItem('Token');
       if (!token) return;
       
-      const response = await fetch('http://localhost:3000/messages/unread-count', {
+      const user = JSON.parse(localStorage.getItem('User'));
+      const response = await fetch(`${MESSAGE_API_URL}/messages/unread-count?userId=${user.id}`, {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',

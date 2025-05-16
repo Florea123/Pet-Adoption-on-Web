@@ -10,7 +10,7 @@ import {
   generatePlaceholder 
 } from '../utils/imageOptimizer.js';
 
-const API_URL = 'http://localhost:3000';
+const ANIMAL_API_URL = 'http://localhost:3002';
 const token = localStorage.getItem('Token');
 let animals = [];
 const uniqueSpecies = [];
@@ -117,7 +117,7 @@ async function fetchAnimals() {
     const container = document.getElementById('animal-cards-container');
     container.innerHTML = '';
     
-    const response = await fetch(`${API_URL}/animals/all`, {
+    const response = await fetch(`${ANIMAL_API_URL}/animals`, {
       headers: {
         'Authorization': `Bearer ${token}`
       }
@@ -328,7 +328,7 @@ function renderAnimalCard(animal, container, lazyLoad = false, priority = 'auto'
       });
     } else if (media.fileData && media.mimeType) {
       imageSource = `data:${media.mimeType};base64,${media.fileData}`;
-    } else if (media.URL) {
+    } else if (media.URL && /^https?:\/\//.test(media.URL)) {
       imageSource = media.URL;
     }
   }
@@ -443,7 +443,7 @@ async function openAnimalDetailsPopup(animalId) {
         'Content-Type': 'application/json',
         'Authorization': `Bearer ${token}`
       },
-      body: JSON.stringify({ animalId }),
+      body: JSON.stringify({ animalId }), // <-- send animalId in POST body
     });
 
     if (!response.ok) {
@@ -451,7 +451,6 @@ async function openAnimalDetailsPopup(animalId) {
     }
 
     const animalDetails = await response.json();
-    
     showAnimalDetailsPopup(animalDetails);
   } catch (error) {
     console.error('Error fetching animal details:', error);

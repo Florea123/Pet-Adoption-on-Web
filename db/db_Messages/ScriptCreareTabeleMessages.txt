@@ -1,0 +1,22 @@
+DROP TABLE Messages CASCADE CONSTRAINTS;
+
+DROP SEQUENCE seq_messages;
+
+CREATE TABLE Messages (
+    messageId NUMBER PRIMARY KEY,
+    senderId NUMBER NOT NULL,
+    receiverId NUMBER NOT NULL,
+    content VARCHAR2(2000) NOT NULL,
+    timestamp DATE DEFAULT SYSDATE,
+    isRead NUMBER(1) DEFAULT 0
+);
+
+CREATE SEQUENCE seq_messages START WITH 1 INCREMENT BY 1;
+
+CREATE OR REPLACE TRIGGER trg_messages
+BEFORE INSERT ON Messages
+FOR EACH ROW
+BEGIN
+    :NEW.messageId := seq_messages.NEXTVAL;
+END;
+/

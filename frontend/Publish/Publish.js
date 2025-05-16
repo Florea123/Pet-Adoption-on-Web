@@ -2,7 +2,7 @@ import userModel from "../models/User.js";
 import { requireAuth } from "../utils/authUtils.js";
 import { showLoading, hideLoading } from "../utils/loadingUtils.js";
 
-const API_URL = "http://localhost:3000";
+const API_URL = "http://localhost:3002";
 const token = localStorage.getItem("Token");
 let user;
 

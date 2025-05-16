@@ -3,8 +3,8 @@ import { requireAuth } from '../utils/authUtils.js';
 import Sidebar from '../SideBar/Sidebar.js';
 import { showLoading, hideLoading } from '../utils/loadingUtils.js';
 
-const API_URL = 'http://localhost:3000';
-const token = localStorage.getItem('Token');
+const API_URL = 'http://localhost:3003'; // or your messages-service port
+const userId = localStorage.getItem('UserID'); // or however you store it
 let user;
 let currentConversationUser = null;
 let conversations = [];
@@ -99,11 +99,11 @@ async function loadConversations(showLoader = true) {
       showLoading('Loading conversations...');
     }
     
-    const response = await fetch(`${API_URL}/messages/conversations`, {
+    const response = await fetch(`${API_URL}/messages/conversations?userId=${userId}`, {
       method: 'GET',
       headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${token}`
+        'Content-Type': 'application/json'
+        // Add Authorization header if your backend requires it
       }
     });
     
@@ -111,7 +111,7 @@ async function loadConversations(showLoader = true) {
       throw new Error('Failed to load conversations');
     }
     
-    conversations = await response.json();
+    const conversations = await response.json();
     displayConversations(conversations);
   } catch (error) {
     console.error('Error loading conversations:', error);
@@ -129,14 +129,18 @@ async function loadConversations(showLoader = true) {
 
 function displayConversations(conversations) {
   const container = document.getElementById('conversation-list');
+  container.innerHTML = '';
   
   if (conversations.length === 0) {
-    container.innerHTML = `<div class="empty-state">No conversations yet</div>`;
+    container.innerHTML = '<div class="loader">No conversations found.</div>';
     return;
   }
   
-  container.innerHTML = conversations.map(conv => `
-    <div class="conversation-item ${conv.unreadCount > 0 ? 'unread' : ''} ${currentConversationUser && currentConversationUser.userId === conv.OTHERUSERID ? 'selected' : ''}" data-user-id="${conv.OTHERUSERID}">
+  conversations.forEach(conv => {
+    const div = document.createElement('div');
+    div.className = `conversation-item ${conv.unreadCount > 0 ? 'unread' : ''} ${currentConversationUser && currentConversationUser.userId === conv.OTHERUSERID ? 'selected' : ''}`;
+    div.dataset.userId = conv.OTHERUSERID;
+    div.innerHTML = `
       <div class="conversation-avatar">${getInitials(conv.OTHERUSERNAME)}</div>
       <div class="conversation-info">
         <div class="conversation-name">${conv.OTHERUSERNAME}</div>
@@ -146,13 +150,10 @@ function displayConversations(conversations) {
         </div>
       </div>
       ${conv.unreadCount > 0 ? `<div class="unread-badge">${conv.unreadCount}</div>` : ''}
-    </div>
-  `).join('');
-  
-  // Add event listeners to conversation items
-  document.querySelectorAll('.conversation-item').forEach(item => {
-    item.addEventListener('click', () => {
-      const userId = parseInt(item.dataset.userId);
+    `;
+    
+    div.addEventListener('click', () => {
+      const userId = parseInt(div.dataset.userId);
       loadConversation(userId);
       
       // Update sidebar unread count after opening a conversation
@@ -162,6 +163,8 @@ function displayConversations(conversations) {
         }, 500);
       }
     });
+    
+    container.appendChild(div);
   });
 }
 
@@ -313,13 +316,34 @@ async function loadConversation(otherUserId, showLoader = true) {
         '<div class="error-message">Failed to load messages</div>';
     }
   } finally {
-    if (showLoader) {
-      hideLoading();
-    }
+    hideLoading();
   }
 }
 
-// Update displayMessages function to ensure message visibility
+function getCurrentUserId() {
+  // Implement this based on your auth system (e.g., decode JWT or from localStorage)
+  return parseInt(localStorage.getItem('UserID'), 10);
+}
+
+async function loadMessages(otherUserId) {
+  const token = localStorage.getItem('Token');
+  const response = await fetch(`${API_URL}/messages/conversation`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${token}`
+    },
+    body: JSON.stringify({ otherUserId })
+  });
+
+  if (!response.ok) {
+    throw new Error('Failed to load messages');
+  }
+
+  const messages = await response.json();
+  displayMessages(messages);
+}
+
 function displayMessages(messages, otherUserId) {
   const container = document.getElementById('messages');
   

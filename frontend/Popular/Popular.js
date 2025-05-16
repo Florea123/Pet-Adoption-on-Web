@@ -9,7 +9,7 @@ import {
 } from '../utils/imageOptimizer.js';
 import { addPreconnect } from '../utils/performanceUtils.js';
 
-const API_URL = 'http://localhost:3000';
+const API_URL = 'http://localhost:3002';
 const token = localStorage.getItem('Token');
 let isMobile = window.innerWidth < 768;
 
@@ -22,7 +22,6 @@ window.addEventListener('resize', () => {
 async function initialize() {
   addPreconnect('http://localhost:3000');
   
-  // Render sidebar
   document.getElementById('sidebar-container').innerHTML = Sidebar.render('popular');
   new Sidebar('popular');
 
@@ -89,6 +88,43 @@ function displayAnimals(animals) {
       remainingBatch.forEach(animal => renderAnimalCard(animal, container, true, 'low'));
     }, 100); 
   }
+}
+
+// Inside the function that renders animal cards
+function renderAnimalCard(animal, container, lazyLoad = false, priority = 'auto') {
+  const container = document.getElementById('animal-cards-container');
+  container.innerHTML = '';
+  
+  if (!animals || animals.length === 0) {
+    container.innerHTML = '<div class="no-results">No popular animals found in your area.</div>';
+    return;
+  }
+  
+  animals.forEach(animal => {
+    // Ensure multimedia is handled correctly
+    const hasMultimedia = animal.multimedia && Array.isArray(animal.multimedia) && animal.multimedia.length > 0;
+    const imageUrl = hasMultimedia ? animal.multimedia[0].URL : '../assets/pet-placeholder.svg';
+    
+    const card = document.createElement('div');
+    card.className = 'card';
+    card.setAttribute('data-id', animal.ANIMALID);
+    card.innerHTML = `
+      <div class="card-img-container">
+        <img src="${imageUrl}" alt="${animal.NAME}" loading="lazy" class="loading" />
+      </div>
+      <div class="card-content">
+        <h2>${animal.NAME}</h2>
+        <p>${animal.BREED} · ${animal.AGE} years</p>
+        <p>${animal.SPECIES} · ${animal.GENDER}</p>
+      </div>
+    `;
+    
+    // Handle image loading
+    const img = card.querySelector('img');
+    img.onload = () => img.classList.replace('loading', 'loaded');
+    
+    container.appendChild(card);
+  });
 }
 
 function renderAnimalCard(animal, container, lazyLoad = false, priority = 'auto') {

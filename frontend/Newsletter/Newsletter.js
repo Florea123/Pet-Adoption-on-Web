@@ -1,7 +1,7 @@
 import Sidebar from '../SideBar/Sidebar.js';
 import { requireAuth } from '../utils/authUtils.js';
 
-const API_URL = 'http://localhost:3000';
+const API_URL = 'http://localhost:3005';
 let user;
 const availableSpecies = [
   'Câine', 'Pisică', 'Papagal', 'Hamster', 'Iepure', 

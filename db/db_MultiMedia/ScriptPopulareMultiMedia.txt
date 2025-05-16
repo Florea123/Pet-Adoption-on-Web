@@ -1,0 +1,17 @@
+BEGIN
+    -- Inserare MultiMedia
+    INSERT INTO MultiMedia (animalID, media, url, description, upload_date)
+    VALUES (1, 'photo', 'http://exemplu.com/foto_rex.jpg', 'Fotografie cu Rex', SYSDATE);
+    
+    INSERT INTO MultiMedia (animalID, media, url, description, upload_date)
+    VALUES (2, 'video', 'http://exemplu.com/video_luna.mp4', 'Video cu Luna jucându-se', SYSDATE);
+
+    INSERT INTO MultiMedia (animalID, media, url, description, upload_date)
+    VALUES (3, 'photo', 'http://exemplu.com/foto_max.jpg', 'Fotografie cu Max', SYSDATE);
+
+    INSERT INTO MultiMedia (animalID, media, url, description, upload_date)
+    VALUES (4, 'video', 'http://exemplu.com/video_bella.mp4', 'Video cu Bella dormind', SYSDATE);
+
+    COMMIT;
+END;
+/
