@@ -276,10 +276,8 @@ class Animal {
       const detailedAnimals = await Promise.all(animals.map(async (animal) => {
         const animalID = animal.ANIMALID;
         
-        const feedingSchedule = await FeedingSchedule.findByAnimalId(ananimalID);
-        
+        const feedingSchedule = await FeedingSchedule.findByAnimalId(animalID);
         const medicalHistory = await MedicalHistory.findByAnimalId(animalID);
-        
         const relationsData = await Relations.findByAnimalId(animalID);
         
         return {
