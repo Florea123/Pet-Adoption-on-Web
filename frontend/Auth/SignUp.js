@@ -1,5 +1,5 @@
 import { redirectIfLoggedIn } from '../utils/authUtils.js';
-const API_URL = 'http://localhost:3000';
+const API_URL = 'http://localhost:3001';
 
 
 document.addEventListener('DOMContentLoaded', function() {
@@ -27,7 +27,7 @@ document.getElementById('signUpForm').addEventListener('submit', async (event) =
   };
 
   try {
-    const response = await fetch(`${API_URL}/users/signup`, {
+    const response = await fetch(`${API_URL}/users/register`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(formData),

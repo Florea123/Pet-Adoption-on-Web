@@ -2,12 +2,11 @@ import Sidebar from '../SideBar/Sidebar.js';
 import { showAnimalDetailsPopup } from '../AnimalCard/AnimalCard.js';
 import { showLoading, hideLoading } from '../utils/loadingUtils.js';
 
-const API_URL = 'http://localhost:3000';
+const API_URL = 'http://localhost:3002';
 const token = localStorage.getItem('Token');
 
 async function initialize() {
   
-  // Render sidebar
   document.getElementById('sidebar-container').innerHTML = Sidebar.render('popular');
   new Sidebar('popular');
 
@@ -69,6 +68,43 @@ function displayAnimals(animals) {
       remainingBatch.forEach(animal => renderAnimalCard(animal, container));
     }, 50);
   }
+}
+
+// Inside the function that renders animal cards
+function renderAnimalCards(animals) {
+  const container = document.getElementById('animal-cards-container');
+  container.innerHTML = '';
+  
+  if (!animals || animals.length === 0) {
+    container.innerHTML = '<div class="no-results">No popular animals found in your area.</div>';
+    return;
+  }
+  
+  animals.forEach(animal => {
+    // Ensure multimedia is handled correctly
+    const hasMultimedia = animal.multimedia && Array.isArray(animal.multimedia) && animal.multimedia.length > 0;
+    const imageUrl = hasMultimedia ? animal.multimedia[0].URL : '../assets/pet-placeholder.svg';
+    
+    const card = document.createElement('div');
+    card.className = 'card';
+    card.setAttribute('data-id', animal.ANIMALID);
+    card.innerHTML = `
+      <div class="card-img-container">
+        <img src="${imageUrl}" alt="${animal.NAME}" loading="lazy" class="loading" />
+      </div>
+      <div class="card-content">
+        <h2>${animal.NAME}</h2>
+        <p>${animal.BREED} · ${animal.AGE} years</p>
+        <p>${animal.SPECIES} · ${animal.GENDER}</p>
+      </div>
+    `;
+    
+    // Handle image loading
+    const img = card.querySelector('img');
+    img.onload = () => img.classList.replace('loading', 'loaded');
+    
+    container.appendChild(card);
+  });
 }
 
 function renderAnimalCard(animal, container) {

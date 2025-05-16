@@ -1,0 +1,105 @@
+DROP TABLE Address CASCADE CONSTRAINTS;
+DROP TABLE Users CASCADE CONSTRAINTS;
+DROP TABLE Admins CASCADE CONSTRAINTS;
+
+DROP SEQUENCE seq_users;
+DROP SEQUENCE seq_admins;
+DROP SEQUENCE seq_address;
+
+CREATE OR REPLACE TYPE AdminObject AS OBJECT (
+    adminId NUMBER,
+    email VARCHAR2(255),
+    password VARCHAR2(100),
+    createdAt DATE,
+    
+    CONSTRUCTOR FUNCTION AdminObject(
+        p_email VARCHAR2, 
+        p_password VARCHAR2, 
+        p_createdAt DATE DEFAULT SYSDATE
+    ) RETURN SELF AS RESULT
+);
+/
+
+CREATE OR REPLACE TYPE BODY AdminObject AS
+    CONSTRUCTOR FUNCTION AdminObject(
+        p_email VARCHAR2, 
+        p_password VARCHAR2, 
+        p_createdAt DATE DEFAULT SYSDATE
+    ) RETURN SELF AS RESULT IS
+    BEGIN
+        IF p_email IS NULL THEN
+            RAISE_APPLICATION_ERROR(-20001, 'Email cannot be null');
+        END IF;
+        
+        IF p_password IS NULL THEN
+            RAISE_APPLICATION_ERROR(-20002, 'Password cannot be null');
+        ELSIF LENGTH(p_password) < 6 THEN
+            RAISE_APPLICATION_ERROR(-20003, 'Password must be at least 6 characters long');
+        END IF;
+        
+        self.adminId := NULL; 
+        self.email := p_email;
+        self.password := p_password;
+        self.createdAt := p_createdAt;
+        
+        RETURN;
+    EXCEPTION
+        WHEN OTHERS THEN
+            DBMS_OUTPUT.PUT_LINE('Error creating AdminObject: ' || SQLERRM);
+            RAISE;
+    END;
+END;
+/
+
+CREATE TABLE Users (
+    userID NUMBER PRIMARY KEY,
+    firstName VARCHAR2(100),
+    lastName VARCHAR2(100),
+    email VARCHAR2(255) UNIQUE,
+    password VARCHAR2(255),
+    phone VARCHAR2(20),
+    createdAt DATE DEFAULT SYSDATE
+);
+
+CREATE TABLE Admins (
+    adminData AdminObject
+);
+
+CREATE TABLE Address (
+    addressID NUMBER PRIMARY KEY,
+    userID NUMBER UNIQUE,
+    Street VARCHAR2(255),
+    City VARCHAR2(100),
+    State VARCHAR2(100),
+    ZipCode NUMBER,
+    Country VARCHAR2(100),
+    CONSTRAINT fk_address_user FOREIGN KEY (userID) REFERENCES Users(userID)
+);
+
+CREATE SEQUENCE seq_users START WITH 1 INCREMENT BY 1;
+CREATE SEQUENCE seq_admins START WITH 1 INCREMENT BY 1;
+CREATE SEQUENCE seq_address START WITH 1 INCREMENT BY 1;
+
+CREATE OR REPLACE TRIGGER trg_users
+BEFORE INSERT ON Users
+FOR EACH ROW
+BEGIN
+    :NEW.userID := seq_users.NEXTVAL;
+END;
+/
+
+CREATE OR REPLACE TRIGGER trg_admins
+BEFORE INSERT ON Admins
+FOR EACH ROW
+BEGIN
+    :NEW.adminData.adminId := seq_admins.NEXTVAL;
+END;
+/
+
+CREATE OR REPLACE TRIGGER trg_address
+BEFORE INSERT ON Address
+FOR EACH ROW
+BEGIN
+    :NEW.addressID := seq_address.NEXTVAL;
+END;
+/

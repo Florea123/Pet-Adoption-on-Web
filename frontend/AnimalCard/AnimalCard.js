@@ -4,7 +4,6 @@ const API_URL = config.API_URL;
 
 let currentMapInstance = null;
 
-// Google Maps API 
 function loadGoogleMapsScript() {
   if (window.google && window.google.maps) return Promise.resolve();
   
@@ -506,5 +505,59 @@ async function initializeOwnerLocationMap(address) {
     });
   } catch (error) {
     console.error('Error initializing map:', error);
+  }
+}
+
+class AnimalCard {
+  static render(animal) {
+    // Check if animal has multimedia and it's an array
+    const multimedia = Array.isArray(animal.multimedia) ? animal.multimedia : [];
+    const hasMultimedia = multimedia.length > 0;
+    
+    // Get the first image or use a placeholder
+    const primaryImage = hasMultimedia ? multimedia[0].URL : 'path/to/placeholder.jpg';
+    
+    // Render the card with the image
+    return `
+      <div class="card" data-id="${animal.ANIMALID}">
+        <div class="card-img-container">
+          <img src="${primaryImage}" alt="${animal.NAME}" loading="lazy" />
+        </div>
+        <div class="card-content">
+          <h2>${animal.NAME}</h2>
+          <p>${animal.BREED} · ${animal.AGE} years</p>
+          <p>${animal.SPECIES} · ${animal.GENDER}</p>
+        </div>
+      </div>
+    `;
+  }
+  
+  static renderPopup(animalData) {
+    const animal = animalData.animal;
+    const multimedia = animalData.multimedia || [];
+    
+    // Create image slideshow from multimedia array
+    const slideshowHtml = multimedia.length > 0 
+      ? `<div class="popup-slideshow">
+          ${multimedia.map((item, index) => 
+            `<div class="slide ${index === 0 ? 'active' : ''}">
+              <img src="${item.URL}" alt="${animal.NAME} image ${index + 1}" />
+            </div>`
+          ).join('')}
+          ${multimedia.length > 1 ? `
+            <button class="slideshow-nav prev">❮</button>
+            <button class="slideshow-nav next">❯</button>
+            <div class="slideshow-dots">
+              ${multimedia.map((_, index) => 
+                `<span class="dot ${index === 0 ? 'active' : ''}" data-index="${index}"></span>`
+              ).join('')}
+            </div>
+          ` : ''}
+        </div>`
+      : `<div class="no-image-placeholder">
+          <img src="../assets/pet-placeholder.svg" alt="No image available" />
+        </div>`;
+    
+    // Rest of popup rendering...
   }
 }

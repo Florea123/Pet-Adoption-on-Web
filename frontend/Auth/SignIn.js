@@ -2,7 +2,7 @@ import { decodeToken } from "./Auth.js";
 import user from "../models/User.js";
 import { redirectIfLoggedIn } from '../utils/authUtils.js';
 
-const API_URL = "http://localhost:3000";
+const API_URL = "http://localhost:3001";
 
 document.addEventListener('DOMContentLoaded', function() {
   

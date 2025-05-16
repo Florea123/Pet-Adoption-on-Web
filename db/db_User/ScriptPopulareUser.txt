@@ -1,0 +1,37 @@
+BEGIN
+    INSERT INTO Admins (adminData)
+    VALUES (AdminObject(1, 'admin@petadoption.com', 'admin123', SYSDATE-60));
+    
+    INSERT INTO Admins (adminData)
+    VALUES (AdminObject(2, 'moderator@petadoption.com', 'mod456', SYSDATE-45));
+
+    INSERT INTO Admins (adminData)
+    VALUES (AdminObject('new.admin@example.com', 'secure_password'));
+
+    INSERT INTO Users (firstName, lastName, email, password, phone, createdAt)
+    VALUES ('Andrei', 'Popescu', 'andrei.popescu@example.com', 'hashed_password_123', '0755123456', SYSDATE-30);
+    
+    INSERT INTO Users (firstName, lastName, email, password, phone, createdAt)
+    VALUES ('Maria', 'Ionescu', 'maria.ionescu@example.com', 'hashed_password_456', '0755987654', SYSDATE-25);
+
+    INSERT INTO Users (firstName, lastName, email, password, phone, createdAt)
+    VALUES ('George', 'Vasilescu', 'george.vasilescu@example.com', 'hashed_password_789', '0755123789', SYSDATE-20);
+
+    INSERT INTO Users (firstName, lastName, email, password, phone, createdAt)
+    VALUES ('Ana', 'Marinescu', 'ana.marinescu@example.com', 'hashed_password_101', '0755987123', SYSDATE-15);
+
+    INSERT INTO Address (userID, Street, City, State, ZipCode, Country)
+    VALUES (1, 'Str. Exemplu 12', 'Bucuresti', 'Ilfov', 123456, 'Romania');
+    
+    INSERT INTO Address (userID, Street, City, State, ZipCode, Country)
+    VALUES (2, 'Str. Lunga 5', 'Cluj-Napoca', 'Cluj', 234567, 'Romania');
+
+    INSERT INTO Address (userID, Street, City, State, ZipCode, Country)
+    VALUES (3, 'Str. Verde 10', 'Timisoara', 'Timis', 345678, 'Romania');
+
+    INSERT INTO Address (userID, Street, City, State, ZipCode, Country)
+    VALUES (4, 'Str. Alba 7', 'Iasi', 'Iasi', 456789, 'Romania');
+
+    COMMIT;
+END;
+/
