@@ -17,7 +17,7 @@ class Admin {
       );
 
       if (result.rows && result.rows.length > 0) {
-        return result.rows[0]; // Returnăm obiectul complet
+        return result.rows[0]; 
       }
       return null;
     } finally {

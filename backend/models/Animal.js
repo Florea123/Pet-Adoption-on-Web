@@ -87,42 +87,54 @@ class Animal {
   static async deleteAnimalWithRelatedData(animalID) {
     const connection = await getConnection();
     try {
- 
       try {
-        await Relations.deleteByAnimalId(animalID);
-        console.log(`Relations deleted`);
+        await connection.execute(
+          `BEGIN
+             pet_adoption_utils.delete_animal_safe(:animalID);
+           END;`,
+          { animalID },
+          { autoCommit: true }
+        );
+        return true;
       } catch (err) {
-        console.error('Error deleting relations:', err);
-      }
-      
-      try {
-        await MultiMedia.deleteByAnimalId(animalID);
-        console.log(`Multimedia deleted`);
-      } catch (err) {
-        console.error('Error deleting multimedia:', err);
-      }
-      
-      try {
-        await FeedingSchedule.deleteByAnimalId(animalID);
-        console.log(`Feeding schedule deleted`);
-      } catch (err) {
-        console.error('Error deleting feeding schedule:', err);
-      }
-      
-      try {
-        await MedicalHistory.deleteByAnimalId(animalID);
-        console.log(`Medical history deleted`);
-      } catch (err) {
-        console.error('Error deleting medical history:', err);
-      }
+        console.error('Error using PL/SQL to delete animal, falling back to individual deletes:', err);
+        
+        try {
+          await Relations.deleteByAnimalId(animalID);
+          console.log(`Relations deleted`);
+        } catch (err) {
+          console.error('Error deleting relations:', err);
+        }
+        
+        try {
+          await MultiMedia.deleteByAnimalId(animalID);
+          console.log(`Multimedia deleted`);
+        } catch (err) {
+          console.error('Error deleting multimedia:', err);
+        }
+        
+        try {
+          await FeedingSchedule.deleteByAnimalId(animalID);
+          console.log(`Feeding schedule deleted`);
+        } catch (err) {
+          console.error('Error deleting feeding schedule:', err);
+        }
+        
+        try {
+          await MedicalHistory.deleteByAnimalId(animalID);
+          console.log(`Medical history deleted`);
+        } catch (err) {
+          console.error('Error deleting medical history:', err);
+        }
 
-      const animalResult = await connection.execute(
-        `DELETE FROM Animal WHERE animalID = :animalID`,
-        { animalID },
-        { autoCommit: true } 
-      );
-      
-      return animalResult.rowsAffected > 0;
+        const animalResult = await connection.execute(
+          `DELETE FROM Animal WHERE animalID = :animalID`,
+          { animalID },
+          { autoCommit: true } 
+        );
+        
+        return animalResult.rowsAffected > 0;
+      }
     } catch (error) {
       console.error('Error in deleteAnimalWithRelatedData:', error);
       throw error;
@@ -229,6 +241,57 @@ class Animal {
       }));
       
       return detailedAnimals;
+    } finally {
+      await connection.close();
+    }
+  }
+
+  static async animalExists(animalID) {
+    const connection = await getConnection();
+    try {
+      const result = await connection.execute(
+        `DECLARE
+           v_exists BOOLEAN;
+         BEGIN
+           v_exists := pet_adoption_utils.animal_exists(:animalID);
+           :result := CASE WHEN v_exists THEN 1 ELSE 0 END;
+         END;`,
+        { 
+          animalID,
+          result: { dir: oracledb.BIND_OUT, type: oracledb.NUMBER }
+        }
+      );
+      
+      return result.outBinds.result === 1;
+    } catch (error) {
+      console.error('Error checking if animal exists:', error);
+      const fallbackResult = await connection.execute(
+        `SELECT COUNT(*) AS count FROM Animal WHERE animalID = :animalID`,
+        { animalID },
+        { outFormat: oracledb.OUT_FORMAT_OBJECT }
+      );
+      return fallbackResult.rows[0].COUNT > 0;
+    } finally {
+      await connection.close();
+    }
+  }
+
+  static async getPopularBreedsBySpecies(species) {
+    const connection = await getConnection();
+    try {
+      const result = await connection.execute(
+        `SELECT breed, COUNT(*) as breed_count
+         FROM Animal
+         WHERE species = :species
+         GROUP BY breed
+         ORDER BY breed_count DESC`,
+        { species },
+        { outFormat: oracledb.OUT_FORMAT_OBJECT }
+      );
+      return result.rows;
+    } catch (error) {
+      console.error('Error getting popular breeds:', error);
+      return [];
     } finally {
       await connection.close();
     }
