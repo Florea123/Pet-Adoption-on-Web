@@ -6,6 +6,9 @@ BEGIN
     INSERT INTO Admins (adminData)
     VALUES (AdminObject(2, 'moderator@petadoption.com', 'mod456', SYSDATE-45));
 
+    INSERT INTO Admins (adminData)
+    VALUES (AdminObject('new.admin@example.com', 'secure_password'));
+
     -- Inserare Users 
     INSERT INTO Users (firstName, lastName, email, password, phone, createdAt)
     VALUES ('Andrei', 'Popescu', 'andrei.popescu@example.com', 'hashed_password_123', '0755123456', SYSDATE-30);
