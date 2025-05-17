@@ -1,6 +1,7 @@
 const http = require('http');
 const url = require('url');
 const UserController = require('./src/controllers/UserController');
+const { handleHealthCheck } = require('../shared/basicHealth');
 
 function parseBody(req) {
   return new Promise((resolve, reject) => {
@@ -18,16 +19,21 @@ function parseBody(req) {
 
 const server = http.createServer(async (req, res) => {
   const parsedUrl = url.parse(req.url, true);
+  req.query = parsedUrl.query;
   
-  // Add CORS headers to all responses
   res.setHeader('Access-Control-Allow-Origin', '*');  
   res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
   
-  // Handle preflight OPTIONS requests
   if (req.method === 'OPTIONS') {
-    res.statusCode = 204;  // No Content
+    res.statusCode = 204;  
     res.end();
+    return;
+  }
+  
+  // Add the health check endpoint
+  if (req.method === 'GET' && parsedUrl.pathname === '/health') {
+    handleHealthCheck(req, res, 'user-service');
     return;
   }
   
@@ -56,8 +62,20 @@ const server = http.createServer(async (req, res) => {
   }
 
   if (req.method === 'GET' && parsedUrl.pathname === '/users/profile') {
-    const userId = parsedUrl.query.userId;
-    await UserController.getProfile({ user: { userId } }, res);
+    try {
+      // Properly construct the req object with query parameters
+      const requestObj = {
+        query: parsedUrl.query,
+        user: null
+      };
+      
+      await UserController.getProfile(requestObj, res);
+    } catch (err) {
+      console.error('Error processing profile request:', err);
+      res.statusCode = 500;
+      res.setHeader('Content-Type', 'application/json');
+      res.end(JSON.stringify({ error: 'Internal Server Error' }));
+    }
     return;
   }
 

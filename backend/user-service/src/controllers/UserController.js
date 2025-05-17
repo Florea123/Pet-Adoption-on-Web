@@ -91,14 +91,20 @@ exports.getProfile = async (req, res) => {
     try {
       address = await Address.findByUserId(userId);
     } catch (err) {
-      // Address is optional, so ignore errors here
+      console.error('Error fetching address:', err);
     }
 
+    // Return consistent format with user and address objects
     res.statusCode = 200;
-    res.end(JSON.stringify({ user, address }));
-  } catch (error) {
+    res.setHeader('Content-Type', 'application/json');
+    res.end(JSON.stringify({
+      user,
+      address
+    }));
+  } catch (err) {
+    console.error('Error getting user profile:', err);
     res.statusCode = 500;
-    res.end(JSON.stringify({ error: 'Internal server error' }));
+    res.end(JSON.stringify({ error: 'Internal Server Error' }));
   }
 };
 

@@ -141,13 +141,14 @@ async function handleDeleteAnimal(event) {
     try {
         showLoading('Deleting animal...');
         
-        const response = await fetch(`${API_URL}/animals/delete`, {
+        // Change the URL to match the backend's expected format
+        const response = await fetch(`${API_URL}/animals/${animalId}`, {
             method: 'DELETE',
             headers: { 
                 'Content-Type': 'application/json',
                 'Authorization': `Bearer ${token}`
-            },
-            body: JSON.stringify({ animalId: parseInt(animalId) })
+            }
+            // No need for body as the ID is in the URL
         });
 
         if (response.ok) {

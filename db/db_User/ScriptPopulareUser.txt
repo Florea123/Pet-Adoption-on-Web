@@ -20,6 +20,7 @@ BEGIN
     INSERT INTO Users (firstName, lastName, email, password, phone, createdAt)
     VALUES ('Ana', 'Marinescu', 'ana.marinescu@example.com', 'hashed_password_101', '0755987123', SYSDATE-15);
 
+    -- Inserare Address
     INSERT INTO Address (userID, Street, City, State, ZipCode, Country)
     VALUES (1, 'Str. Exemplu 12', 'Bucuresti', 'Ilfov', 123456, 'Romania');
     

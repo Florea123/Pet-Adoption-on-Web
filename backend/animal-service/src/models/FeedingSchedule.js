@@ -5,17 +5,32 @@ class FeedingSchedule {
   static async create(animalID, feeding_times, food_type, notes) {
     const connection = await getConnection();
     try {
-
       if (!Array.isArray(feeding_times)) {
         throw new Error('feeding_times must be an array of time strings');
       }
       
+      // Ensure each time is properly formatted 
+      const validatedTimes = feeding_times.map(time => {
+        // If time doesn't match HH:MM format, try to parse and format it
+        if (!/^\d{2}:\d{2}$/.test(time)) {
+          try {
+            const parts = time.split(':');
+            const hours = parts[0].padStart(2, '0');
+            const minutes = parts[1].padStart(2, '0');
+            return `${hours}:${minutes}`;
+          } catch (e) {
+            console.warn(`Invalid time format: ${time}, using as-is`);
+            return time;
+          }
+        }
+        return time;
+      });
+      
       // Create the Oracle array constructor syntax with proper timestamps
       const feedingTimeSQL = `feeding_time_array(${
-        feeding_times.map(time => `TO_TIMESTAMP('${time}', 'HH24:MI')`).join(',')
+        validatedTimes.map(time => `'${time}'`).join(',')
       })`;
       
-   
       const result = await connection.execute(
         `INSERT INTO FeedingSchedule (animalID, feeding_time, food_type, notes) 
          VALUES (:animalID, ${feedingTimeSQL}, :food_type, :notes)`,

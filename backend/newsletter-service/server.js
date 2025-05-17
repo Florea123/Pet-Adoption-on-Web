@@ -2,6 +2,7 @@ const http = require('http');
 const url = require('url');
 const NewsletterController = require('./src/controllers/NewsletterController');
 const Newsletter = require('./src/models/Newsletter');
+const { handleHealthCheck } = require('../shared/basicHealth');
 
 // Helper to parse JSON body
 function parseBody(req) {
@@ -29,6 +30,12 @@ const server = http.createServer(async (req, res) => {
   if (req.method === 'OPTIONS') {
     res.statusCode = 204;  
     res.end();
+    return;
+  }
+  
+  // Add the health check endpoint
+  if (req.method === 'GET' && parsedUrl.pathname === '/health') {
+    handleHealthCheck(req, res, 'newsletter-service');
     return;
   }
   

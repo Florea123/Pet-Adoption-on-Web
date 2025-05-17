@@ -2,6 +2,7 @@ const http = require('http');
 const url = require('url');
 const MessageController = require('./src/controllers/MessageController');
 const { withAuth } = require('./src/middleware/auth');
+const { handleHealthCheck } = require('../shared/basicHealth');
 
 function parseBody(req) {
   return new Promise((resolve, reject) => {
@@ -29,6 +30,11 @@ const server = http.createServer(async (req, res) => {
   if (req.method === 'OPTIONS') {
     res.statusCode = 204;  
     res.end();
+    return;
+  }
+
+  if (req.method === 'GET' && parsedUrl.pathname === '/health') {
+    handleHealthCheck(req, res, 'messages-service');
     return;
   }
 

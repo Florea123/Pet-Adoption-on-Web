@@ -3,6 +3,7 @@ import { requireAuth } from "../utils/authUtils.js";
 import { showLoading, hideLoading } from "../utils/loadingUtils.js";
 
 const API_URL = "http://localhost:3002";
+const MEDIA_API_URL = "http://localhost:3004";
 const token = localStorage.getItem("Token");
 let user;
 
@@ -421,8 +422,8 @@ async function uploadFileToServer(file, mediaType, fileName) {
   const timeoutId = setTimeout(() => controller.abort(), 30000); // 30 second timeout for uploads
   
   try {
-    console.log(`Sending to ${API_URL}/upload`);
-    const uploadResponse = await fetch(`${API_URL}/upload`, {
+    console.log(`Sending to ${MEDIA_API_URL}/media/upload`);
+    const uploadResponse = await fetch(`${MEDIA_API_URL}/media/upload`, {
       method: "POST",
       headers: {
         Authorization: `Bearer ${token}`,

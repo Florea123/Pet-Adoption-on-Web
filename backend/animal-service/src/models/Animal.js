@@ -297,28 +297,16 @@ class Animal {
   static async animalExists(animalID) {
     const connection = await getConnection();
     try {
+        // Use direct SQL query instead of PL/SQL function
       const result = await connection.execute(
-        `DECLARE
-           v_exists BOOLEAN;
-         BEGIN
-           v_exists := pet_adoption_utils.animal_exists(:animalID);
-           :result := CASE WHEN v_exists THEN 1 ELSE 0 END;
-         END;`,
-        { 
-          animalID,
-          result: { dir: oracledb.BIND_OUT, type: oracledb.NUMBER }
-        }
-      );
-      
-      return result.outBinds.result === 1;
-    } catch (error) {
-      console.error('Error checking if animal exists:', error);
-      const fallbackResult = await connection.execute(
         `SELECT COUNT(*) AS count FROM Animal WHERE animalID = :animalID`,
         { animalID },
         { outFormat: oracledb.OUT_FORMAT_OBJECT }
       );
-      return fallbackResult.rows[0].COUNT > 0;
+      return result.rows[0].COUNT > 0;
+    } catch (error) {
+      console.error('Error checking if animal exists:', error);
+      return false;
     } finally {
       await connection.close();
     }

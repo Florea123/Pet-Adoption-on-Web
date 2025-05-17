@@ -322,7 +322,7 @@ function renderAnimalCard(animal, container, lazyLoad = false, priority = 'auto'
         Math.min(window.innerWidth - 30, 600) : 
         getOptimalImageSize();
         
-      imageSource = getResponsiveImageUrl(`${API_URL}${media.pipeUrl}`, {
+      imageSource = getResponsiveImageUrl(`${ANIMAL_API_URL}${media.pipeUrl}`, {
         width: optimalWidth,
         quality: isMobile ? 80 : 85 // Lower quality for mobile to save data
       });
@@ -437,13 +437,13 @@ async function openAnimalDetailsPopup(animalId) {
   try {
     showLoading('Loading animal details...');
     
-    const response = await fetch(`${API_URL}/animals/details`, {
-      method: 'POST',
+    // Change from POST to GET request with animalId in the URL path
+    const response = await fetch(`${ANIMAL_API_URL}/animals/${animalId}`, {
+      method: 'GET',
       headers: { 
         'Content-Type': 'application/json',
         'Authorization': `Bearer ${token}`
-      },
-      body: JSON.stringify({ animalId }), // <-- send animalId in POST body
+      }
     });
 
     if (!response.ok) {
