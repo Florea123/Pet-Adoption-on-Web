@@ -9,17 +9,10 @@
 
   <!-- Badges -->
   <p>
-    <img src="https://img.shields.io/badge/Status-În%20dezvoltare-yellow" alt="status" />
+    <img src="https://img.shields.io/badge/Status-Terminat-green" alt="status" />
     <img src="https://img.shields.io/badge/Versiune-1.0.0-blue" alt="versiune" />
     <img src="https://img.shields.io/badge/Licență-MIT-green" alt="licență" />
   </p>
-
-  <h4>
-    <a href="#demo-link">Demo</a> 
-    <a href="#documentație">Documentație</a> 
-    <a href="#issues-link">Raportează Probleme</a> 
-    <a href="#feature-request-link">Solicită Funcționalități</a>
-  </h4>
 
 </div>
 
