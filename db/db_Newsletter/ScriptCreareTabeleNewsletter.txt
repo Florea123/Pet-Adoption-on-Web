@@ -1,0 +1,21 @@
+DROP TABLE Newsletter CASCADE CONSTRAINTS;
+
+DROP SEQUENCE seq_newsletter;
+
+CREATE TABLE Newsletter (
+    id NUMBER PRIMARY KEY,
+    userID NUMBER NOT NULL,
+    species VARCHAR2(100) NOT NULL,
+    isActive NUMBER(1) DEFAULT 1,
+    subscribedAt DATE DEFAULT SYSDATE
+);
+
+CREATE SEQUENCE seq_newsletter START WITH 1 INCREMENT BY 1;
+
+CREATE OR REPLACE TRIGGER trg_newsletter
+BEFORE INSERT ON Newsletter
+FOR EACH ROW
+BEGIN
+    :NEW.id := seq_newsletter.NEXTVAL;
+END;
+/

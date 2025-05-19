@@ -1,8 +1,13 @@
+import config from '../config.js';
+
+const API_URL = config.SERVICES.USER_SERVICE;
+const DELETE_ENDPOINT = config.ENDPOINTS.USER.DELETE;
+
 function initUsersView(users) {
-    const usersSection = document.getElementById('users');
-    if (usersSection && users) {
-        populateUsersTable(users, usersSection);
-    }
+    const container = document.getElementById('usersTableContainer');
+    if (!container) return;
+    
+    populateUsersTable(users, container);
 }
 
 // Populate users table with data
@@ -79,7 +84,7 @@ async function handleDeleteUser(userId, users) {
             return;
         }
         
-        const response = await fetch('http://localhost:3000/users/delete', {
+        const response = await fetch(`${API_URL}${DELETE_ENDPOINT}`, {
             method: 'DELETE',
             headers: { 
                 'Content-Type': 'application/json',

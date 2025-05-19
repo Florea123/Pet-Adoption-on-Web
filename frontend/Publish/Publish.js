@@ -1,8 +1,13 @@
 import userModel from "../models/User.js";
 import { requireAuth } from "../utils/authUtils.js";
 import { showLoading, hideLoading } from "../utils/loadingUtils.js";
+import config from "../config.js";
 
-const API_URL = "http://localhost:3000";
+const API_URL = config.SERVICES.ANIMAL_SERVICE;
+const MEDIA_API_URL = config.SERVICES.MEDIA_SERVICE;
+const ANIMAL_CREATE_ENDPOINT = config.ENDPOINTS.ANIMAL.CREATE;
+const MEDIA_UPLOAD_ENDPOINT = config.ENDPOINTS.MEDIA.UPLOAD;
+
 const token = localStorage.getItem("Token");
 let user;
 
@@ -345,8 +350,8 @@ window.submitPublishForm = async function (event) {
     const timeoutId = setTimeout(() => controller.abort(), 15000); // 15 second timeout
     
     try {
-      console.log(`Connecting to ${API_URL}/animals/create`);
-      const response = await fetch(`${API_URL}/animals/create`, {
+      console.log(`Connecting to ${API_URL}${ANIMAL_CREATE_ENDPOINT}`);
+      const response = await fetch(`${API_URL}${ANIMAL_CREATE_ENDPOINT}`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -421,8 +426,8 @@ async function uploadFileToServer(file, mediaType, fileName) {
   const timeoutId = setTimeout(() => controller.abort(), 30000); // 30 second timeout for uploads
   
   try {
-    console.log(`Sending to ${API_URL}/upload`);
-    const uploadResponse = await fetch(`${API_URL}/upload`, {
+    console.log(`Sending to ${MEDIA_API_URL}${MEDIA_UPLOAD_ENDPOINT}`);
+    const uploadResponse = await fetch(`${MEDIA_API_URL}${MEDIA_UPLOAD_ENDPOINT}`, {
       method: "POST",
       headers: {
         Authorization: `Bearer ${token}`,

@@ -23,14 +23,14 @@ class Newsletter {
   static async updateSubscriptions(userId, species) {
     const connection = await getConnection();
     try {
-    
+      // First, deactivate all subscriptions for this user
       await connection.execute(
         `UPDATE Newsletter SET isActive = 0 WHERE userID = :userId`,
         { userId },
         { autoCommit: false }
       );
       
-      
+      // Then, activate or insert the selected species
       if (species && species.length > 0) {
         for (const speciesName of species) {
           // Check if subscription exists
@@ -41,14 +41,14 @@ class Newsletter {
           );
           
           if (exists.rows.length > 0) {
-           
+            // Update existing subscription
             await connection.execute(
               `UPDATE Newsletter SET isActive = 1 WHERE userID = :userId AND species = :species`,
               { userId, species: speciesName },
               { autoCommit: false }
             );
           } else {
-           
+            // Insert new subscription
             await connection.execute(
               `INSERT INTO Newsletter (userID, species) VALUES (:userId, :species)`,
               { userId, species: speciesName },
@@ -58,11 +58,11 @@ class Newsletter {
         }
       }
       
-      
+      // Commit all changes
       await connection.commit();
       return true;
     } catch (error) {
-    
+      // Rollback in case of error
       await connection.rollback();
       throw error;
     } finally {
@@ -70,7 +70,7 @@ class Newsletter {
     }
   }
   
-  
+  // Get subscribers for a specific species
   static async getSubscribersBySpecies(species) {
     const connection = await getConnection();
     try {

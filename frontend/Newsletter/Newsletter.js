@@ -1,7 +1,11 @@
 import Sidebar from '../SideBar/Sidebar.js';
 import { requireAuth } from '../utils/authUtils.js';
+import config from '../config.js';
 
-const API_URL = 'http://localhost:3000';
+const API_URL = config.SERVICES.NEWSLETTER_SERVICE;
+const SUBSCRIPTIONS_ENDPOINT = config.ENDPOINTS.NEWSLETTER.SUBSCRIPTIONS;
+const UPDATE_ENDPOINT = config.ENDPOINTS.NEWSLETTER.UPDATE;
+
 let user;
 const availableSpecies = [
   'Câine', 'Pisică', 'Papagal', 'Hamster', 'Iepure', 
@@ -33,7 +37,7 @@ async function fetchSubscriptions() {
       return;
     }
     
-    const response = await fetch(`${API_URL}/newsletter/subscriptions`, {
+    const response = await fetch(`${API_URL}${SUBSCRIPTIONS_ENDPOINT}`, {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',
@@ -97,7 +101,7 @@ async function savePreferences() {
     const selectedSpecies = Array.from(selectedCheckboxes).map(cb => cb.value);
     
     // Save to backend
-    const response = await fetch(`${API_URL}/newsletter/update`, {
+    const response = await fetch(`${API_URL}${UPDATE_ENDPOINT}`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

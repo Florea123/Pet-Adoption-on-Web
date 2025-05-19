@@ -12,13 +12,21 @@ const { sendNewsletterEmails } = require('./NewsletterRoute');
 async function getAllAnimals(req, res) {
   try {
     const animals = await Animal.getAll();
+    
+    console.log(`Found ${animals.length} animals, adding multimedia...`);
 
     const animalsWithMedia = await Promise.all(
       animals.map(async (animal) => {
-        const multimedia = await MultiMedia.findByAnimalIdOnePhoto(
-          animal.ANIMALID
-        );
-        return { ...animal, multimedia };
+        try {
+          const multimedia = await MultiMedia.findByAnimalIdOnePhoto(
+            animal.ANIMALID
+          );
+          return { ...animal, multimedia };
+        } catch (mediaError) {
+          console.warn(`Warning: Could not fetch multimedia for animal ${animal.ANIMALID}:`, mediaError.message);
+          // Return the animal without multimedia instead of failing
+          return { ...animal, multimedia: [] };
+        }
       })
     );
 
@@ -26,7 +34,6 @@ async function getAllAnimals(req, res) {
     res.end(JSON.stringify(animalsWithMedia));
   } catch (err) {
     console.error("Error fetching animals:", err);
-
     if (!res.headersSent) {
       res.writeHead(500, { "Content-Type": "application/json" });
       res.end(JSON.stringify({ error: "Internal Server Error" }));

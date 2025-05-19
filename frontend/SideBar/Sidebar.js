@@ -1,5 +1,9 @@
 import userModel from '../models/User.js';
 import { requireAuth } from '../utils/authUtils.js';
+import config from '../config.js';
+
+const MESSAGE_API_URL = config.SERVICES.MESSAGE_SERVICE;
+const UNREAD_COUNT_ENDPOINT = config.ENDPOINTS.MESSAGE.UNREAD_COUNT;
 
 export default class Sidebar {
   constructor(activePage) {
@@ -260,7 +264,8 @@ export default class Sidebar {
       const token = localStorage.getItem('Token');
       if (!token) return;
       
-      const response = await fetch('http://localhost:3000/messages/unread-count', {
+      const user = JSON.parse(localStorage.getItem('User'));
+      const response = await fetch(`${MESSAGE_API_URL}/${UNREAD_COUNT_ENDPOINT}?userId=${user.id}`, {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',

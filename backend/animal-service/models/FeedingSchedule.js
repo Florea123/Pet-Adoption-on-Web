@@ -5,17 +5,14 @@ class FeedingSchedule {
   static async create(animalID, feeding_times, food_type, notes) {
     const connection = await getConnection();
     try {
-
       if (!Array.isArray(feeding_times)) {
         throw new Error('feeding_times must be an array of time strings');
       }
       
-      // Create the Oracle array constructor syntax with proper timestamps
       const feedingTimeSQL = `feeding_time_array(${
         feeding_times.map(time => `TO_TIMESTAMP('${time}', 'HH24:MI')`).join(',')
       })`;
       
-   
       const result = await connection.execute(
         `INSERT INTO FeedingSchedule (animalID, feeding_time, food_type, notes) 
          VALUES (:animalID, ${feedingTimeSQL}, :food_type, :notes)`,

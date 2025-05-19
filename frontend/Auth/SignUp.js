@@ -1,5 +1,8 @@
 import { redirectIfLoggedIn } from '../utils/authUtils.js';
-const API_URL = 'http://localhost:3000';
+import config from '../config.js';
+
+const API_URL = config.SERVICES.USER_SERVICE;
+const REGISTER_ENDPOINT = config.ENDPOINTS.USER.REGISTER;
 
 
 document.addEventListener('DOMContentLoaded', function() {
@@ -27,7 +30,7 @@ document.getElementById('signUpForm').addEventListener('submit', async (event) =
   };
 
   try {
-    const response = await fetch(`${API_URL}/users/signup`, {
+    const response = await fetch(`${API_URL}${REGISTER_ENDPOINT}`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(formData),

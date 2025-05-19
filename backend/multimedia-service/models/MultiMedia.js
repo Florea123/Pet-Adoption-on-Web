@@ -4,17 +4,33 @@ const fileUtils = require("../utils/fileStorageUtils");
 const fs = require("fs");
 const sharp = require("sharp");
 
-class MultiMedia {
+class Multimedia {
   static async create(animalID, media, url, description, upload_date) {
     const connection = await getConnection();
     try {
       const result = await connection.execute(
         `INSERT INTO MultiMedia (animalID, media, url, description, upload_date) 
-         VALUES (:animalID, :media, :url, :description, :upload_date)`,
-        { animalID, media, url, description, upload_date },
+         VALUES (:animalID, :media, :url, :description, :upload_date)
+         RETURNING ID INTO :id`,
+        { 
+          animalID, 
+          media, 
+          url, 
+          description, 
+          upload_date,
+          id: { type: oracledb.NUMBER, dir: oracledb.BIND_OUT }
+        },
         { autoCommit: true }
       );
-      return result;
+      
+      return {
+        id: result.outBinds.id[0],
+        animalID,
+        media,
+        url,
+        description,
+        upload_date
+      };
     } finally {
       await connection.close();
     }
@@ -33,7 +49,7 @@ class MultiMedia {
       const processedRecords = result.rows.map((record) => {
         return {
           ...record,
-          pipeUrl: `/media/pipe/${record.ID}`,
+          pipeUrl: `/api/multimedia/stream/${record.ID}`,
         };
       });
 
@@ -56,7 +72,7 @@ class MultiMedia {
       const processedRecords = result.rows.map((record) => {
         return {
           ...record,
-          pipeUrl: `/media/pipe/${record.ID}`,
+          pipeUrl: `/api/multimedia/stream/${record.ID}`,
         };
       });
 
@@ -122,7 +138,7 @@ class MultiMedia {
         return;
       }
 
-      // The URL should be in the format: /server/{mediaType}/{fileName}
+      
       const urlPath = mediaRecord.URL;
       if (!urlPath) {
         res.writeHead(404, { "Content-Type": "application/json" });
@@ -143,13 +159,15 @@ class MultiMedia {
         return;
       }
 
+      // Get file stats for Content-Length
+      const stats = await fs.promises.stat(filePath);
+      
       // Determine content type
       const contentType = mediaRecord.MIMETYPE || "application/octet-stream";
 
-      // Add cache control headers for all responses - great for mobile optimization
       const cacheHeaders = {
         "Cache-Control": "public, max-age=86400", // Cache for 24 hours
-        "ETag": `"${mediaRecord.ID}-${options.width || 'orig'}"`, // Simple ETag
+        "ETag": `"${mediaRecord.ID}-${options.width || 'orig'}"`, 
       };
 
       // Check if resizing is requested and supported
@@ -159,20 +177,16 @@ class MultiMedia {
         contentType !== "image/gif";
 
       if (!shouldResize) {
-        // Stream the file directly without modification
+        // Stream the file directly with Content-Length header
         const fileStream = fs.createReadStream(filePath);
         res.writeHead(200, { 
           "Content-Type": contentType,
+          "Content-Length": stats.size,
           ...cacheHeaders
         });
         fileStream.pipe(res);
       } else {
-        // Use sharp to resize the image
-
-        // Get requested width
         const width = Math.min(2000, Math.max(50, parseInt(options.width, 10)));
-
-        // Detect if client supports WebP
         let outputFormat = 'jpeg';
         let outputContentType = "image/jpeg";
         const acceptHeader = req && req.headers && req.headers.accept;
@@ -182,33 +196,44 @@ class MultiMedia {
           outputContentType = "image/webp";
         }
         
-        // Process the image
-        let transformer = sharp(filePath).resize({ 
-          width, 
-          withoutEnlargement: true,
-          kernel: width < 300 ? 'lanczos3' : 'mitchell'  
-        });
-        
-        // Apply format and quality
-        if (outputFormat === 'webp') {
-          transformer = transformer.webp({ 
-            quality: 80, 
-            effort: 4 
+        try {
+          // Process the image with proper error handling
+          let transformer = sharp(filePath).resize({ 
+            width, 
+            withoutEnlargement: true,
+            kernel: width < 300 ? 'lanczos3' : 'mitchell'  
           });
-        } else {
-          transformer = transformer.jpeg({ 
-            quality: 80, 
-            progressive: true,
-            optimizeScans: true
+          
+          if (outputFormat === 'webp') {
+            transformer = transformer.webp({ 
+              quality: 80, 
+              effort: 4 
+            });
+          } else {
+            transformer = transformer.jpeg({ 
+              quality: 80, 
+              progressive: true,
+              optimizeScans: true
+            });
+          }
+
+          res.writeHead(200, {
+            "Content-Type": outputContentType,
+            ...cacheHeaders
           });
+
+          transformer.pipe(res);
+        } catch (sharpError) {
+          console.error("Error processing image with sharp:", sharpError);
+          // Fallback to sending the original file
+          const fileStream = fs.createReadStream(filePath);
+          res.writeHead(200, { 
+            "Content-Type": contentType,
+            "Content-Length": stats.size,
+            ...cacheHeaders
+          });
+          fileStream.pipe(res);
         }
-
-        res.writeHead(200, {
-          "Content-Type": outputContentType,
-          ...cacheHeaders
-        });
-
-        transformer.pipe(res);
       }
     } catch (error) {
       console.error("Error in pipeMediaStream:", error);
@@ -220,4 +245,4 @@ class MultiMedia {
   }
 }
 
-module.exports = MultiMedia;
+module.exports = Multimedia;

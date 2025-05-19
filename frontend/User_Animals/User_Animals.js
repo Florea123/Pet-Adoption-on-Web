@@ -2,15 +2,19 @@ import { requireAuth } from '../utils/authUtils.js';
 import Sidebar from '../SideBar/Sidebar.js';
 import { showLoading, hideLoading } from '../utils/loadingUtils.js';
 import { setupLazyLoading, addPreconnect, addDnsPrefetch } from '../utils/performanceUtils.js';
+import config from '../config.js';
 
-const API_URL = 'http://localhost:3000';
+const API_URL = config.SERVICES.ANIMAL_SERVICE;
+const ALL_ANIMALS_ENDPOINT = config.ENDPOINTS.ANIMAL.ALL;
+const DELETE_ENDPOINT = config.ENDPOINTS.ANIMAL.DELETE;
+
 const token = localStorage.getItem('Token');
 
 let user;
 let userAnimals = [];
 
 async function initialize() {
-    addDnsPrefetch('http://localhost:3000');
+    addDnsPrefetch(API_URL);
     
     user = requireAuth();
     if (!user) return; 
@@ -28,7 +32,7 @@ async function fetchUserAnimals() {
     try {
         showLoading('Loading your animals...');
         
-        const response = await fetch(`${API_URL}/animals/all`, {
+        const response = await fetch(`${API_URL}${ALL_ANIMALS_ENDPOINT}`, {
             method: 'GET',
             headers: {
               'Content-Type': 'application/json',
@@ -141,13 +145,13 @@ async function handleDeleteAnimal(event) {
     try {
         showLoading('Deleting animal...');
         
-        const response = await fetch(`${API_URL}/animals/delete`, {
+        const response = await fetch(`${API_URL}${DELETE_ENDPOINT}`, {
             method: 'DELETE',
             headers: { 
                 'Content-Type': 'application/json',
                 'Authorization': `Bearer ${token}`
             },
-            body: JSON.stringify({ animalId: parseInt(animalId) })
+            body: JSON.stringify({ animalId })
         });
 
         if (response.ok) {

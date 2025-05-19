@@ -1,8 +1,10 @@
 import { decodeToken } from "./Auth.js"; 
 import user from "../models/User.js";
 import { redirectIfLoggedIn } from '../utils/authUtils.js';
+import config from '../config.js';
 
-const API_URL = "http://localhost:3000";
+const API_URL = config.SERVICES.USER_SERVICE;
+const LOGIN_ENDPOINT = config.ENDPOINTS.USER.LOGIN;
 
 document.addEventListener('DOMContentLoaded', function() {
   
@@ -19,7 +21,7 @@ document
     const password = document.getElementById("password").value;
 
     try {
-      const response = await fetch(`${API_URL}/users/login`, {
+      const response = await fetch(`${API_URL}${LOGIN_ENDPOINT}`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, password }),

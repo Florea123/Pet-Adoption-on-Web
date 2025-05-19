@@ -1,4 +1,7 @@
-const API_URL = 'http://localhost:3000'; 
+import config from '../config.js';
+
+const API_URL = config.SERVICES.MEDIA_SERVICE;
+const PIPE_ENDPOINT = config.ENDPOINTS.MEDIA.PIPE;
 
 // Generate responsive image sizes based on device and viewport
 export function getResponsiveImageUrl(originalUrl, options = {}) {
@@ -15,7 +18,7 @@ export function getResponsiveImageUrl(originalUrl, options = {}) {
     const matches = originalUrl.match(/\/media\/pipe\/(\d+)/);
     if (matches && matches[1]) {
       const id = matches[1];
-      let url = `${API_URL}/media/pipe/${id}?width=${settings.width}`;
+      let url = `${API_URL}${PIPE_ENDPOINT}/${id}?width=${settings.width}`;
       
       //quality parameter
       if (settings.quality !== 'auto') {
@@ -49,10 +52,10 @@ export function generateSrcSet(baseUrl) {
   
   // Create srcset for different screen sizes with full API URL
   return `
-    ${API_URL}/media/pipe/${id}?width=300 300w,
-    ${API_URL}/media/pipe/${id}?width=600 600w, 
-    ${API_URL}/media/pipe/${id}?width=900 900w,
-    ${API_URL}/media/pipe/${id}?width=1200 1200w
+    ${API_URL}${PIPE_ENDPOINT}/${id}?width=300 300w,
+    ${API_URL}${PIPE_ENDPOINT}/${id}?width=600 600w, 
+    ${API_URL}${PIPE_ENDPOINT}/${id}?width=900 900w,
+    ${API_URL}${PIPE_ENDPOINT}/${id}?width=1200 1200w
   `.trim();
 }
 

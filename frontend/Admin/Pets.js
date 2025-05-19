@@ -1,4 +1,9 @@
+import config from '../config.js';
 
+const API_URL = config.SERVICES.USER_SERVICE;
+const MEDIA_SERVICE_URL = config.SERVICES.MEDIA_SERVICE;
+const ANIMAL_DELETE_ENDPOINT = config.ENDPOINTS.ANIMAL.DELETE;
+const MEDIA_PIPE_ENDPOINT = config.ENDPOINTS.MEDIA.PIPE;
 
 function initPetsView(animals) {
     const petsSection = document.getElementById('pets');
@@ -137,7 +142,7 @@ function showPetDetails(pet) {
         let imageUrl;
         
         if (mediaItem.pipeUrl) {
-            imageUrl = `http://localhost:3000${mediaItem.pipeUrl}`;
+            imageUrl = `${MEDIA_SERVICE_URL}${MEDIA_PIPE_ENDPOINT}/${mediaItem.pipeUrl.split('/').pop()}`;
         } else if (mediaItem.URL) {
             imageUrl = mediaItem.URL;
         }
@@ -255,7 +260,7 @@ async function handleDeleteAnimal(event) {
             return;
         }
         
-        const response = await fetch('http://localhost:3000/animals/delete', {
+        const response = await fetch(`${API_URL}${ANIMAL_DELETE_ENDPOINT}`, {
             method: 'DELETE',
             headers: { 
                 'Content-Type': 'application/json',

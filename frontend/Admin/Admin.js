@@ -1,7 +1,10 @@
+import config from '../config.js';
+
 document.addEventListener('DOMContentLoaded', function() {
   const adminLoginForm = document.getElementById('adminLoginForm');
   const errorMessage = document.getElementById('error-message');
-  const API_URL = 'http://localhost:3000';
+  const API_URL = config.SERVICES.ADMIN_SERVICE;
+  const LOGIN_ENDPOINT = config.ENDPOINTS.ADMIN.LOGIN;
   
  
   const existingToken = localStorage.getItem('adminToken');
@@ -28,7 +31,7 @@ document.addEventListener('DOMContentLoaded', function() {
     errorMessage.textContent = '';
     
 
-    fetch(`${API_URL}/admin/login`, {
+    fetch(`${API_URL}${LOGIN_ENDPOINT}`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
