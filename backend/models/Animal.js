@@ -226,7 +226,7 @@ class Animal {
         const feedingSchedule = await FeedingSchedule.findByAnimalId(animalID);
         
         // Get medical history
-        const medicalHistory = await MedicalHistory.findByAnimalId(ananimalID);
+        const medicalHistory = await MedicalHistory.findByAnimalId(animalID);
         
         // Get relations
         const relationsData = await Relations.findByAnimalId(animalID);

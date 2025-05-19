@@ -106,7 +106,56 @@ function withAuth(handler) {
 // Get configured multer instance
 const upload = fileUtils.configureStorage();
 
+
+// XSS Protection middleware - sanitize request body
+function sanitizeRequestBody(req, res, next) {
+  if (req.body && typeof req.body === 'object') {
+    // Recursive function to sanitize strings in an object
+    function sanitizeObject(obj) {
+      const sanitized = {};
+      
+      Object.keys(obj).forEach(key => {
+        if (typeof obj[key] === 'string') {
+          sanitized[key] = sanitizeString(obj[key]);
+        } else if (typeof obj[key] === 'object' && obj[key] !== null) {
+          sanitized[key] = sanitizeObject(obj[key]);
+        } else {
+          sanitized[key] = obj[key];
+        }
+      });
+      
+      return sanitized;
+    }
+    
+    // Basic string sanitization
+    function sanitizeString(str) {
+      return str
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;');
+    }
+    
+    req.body = sanitizeObject(req.body);
+  }
+  
+  next();
+}
+
+// security headers
+function addSecurityHeaders(res) {
+  res.setHeader('X-Content-Type-Options', 'nosniff');
+  res.setHeader('X-Frame-Options', 'DENY');
+  res.setHeader('X-XSS-Protection', '1; mode=block');
+  res.setHeader('Content-Security-Policy', "default-src 'self'; img-src 'self' data: http://localhost:3000 https://maps.gstatic.com https://maps.googleapis.com; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://maps.googleapis.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; connect-src 'self' http://localhost:3000 https://maps.googleapis.com; font-src 'self' https://fonts.gstatic.com");
+  res.setHeader('Referrer-Policy', 'same-origin');
+}
+
+
 const server = http.createServer(async (req, res) => {
+  // security headers
+  addSecurityHeaders(res);
+  
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', '*');
   res.setHeader('Access-Control-Allow-Headers', '*');
@@ -349,6 +398,7 @@ const server = http.createServer(async (req, res) => {
   }
 });
 
+// Apply middleware to all requests
 async function startServer() {
 
   emailConfigValid = await validateEmailConfig();
