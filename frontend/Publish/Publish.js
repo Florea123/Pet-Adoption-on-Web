@@ -1,6 +1,7 @@
 import userModel from "../models/User.js";
 import { requireAuth } from "../utils/authUtils.js";
 import { showLoading, hideLoading } from "../utils/loadingUtils.js";
+import { createElement, sanitizeInput, getCsrfToken } from "../utils/securityUtils.js";
 
 const API_URL = "http://localhost:3000";
 const token = localStorage.getItem("Token");
@@ -8,13 +9,10 @@ let user;
 
 // Initialize the page
 document.addEventListener("DOMContentLoaded", function () {
-
   user = requireAuth();
   if (!user) return;
 
-  const feedingContainer = document.getElementById(
-    "feeding-schedule-container"
-  );
+  const feedingContainer = document.getElementById("feeding-schedule-container");
   if (
     feedingContainer &&
     feedingContainer.querySelectorAll(".feeding-schedule-entry").length === 0
@@ -24,6 +22,9 @@ document.addEventListener("DOMContentLoaded", function () {
   }
 
   updateDeleteButtons();
+  
+  // Initialize all event listeners
+  initializeEventListeners();
 
   // Set up photo input handler
   const photoInput = document.getElementById("photo");
@@ -37,7 +38,10 @@ document.addEventListener("DOMContentLoaded", function () {
           img.onload = function() {
             const previewContainer = document.getElementById("photo-preview");
             if (previewContainer) {
-              previewContainer.innerHTML = '';
+              // Clear container safely
+              while (previewContainer.firstChild) {
+                previewContainer.removeChild(previewContainer.firstChild);
+              }
               previewContainer.appendChild(img);
               previewContainer.style.display = "block";
             }
@@ -55,87 +59,224 @@ document.addEventListener("DOMContentLoaded", function () {
   addMultimediaEntry();
 });
 
+function initializeEventListeners() {
+  // Back to home button
+  const backBtn = document.getElementById('backToHomeBtn');
+  if (backBtn) {
+    backBtn.addEventListener('click', redirectToHome);
+  }
+  
+  // Form submission
+  const publishForm = document.getElementById('publishForm');
+  if (publishForm) {
+    publishForm.addEventListener('submit', submitPublishForm);
+  }
+  
+  // Species selection for breed options
+  const speciesSelect = document.getElementById('species');
+  if (speciesSelect) {
+    speciesSelect.addEventListener('change', updateBreedOptions);
+  }
+  
+  // Add event listeners for add/delete buttons
+  const addFeedingBtn = document.getElementById('addFeedingScheduleBtn');
+  if (addFeedingBtn) {
+    addFeedingBtn.addEventListener('click', addFeedingScheduleEntry);
+  }
+  
+  const addMedicalBtn = document.getElementById('addMedicalHistoryBtn');
+  if (addMedicalBtn) {
+    addMedicalBtn.addEventListener('click', addMedicalHistoryEntry);
+  }
+  
+  const addMultimediaBtn = document.getElementById('addMultimediaBtn');
+  if (addMultimediaBtn) {
+    addMultimediaBtn.addEventListener('click', addMultimediaEntry);
+  }
+  
+ 
+  updateDeleteButtons();
+}
+
+function updateDeleteButtons() {
+  // Feeding schedule delete buttons
+  document.querySelectorAll('.feeding-schedule-entry .delete-entry-btn').forEach(button => {
+    button.removeEventListener('click', deleteFeedingScheduleEntry);
+    button.addEventListener('click', function() {
+      deleteFeedingScheduleEntry(this);
+    });
+  });
+  
+  // Medical history delete buttons
+  document.querySelectorAll('.medical-history-entry .delete-entry-btn').forEach(button => {
+    button.removeEventListener('click', deleteMedicalHistoryEntry);
+    button.addEventListener('click', function() {
+      deleteMedicalHistoryEntry(this);
+    });
+  });
+  
+  // Multimedia delete buttons
+  document.querySelectorAll('.multimedia-entry .delete-entry-btn').forEach(button => {
+    button.removeEventListener('click', deleteMultimediaEntry);
+    button.addEventListener('click', function() {
+      deleteMultimediaEntry(this);
+    });
+  });
+  
+  // Hide/show delete buttons based on entry position
+  const entries = document.querySelectorAll(".feeding-schedule-entry");
+  entries.forEach((entry, index) => {
+    const deleteButton = entry.querySelector(".delete-entry-btn");
+    if (index === 0 && entries.length === 1) {
+      deleteButton.style.display = "none";
+    } else {
+      deleteButton.style.display = "inline-block";
+    }
+  });
+}
+
 // Add initial feeding entry
 function addInitialFeedingEntry() {
   const container = document.getElementById("feeding-schedule-container");
-  const initialEntry = document.createElement("div");
-  initialEntry.className = "feeding-schedule-entry";
-  initialEntry.innerHTML = `
-      <div class="form-group">
-        <label for="feedingTime">Ora Hrănire</label>
-        <input type="time" name="feedingTime" required>
-      </div>
-      <div class="form-group full-width">
-        <label for="foodType">Tip de Hrană</label>
-        <textarea name="foodType" placeholder="Introdu tipurile de hrană" rows="2"></textarea>
-      </div>
-      <button type="button" class="btn delete-entry-btn" onclick="deleteFeedingScheduleEntry(this)">Șterge</button>
-    `;
+  const initialEntry = createElement('div', { className: 'feeding-schedule-entry' });
+  
+  // Create form group for feeding time
+  const timeGroup = createElement('div', { className: 'form-group' });
+  timeGroup.appendChild(createElement('label', { for: 'feedingTime' }, 'Ora Hrănire'));
+  timeGroup.appendChild(createElement('input', { type: 'time', name: 'feedingTime', required: true }));
+  initialEntry.appendChild(timeGroup);
+  
+  // Create form group for food type
+  const foodGroup = createElement('div', { className: 'form-group full-width' });
+  foodGroup.appendChild(createElement('label', { for: 'foodType' }, 'Tip de Hrană'));
+  foodGroup.appendChild(createElement('textarea', { 
+    name: 'foodType', 
+    placeholder: 'Introdu tipurile de hrană', 
+    rows: '2'
+  }));
+  initialEntry.appendChild(foodGroup);
+  
+  const deleteButton = createElement('button', { 
+    type: 'button', 
+    className: 'btn delete-entry-btn'
+  }, 'Șterge');
+  deleteButton.addEventListener('click', function() {
+    deleteFeedingScheduleEntry(this);
+  });
+  initialEntry.appendChild(deleteButton);
+  
   container.appendChild(initialEntry);
+  updateDeleteButtons();
 }
 
-// Medical history entry functions
-window.addMedicalHistoryEntry = function () {
+// Medical history entry functions 
+function addMedicalHistoryEntry() {
   const container = document.getElementById("medical-history-container");
-
-  const newEntry = document.createElement("div");
-  newEntry.className = "medical-history-entry";
-  newEntry.innerHTML = `
-      <div class="form-group">
-        <label for="recordDate">Dată Înregistrare</label>
-        <input type="date" name="recordDate" value="2025-04-14" required>
-      </div>
-      <div class="form-group full-width">
-        <label for="description">Descriere</label>
-        <textarea name="description" placeholder="Introdu detalii despre vaccinuri, deparazitări etc." rows="3"></textarea>
-      </div>
-      <button type="button" class="btn delete-entry-btn" onclick="deleteMedicalHistoryEntry(this)">Șterge</button>
-    `;
-
+  const newEntry = createElement('div', { className: 'medical-history-entry' });
+  
+  const dateGroup = createElement('div', { className: 'form-group' });
+  dateGroup.appendChild(createElement('label', { for: 'recordDate' }, 'Dată Înregistrare'));
+  dateGroup.appendChild(createElement('input', { 
+    type: 'date', 
+    name: 'recordDate', 
+    value: '2025-04-14', 
+    required: true 
+  }));
+  newEntry.appendChild(dateGroup);
+  
+  // Create description textarea
+  const descGroup = createElement('div', { className: 'form-group full-width' });
+  descGroup.appendChild(createElement('label', { for: 'description' }, 'Descriere'));
+  descGroup.appendChild(createElement('textarea', { 
+    name: 'description', 
+    placeholder: 'Introdu detalii despre vaccinuri, deparazitări etc.', 
+    rows: '3' 
+  }));
+  newEntry.appendChild(descGroup);
+  
+  // Create delete button with event listener
+  const deleteButton = createElement('button', { 
+    type: 'button', 
+    className: 'btn delete-entry-btn'
+  }, 'Șterge');
+  deleteButton.addEventListener('click', function() {
+    deleteMedicalHistoryEntry(this);
+  });
+  newEntry.appendChild(deleteButton);
+  
   container.appendChild(newEntry);
-};
+  updateDeleteButtons();
+}
 
-window.deleteMedicalHistoryEntry = function (button) {
+function deleteMedicalHistoryEntry(button) {
   const entry = button.parentElement;
   entry.remove();
-};
+}
 
-// Multimedia entry functions
-window.addMultimediaEntry = function () {
+// Multimedia entry functions 
+function addMultimediaEntry() {
   const container = document.getElementById("multimedia-container");
-
-  const newEntry = document.createElement("div");
-  newEntry.className = "multimedia-entry";
-  newEntry.innerHTML = `
-      <div class="form-group">
-        <label for="mediaType">Tip Media</label>
-        <select name="mediaType" required>
-          <option value="photo">Poză</option>
-          <option value="video">Video</option>
-          <option value="audio">Audio</option>
-        </select>
-      </div>
-      <div class="form-group">
-        <label for="file">Încarcă Fișier</label>
-        <input type="file" name="file" accept="image/*,video/*,audio/*" required>
-      </div>
-      <div class="form-group full-width">
-        <label for="description">Descriere</label>
-        <textarea name="description" placeholder="Introdu descrierea" rows="3"></textarea>
-      </div>
-      <button type="button" class="btn delete-entry-btn" onclick="deleteMultimediaEntry(this)">Șterge</button>
-    `;
-
+  const newEntry = createElement('div', { className: 'multimedia-entry' });
+  
+  // Create media type select
+  const typeGroup = createElement('div', { className: 'form-group' });
+  typeGroup.appendChild(createElement('label', { for: 'mediaType' }, 'Tip Media'));
+  
+  const select = createElement('select', { name: 'mediaType', required: true });
+  ['photo', 'video', 'audio'].forEach(type => {
+    const option = createElement('option', { value: type }, 
+      type === 'photo' ? 'Poză' : type === 'video' ? 'Video' : 'Audio');
+    select.appendChild(option);
+  });
+  
+  typeGroup.appendChild(select);
+  newEntry.appendChild(typeGroup);
+  
+  const fileGroup = createElement('div', { className: 'form-group' });
+  fileGroup.appendChild(createElement('label', { for: 'file' }, 'Încarcă Fișier'));
+  fileGroup.appendChild(createElement('input', { 
+    type: 'file', 
+    name: 'file', 
+    accept: 'image/*,video/*,audio/*', 
+    required: true 
+  }));
+  newEntry.appendChild(fileGroup);
+  
+  // Create description textarea
+  const descGroup = createElement('div', { className: 'form-group full-width' });
+  descGroup.appendChild(createElement('label', { for: 'description' }, 'Descriere'));
+  descGroup.appendChild(createElement('textarea', { 
+    name: 'description', 
+    placeholder: 'Introdu descrierea', 
+    rows: '3' 
+  }));
+  newEntry.appendChild(descGroup);
+  
+  const deleteButton = createElement('button', { 
+    type: 'button', 
+    className: 'btn delete-entry-btn'
+  }, 'Șterge');
+  deleteButton.addEventListener('click', function() {
+    deleteMultimediaEntry(this);
+  });
+  newEntry.appendChild(deleteButton);
+  
   container.appendChild(newEntry);
-};
+  updateDeleteButtons();
+}
 
-window.deleteMultimediaEntry = function (button) {
+function deleteMultimediaEntry(button) {
   const entry = button.parentElement;
   entry.remove();
-};
+}
+
+// Navigation function
+function redirectToHome() {
+  window.location.href = "../Home/Home.html";
+}
 
 // Breed selection options
-window.updateBreedOptions = function () {
+function updateBreedOptions() {
   const species = document.getElementById("species").value;
   const breedSelect = document.getElementById("breed");
 
@@ -160,72 +301,78 @@ window.updateBreedOptions = function () {
   if (breeds[species]) {
     breeds[species].forEach((breed) => {
       const option = document.createElement("option");
-      option.value = breed.toLowerCase();
+      option.value = breed;
       option.textContent = breed;
       breedSelect.appendChild(option);
     });
   }
-};
-
-// Feeding schedule functions
-window.addFeedingScheduleEntry = function () {
-  const container = document.getElementById("feeding-schedule-container");
-
-  const newEntry = document.createElement("div");
-  newEntry.className = "feeding-schedule-entry";
-  newEntry.innerHTML = `
-      <div class="form-group">
-        <label for="feedingTime">Ora Hrănire</label>
-        <input type="time" name="feedingTime" required>
-      </div>
-      <div class="form-group full-width">
-        <label for="foodType">Tip de Hrană</label>
-        <textarea name="foodType" placeholder="Introdu tipurile de hrană" rows="2"></textarea>
-      </div>
-      <button type="button" class="btn delete-entry-btn" onclick="deleteFeedingScheduleEntry(this)">Șterge</button>
-    `;
-
-  container.appendChild(newEntry);
-  updateDeleteButtons();
-};
-
-window.deleteFeedingScheduleEntry = function (button) {
-  const container = document.getElementById("feeding-schedule-container");
-  const entries = container.querySelectorAll(".feeding-schedule-entry");
-
-  if (entries.length > 1) {
-    const entry = button.parentElement;
-    entry.remove();
-    updateDeleteButtons();
-  } else {
-    alert("Prima intrare nu poate fi ștearsă.");
-  }
-};
-
-function updateDeleteButtons() {
-  const entries = document.querySelectorAll(".feeding-schedule-entry");
-  entries.forEach((entry, index) => {
-    const deleteButton = entry.querySelector(".delete-entry-btn");
-    if (index === 0) {
-      deleteButton.style.display = "none";
-    } else {
-      deleteButton.style.display = "inline-block";
-    }
-  });
 }
 
-// Form submission
-window.submitPublishForm = async function (event) {
-  event.preventDefault();
+// Add feeding schedule entry
+function addFeedingScheduleEntry() {
+  const container = document.getElementById("feeding-schedule-container");
+  const newEntry = createElement('div', { className: 'feeding-schedule-entry' });
+  
+  // Create time input
+  const timeGroup = createElement('div', { className: 'form-group' });
+  timeGroup.appendChild(createElement('label', { for: 'feedingTime' }, 'Ora Hrănire'));
+  timeGroup.appendChild(createElement('input', { 
+    type: 'time', 
+    name: 'feedingTime', 
+    required: true 
+  }));
+  newEntry.appendChild(timeGroup);
+  
+  // Create food type textarea
+  const foodGroup = createElement('div', { className: 'form-group full-width' });
+  foodGroup.appendChild(createElement('label', { for: 'foodType' }, 'Tip de Hrană'));
+  foodGroup.appendChild(createElement('textarea', { 
+    name: 'foodType', 
+    placeholder: 'Introdu tipurile de hrană', 
+    rows: '2' 
+  }));
+  newEntry.appendChild(foodGroup);
+  
+  // Create delete button with event listener
+  const deleteButton = createElement('button', { 
+    type: 'button', 
+    className: 'btn delete-entry-btn'
+  }, 'Șterge');
+  deleteButton.addEventListener('click', function() {
+    deleteFeedingScheduleEntry(this);
+  });
+  newEntry.appendChild(deleteButton);
+  
+  container.appendChild(newEntry);
+  updateDeleteButtons();
+}
+
+// Delete feeding schedule entry
+function deleteFeedingScheduleEntry(button) {
+  const entry = button.parentElement;
+  const container = document.getElementById("feeding-schedule-container");
+  
+  if (container.querySelectorAll(".feeding-schedule-entry").length > 1) {
+    entry.remove();
+  } else {
+    alert("Trebuie să existe cel puțin o înregistrare pentru programul de hrănire.");
+  }
+  
+  updateDeleteButtons();
+}
+
+// Form submission handling
+async function submitPublishForm(event) {
+  if (event) event.preventDefault();
   
   try {
     // Show loading spinner
     showLoading("Publicare în curs...");
     
     const userID = user.id;
-    const name = document.getElementById("name").value;
-    const species = document.getElementById("species").value;
-    const breed = document.getElementById("breed").value;
+    const name = sanitizeInput(document.getElementById("name").value.trim());
+    const species = sanitizeInput(document.getElementById("species").value);
+    const breed = sanitizeInput(document.getElementById("breed").value);
     const age = parseInt(document.getElementById("age").value, 10);
     const gender = document.getElementById("gender").value;
 
@@ -240,7 +387,7 @@ window.submitPublishForm = async function (event) {
       if (timeInput && timeInput.value) {
         feedingSchedule.push({
           feedingTime: timeInput.value,
-          foodType: foodTypeInput ? foodTypeInput.value : "",
+          foodType: sanitizeInput(foodTypeInput ? foodTypeInput.value : ""),
         });
       }
     });
@@ -256,17 +403,16 @@ window.submitPublishForm = async function (event) {
       if (recordDateInput && recordDateInput.value) {
         medicalHistory.push({
           recordDate: recordDateInput.value,
-          description: descriptionInput ? descriptionInput.value : "",
-          vetNumber: document.getElementById("vetNumber").value,
-          first_aid_noted: document.getElementById("firstAidNoted").value
+          description: sanitizeInput(descriptionInput ? descriptionInput.value : ""),
+          vetNumber: sanitizeInput(document.getElementById("vetNumber").value),
+          first_aid_noted: sanitizeInput(document.getElementById("firstAidNoted").value)
         });
       }
     });
 
     // Upload all files first
     const multimedia = [];
-    const uploadPromises = [];
-
+    
     // Main photo
     const photoInput = document.getElementById("photo");
     if (photoInput && photoInput.files.length > 0) {
@@ -296,7 +442,7 @@ window.submitPublishForm = async function (event) {
       if (fileInput && fileInput.files.length > 0) {
         const file = fileInput.files[0];
         const mediaType = mediaTypeSelect ? mediaTypeSelect.value : "photo";
-        const description = descriptionInput ? descriptionInput.value : "";
+        const description = sanitizeInput(descriptionInput ? descriptionInput.value : "");
 
         try {
           const serverPath = await uploadFileToServer(file, mediaType);
@@ -316,7 +462,7 @@ window.submitPublishForm = async function (event) {
     const relationsInput = document.getElementById("relations");
     const relations = relationsInput && relationsInput.value
       ? {
-          friendWith: relationsInput.value
+          friendWith: sanitizeInput(relationsInput.value)
             .split(",")
             .map((name) => name.trim())
             .filter((name) => name)
@@ -340,7 +486,6 @@ window.submitPublishForm = async function (event) {
 
     console.log("Sending payload:", payload);
     
-    // Send data to server with fetch API and timeout
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), 15000); // 15 second timeout
     
@@ -351,6 +496,7 @@ window.submitPublishForm = async function (event) {
         headers: {
           "Content-Type": "application/json",
           "Authorization": `Bearer ${token}`,
+          "X-CSRF-Token": getCsrfToken()
         },
         body: JSON.stringify(payload),
         signal: controller.signal
@@ -402,11 +548,11 @@ window.submitPublishForm = async function (event) {
     hideLoading();
     alert(`Error: ${error.message || "Failed to publish animal"}`);
   }
-};
+}
 
 // Helper function to upload files to the server
-async function uploadFileToServer(file, mediaType, fileName) {
-  // Create FormData object for file upload
+async function uploadFileToServer(file, mediaType) {
+
   const formData = new FormData();
   
   // Append the file with its original name to preserve the extension
@@ -425,7 +571,8 @@ async function uploadFileToServer(file, mediaType, fileName) {
     const uploadResponse = await fetch(`${API_URL}/upload`, {
       method: "POST",
       headers: {
-        Authorization: `Bearer ${token}`,
+        "Authorization": `Bearer ${token}`,
+        "X-CSRF-Token": getCsrfToken() 
       },
       body: formData,
       signal: controller.signal
@@ -448,8 +595,3 @@ async function uploadFileToServer(file, mediaType, fileName) {
     throw error;
   }
 }
-
-// Navigation
-window.redirectToHome = function() {
-  window.location.replace("../Home/Home.html");
-};

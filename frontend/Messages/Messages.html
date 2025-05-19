@@ -3,10 +3,18 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Messages</title>
+    
+    <!--  security headers -->
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline'; img-src 'self' data: http://localhost:3000; connect-src 'self' http://localhost:3000">
+    <meta name="csrf-token" id="csrf-token">
+    <meta http-equiv="X-XSS-Protection" content="1; mode=block">
+    <meta http-equiv="X-Content-Type-Options" content="nosniff">
+    
+    <title>Messages - Pet Adoption</title>
     <link rel="stylesheet" href="../Home/Home.css">
     <link rel="stylesheet" href="../SideBar/Sidebar.css">
     <link rel="stylesheet" href="Messages.css">
+    <link rel="stylesheet" href="../utils/mobileStyles.css">
 </head>
 <body>
     <div class="app-container">
@@ -51,5 +59,6 @@
     </div>
     
     <script type="module" src="Messages.js"></script>
+    <script type="module" src="../utils/globalSecurity.js"></script>
 </body>
 </html>

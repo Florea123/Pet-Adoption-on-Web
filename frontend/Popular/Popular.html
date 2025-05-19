@@ -3,7 +3,14 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Popular Animals</title>
+  <meta name="theme-color" content="#ffffff">
+  <title>Popular Pets</title>
+  
+  <!--  security headers -->
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline'; img-src 'self' data: http://localhost:3000; connect-src 'self' http://localhost:3000">
+  <meta name="csrf-token" id="csrf-token">
+  <meta http-equiv="X-XSS-Protection" content="1; mode=block">
+  <meta http-equiv="X-Content-Type-Options" content="nosniff">
   
   <link rel="dns-prefetch" href="http://localhost:3000">
   
@@ -42,13 +49,33 @@
     }
   </style>
   
-  <!-- Non-critical CSS loaded asynchronously -->
-  <link rel="preload" href="Popular.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+  <!-- Remove inline event handlers for stylesheet loading -->
+  <link rel="preload" href="Popular.css" as="style">
   <noscript><link rel="stylesheet" href="Popular.css"></noscript>
-    <link rel="preload" href="../SideBar/Sidebar.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+  
+  <link rel="preload" href="../SideBar/Sidebar.css" as="style">
   <noscript><link rel="stylesheet" href="../SideBar/Sidebar.css"></noscript>
-  <link rel="preload" href="../AnimalCard/AnimalCard.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+  
+  <link rel="preload" href="../AnimalCard/AnimalCard.css" as="style">
   <noscript><link rel="stylesheet" href="../AnimalCard/AnimalCard.css"></noscript>
+  
+  <script>
+
+    document.addEventListener('DOMContentLoaded', function() {
+      const styleSheets = [
+        document.querySelector('link[href="Popular.css"]'),
+        document.querySelector('link[href="../SideBar/Sidebar.css"]'),
+        document.querySelector('link[href="../AnimalCard/AnimalCard.css"]')
+      ];
+      
+      styleSheets.forEach(styleSheet => {
+        if (styleSheet) {
+          styleSheet.rel = 'stylesheet';
+        }
+      });
+    });
+  </script>
+  
   <link rel="stylesheet" href="../utils/mobileStyles.css">
 </head>
 <body>
@@ -63,30 +90,7 @@
     </main>
   </div>
   
-  <!-- CSS loader -->
-  <script>
-    (function() {
-      var loadCSS = function(href) {
-        var link = document.createElement('link');
-        link.rel = 'stylesheet';
-        link.href = href;
-        document.head.appendChild(link);
-      };
-      
-      if (!window.loadCSS) {
-        // Fallback for preload polyfill
-        var links = document.getElementsByTagName('link');
-        for (var i = 0; i < links.length; i++) {
-          var link = links[i];
-          if (link.rel === 'preload' && link.getAttribute('as') === 'style') {
-            loadCSS(link.href);
-            link.rel = 'stylesheet';
-          }
-        }
-      }
-    })();
-  </script>
-  
   <script type="module" src="Popular.js"></script>
+  <script type="module" src="../utils/globalSecurity.js"></script>
 </body>
 </html>

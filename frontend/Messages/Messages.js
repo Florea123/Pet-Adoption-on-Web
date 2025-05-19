@@ -373,7 +373,7 @@ function setupScrollObserver() {
   }
 }
 
-// Improved scroll to bottom function with extra offset for mobile
+
 function scrollToBottom() {
   const messagesDiv = document.getElementById('messages');
   if (messagesDiv) {
@@ -381,14 +381,12 @@ function scrollToBottom() {
     const extraOffset = isMobile ? 2000 : 1000; // Extra padding on mobile
     messagesDiv.scrollTop = messagesDiv.scrollHeight + extraOffset;
     
-    // Try again after a slight delay to handle any rendering delays
     setTimeout(() => {
       messagesDiv.scrollTop = messagesDiv.scrollHeight + extraOffset;
     }, 50);
   }
 }
 
-// Add a function to format time in a simpler way for message bubbles
 function formatTimeOnly(timestamp) {
   if (!timestamp) return '';
   
@@ -407,11 +405,9 @@ async function handleSendMessage(event) {
     return;
   }
   
-  // Clear input immediately for better UX
   messageInput.value = '';
   
   try {
-    // Add message to UI immediately (optimistic UI)
     const tempId = `temp-${Date.now()}`;
     const messagesContainer = document.querySelector('.messages');
     const tempMessage = document.createElement('div');
@@ -432,19 +428,14 @@ async function handleSendMessage(event) {
     `;
     messagesContainer.appendChild(tempMessage);
     
-    // Scroll to bottom with extra assurance for mobile
     scrollToBottom();
     
-    // Send message to server
     await sendMessage(currentConversationUser.userId, content);
     
-    // Update the conversation list to show the latest message
     await loadConversations(false);
     
-    // Reload the conversation to show the sent message with server timestamp
     await loadConversation(currentConversationUser.userId, false);
     
-    // Focus the input field again
     messageInput.focus();
   } catch (error) {
     console.error('Error sending message:', error);
@@ -548,6 +539,5 @@ function checkUrlForDirectMessage() {
 document.addEventListener('DOMContentLoaded', () => {
   initialize();
   
-  // Check for direct message parameter in URL
   setTimeout(checkUrlForDirectMessage, 500);
 });

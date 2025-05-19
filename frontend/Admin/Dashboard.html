@@ -3,6 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+    <!-- security headers -->
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline'; img-src 'self' data: http://localhost:3000; connect-src 'self' http://localhost:3000">
+    <meta name="csrf-token" id="csrf-token">
+    <meta http-equiv="X-XSS-Protection" content="1; mode=block">
+    <meta http-equiv="X-Content-Type-Options" content="nosniff">
+    
     <title>Admin Dashboard</title>
     
     <!-- Preconnect to important domains -->
@@ -55,15 +62,36 @@
       }
     </style>
     
-    <!-- Preload non-critical CSS and scripts -->
-    <link rel="preload" href="Dashboard.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+    <!-- Non-critical CSS loaded asynchronously -->
+    <link rel="preload" href="Dashboard.css" as="style">
     <noscript><link rel="stylesheet" href="Dashboard.css"></noscript>
-    <link rel="preload" href="Users.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+    
+    <link rel="preload" href="Users.css" as="style">
     <noscript><link rel="stylesheet" href="Users.css"></noscript>
-    <link rel="preload" href="Pets.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+    
+    <link rel="preload" href="Pets.css" as="style">
     <noscript><link rel="stylesheet" href="Pets.css"></noscript>
-    <link rel="preload" href="Chart.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+    
+    <link rel="preload" href="Chart.css" as="style">
     <noscript><link rel="stylesheet" href="Chart.css"></noscript>
+    
+    <!-- Safe CSS loading script -->
+    <script>
+      document.addEventListener('DOMContentLoaded', function() {
+        const styleSheets = [
+          document.querySelector('link[href="Dashboard.css"]'),
+          document.querySelector('link[href="Users.css"]'),
+          document.querySelector('link[href="Pets.css"]'),
+          document.querySelector('link[href="Chart.css"]')
+        ];
+        
+        styleSheets.forEach(styleSheet => {
+          if (styleSheet) {
+            styleSheet.rel = 'stylesheet';
+          }
+        });
+      });
+    </script>
     
     <link rel="preload" href="https://cdn.jsdelivr.net/npm/jwt-decode@3.1.2/build/jwt-decode.min.js" as="script">
     <script src="https://cdn.jsdelivr.net/npm/jwt-decode@3.1.2/build/jwt-decode.min.js" defer></script>
@@ -153,32 +181,10 @@
         </main>
     </div>
 
-    <!-- CSS loading helper -->
-    <script>
-      (function() {
-        var loadCSS = function(href) {
-          var link = document.createElement('link');
-          link.rel = 'stylesheet';
-          link.href = href;
-          document.head.appendChild(link);
-        };
-        
-        if (!window.loadCSS) {
-          var links = document.getElementsByTagName('link');
-          for (var i = 0; i < links.length; i++) {
-            var link = links[i];
-            if (link.rel === 'preload' && link.getAttribute('as') === 'style') {
-              loadCSS(link.href);
-              link.rel = 'stylesheet';
-            }
-          }
-        }
-      })();
-    </script>
-
     <script type="module" src="Chart.js" defer></script>
     <script type="module" src="Users.js" defer></script>
     <script type="module" src="Pets.js" defer></script>
     <script type="module" src="Dashboard.js" defer></script>
+    <script type="module" src="../utils/globalSecurity.js"></script>
 </body>
 </html>
