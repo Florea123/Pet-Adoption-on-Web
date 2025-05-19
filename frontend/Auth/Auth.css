@@ -1,8 +1,8 @@
 body, html {
   height: 100%;
   font-family: Arial, sans-serif;
-  background: linear-gradient(to bottom right, #fffaf3, #ffe5c4); /* Gradient cald */
-  background-image: url('https://www.transparenttextures.com/patterns/paw-print.png'); /* Pattern cu lăbuțe */
+  background: linear-gradient(to bottom right, #fffaf3, #ffe5c4); 
+  background-image: url('https://www.transparenttextures.com/patterns/paw-print.png'); 
   background-size: 200px 200px; /* Dimensiunea patternului */
   background-blend-mode: overlay; /* Combină patternul cu gradientul */
   margin: 0;
@@ -29,16 +29,16 @@ body {
     width: 100%;
     max-width: 350px;
     padding: 20px;
-    background: linear-gradient(to bottom right, #ffffff, #ffe9cc); /* Gradient cald */
-    backdrop-filter: blur(10px); /* Efect de blur */
-    border-radius: 20px; /* Colțuri rotunjite */
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1); /* Umbra subtilă */
+    background: linear-gradient(to bottom right, #ffffff, #ffe9cc); 
+    backdrop-filter: blur(10px); 
+    border-radius: 20px; 
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1); 
   }
 
   .card h1 {
-    font-size: 24px; /* Dimensiunea textului */
-    font-weight: 600; /* Grosime mai mare */
-    color: #333; /* Culoare mai prietenoasă */
+    font-size: 24px; 
+    font-weight: 600; 
+    color: #333; 
     margin-bottom: 20px;
     text-align: center;
   }
@@ -92,19 +92,19 @@ body {
   .btn {
     width: 100%;
     padding: 10px;
-    background-color: #fca311; /* Culoare caldă */
+    background-color: #fca311;
     color: white;
     border: none;
-    border-radius: 10px; /* Colțuri rotunjite */
+    border-radius: 10px; 
     cursor: pointer;
     font-size: 16px;
     font-weight: 600;
-    transition: all 0.3s ease; /* Tranziție lină */
+    transition: all 0.3s ease;
   }
   
   .btn:hover {
-    background-color: #fb8500; /* Culoare mai intensă la hover */
-    transform: scale(1.02); /* Efect de mărire ușoară */
+    background-color: #fb8500; 
+    transform: scale(1.02); 
   }
   
   .footer-text {
@@ -113,14 +113,14 @@ body {
   }
   
   .footer-text a {
-    color: #fca311; /* Culoare caldă */
-    font-weight: 500; /* Grosime mai mare */
-    text-decoration: underline; /* Subliniază textul */
-    transition: color 0.3s ease; /* Tranziție lină */
+    color: #fca311; 
+    font-weight: 500; 
+    text-decoration: underline;
+    transition: color 0.3s ease; 
   }
   
   .footer-text a:hover {
-    color: #fb8500; /* Culoare mai intensă la hover */
+    color: #fb8500; 
   }
 
   /* Two-column grid layout for the form */

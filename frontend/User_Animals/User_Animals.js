@@ -42,7 +42,6 @@ async function fetchUserAnimals() {
         
         const allAnimals = await response.json();
         
-        // Filter to only show animals belonging to the current user
         userAnimals = allAnimals.filter(animal => animal.USERID === user.id);
         
         displayUserAnimals(userAnimals);
@@ -71,7 +70,6 @@ function displayUserAnimals(animals) {
         return;
     }
     
-    // Split rendering 
     const initialBatch = animals.slice(0, 6);
     const remainingBatch = animals.slice(6);
     
@@ -83,7 +81,6 @@ function displayUserAnimals(animals) {
         }, 50);
     }
     
-    // Add event listeners for delete buttons
     document.querySelectorAll('.delete-btn').forEach(button => {
         button.addEventListener('click', handleDeleteAnimal);
     });
