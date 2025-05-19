@@ -1,4 +1,3 @@
-# Ignore all files except .gitignore and the specific photo files
 *
 !.gitignore
 !cat1.jpeg
