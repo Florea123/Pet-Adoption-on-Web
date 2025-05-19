@@ -245,6 +245,7 @@ Distribuit sub licența MIT. Vezi fișierul `LICENSE`.
 ## :handshake: Contact
 
 **Florea Robert-Andrei** și **Sandu Theodor** 
+
 **Proiect**: [https://github.com/Florea123/Pet-Adoption-on-Web.git](https://github.com/username/Pet-Adoption-on-Web)
 
 ---
