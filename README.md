@@ -22,6 +22,7 @@
 
 - [Despre Proiect](#star2-despre-proiect)
   - [Capturi de Ecran](#camera-capturi-de-ecran)
+  - [Demo Video](#movie_camera-demo-video)
   - [Tehnologii Utilizate](#space_invader-tehnologii-utilizate)
   - [Funcționalități](#dart-funcționalități)
   - [Referință Culori](#art-referință-culori)
