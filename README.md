@@ -47,11 +47,29 @@ Platforma de Adopție a Animalelor de Companie este o aplicație web care permit
 ### :camera: Capturi de Ecran
 
 <div align="center"> 
-  <img src="Photos/Pagina_De_Start.png" alt="screenshot" width="600px" />
+  <img src="documentation/Photos/Pagina_De_Start.png" alt="screenshot" width="600px" />
   <p>Pagina de start a aplicației</p>
 
-  <img src="Photos/Profil_Animal_Disponibil.png" alt="screenshot" width="600px" />
+  <img src="documentation/Photos/Pagina_De_Inregistrare.png" alt="screenshot" width="600px" />
+  <p>Pagina de înregistrare utilizatori</p>
+
+  <img src="documentation/Photos/Profil_Animal_Disponibil.png" alt="screenshot" width="600px" />
   <p>Profil animal disponibil pentru adopție</p>
+  
+  <img src="documentation/Photos/Pagina_De_Publish.png" alt="screenshot" width="600px" />
+  <p>Formular pentru publicarea animalelor</p>
+  
+  <img src="documentation/Photos/Pagina_De_Mesaje.png" alt="screenshot" width="600px" />
+  <p>Sistem de mesagerie între utilizatori</p>
+  
+  <img src="documentation/Photos/Cele_Mai_Populare_Animale.png" alt="screenshot" width="600px" />
+  <p>Afișare animale populare</p>
+  
+  <img src="documentation/Photos/Newsletter.png" alt="screenshot" width="600px" />
+  <p>Sistem de newsletter și notificări</p>
+  
+  <img src="documentation/Photos/Vizualizarea_Animalelor_Tale.png" alt="screenshot" width="600px" />
+  <p>Gestionarea animalelor publicate de utilizator</p>
 </div>
 
 ---
