@@ -546,7 +546,7 @@ async function submitPublishForm(event) {
   } catch (error) {
     console.error("Error during publication:", error);
     hideLoading();
-    alert(`Error: ${error.message || "Failed to publish animal"}`);
+    //alert(`Error: ${error.message || "Failed to publish animal"}`);
   }
 }
 
