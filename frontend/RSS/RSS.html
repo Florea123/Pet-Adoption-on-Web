@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="ro">
+<head>
+  <meta charset="UTF-8">
+  <title>Flux RSS - Adopții Animale</title>
+  <link rel="stylesheet" href="../utils/mobileStyles.css">
+  <link rel="stylesheet" href="RSS.css">
+</head>
+<body>
+  <div class="container">
+    <div class="card">
+      <h1>Flux RSS - Oferte Adopție</h1>
+      <p>Pentru a primi automat cele mai noi anunțuri de adopție, folosește acest link în orice cititor RSS.</p>
+      <div class="rss-link-box">
+        <input type="text" id="rssLink" value="http://localhost:3000/rss" readonly>
+        <button id="copyBtn">Copiază Link</button>
+      </div>
+      <p class="info">Poți folosi acest link în aplicații ca Feedly, Inoreader sau extensii de browser.</p>
+      <a href="../Home/Home.html" class="btn">Înapoi la Home</a>
+    </div>
+  </div>
+  <script type="module" src="RSS.js"></script>
+</body>
+</html>
