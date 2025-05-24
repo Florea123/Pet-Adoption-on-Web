@@ -191,7 +191,8 @@ export default class Sidebar {
           { id: 'my-animals', initial: 'M', title: 'My Animals', path: '../User_Animals/User_Animals.html', color: '#10b981' },
           { id: 'messages', initial: 'M', title: 'Messages', path: '../Messages/Messages.html', color: '#ef4444' },
           { id: 'newsletter', initial: 'N', title: 'Newsletter', path: '../Newsletter/Newsletter.html', color: '#6366f1' },
-          { id: 'popular', initial: 'P', title: 'Popular', path: '../Popular/Popular.html', color: '#8b5cf6' }
+          { id: 'popular', initial: 'P', title: 'Popular', path: '../Popular/Popular.html', color: '#8b5cf6' },
+          { id: 'rss', initial: 'R', title: 'RSS', path: '../RSS/RSS.html', color: '#fca311' }
         ];
         
         navItems.forEach(item => {
@@ -373,6 +374,8 @@ export default class Sidebar {
                   onclick="location.href='../Newsletter/Newsletter.html'">Newsletter</button>
           <button id="popular-btn" class="btn ${activePage === 'popular' ? 'active' : ''}"
                   onclick="location.href='../Popular/Popular.html'">Popular</button>
+          <button id="rss-btn" class="btn ${activePage === 'rss' ? 'active' : ''}"
+                  onclick="location.href='../RSS/RSS.html'">RSS</button>
         </div>
         <div class="sidebar-content">
           ${activePage === 'home' ? `

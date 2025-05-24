@@ -1,5 +1,6 @@
 const http = require('http');
 const util = require('util');
+const { rssHandler } = require('./rss.js');
 const { 
   getUserByEmailAndPassword, 
   insertUser, 
@@ -383,6 +384,10 @@ const server = http.createServer(async (req, res) => {
         res.end(JSON.stringify({ error: 'Error serving API documentation' }));
         return;
       }
+    }
+    // RSS feed route
+    if (req.method === 'GET' && req.url === '/rss') {
+      return rssHandler(req, res);
     }
 
     // Route not found
