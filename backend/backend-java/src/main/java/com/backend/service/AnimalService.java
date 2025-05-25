@@ -134,8 +134,6 @@ public class AnimalService {
             throw new RuntimeException("Animal not found with ID: " + animalId);
         }
         
-        Animal animal = animalOpt.get();
-        
         StringBuilder varrayConstructor = new StringBuilder("feeding_time_array(");
         boolean hasValidTimes = false;
         
@@ -149,8 +147,8 @@ public class AnimalService {
                 if (hasValidTimes) {
                     varrayConstructor.append(", ");
                 }
-                // Create a proper TIMESTAMP for today with the specified time
-                varrayConstructor.append("TIMESTAMP '2025-01-05 ").append(formattedTime).append("'");
+                // Use VARCHAR2 format since the VARRAY is defined as VARCHAR2(50)
+                varrayConstructor.append("'").append(formattedTime).append("'");
                 hasValidTimes = true;
             }
         }
@@ -162,16 +160,24 @@ public class AnimalService {
             return;
         }
         
-        String sql = "INSERT INTO FeedingSchedule (id, animalID, feeding_time, food_type, notes) " +
-                     "VALUES (seq_feeding.NEXTVAL, ?, " + varrayConstructor.toString() + ", ?, ?)";
+        String sql = "INSERT INTO FeedingSchedule (animalID, feeding_time, food_type, notes) " +
+                     "VALUES (?, " + varrayConstructor.toString() + ", ?, ?)";
         
-        Query query = entityManager.createNativeQuery(sql);
-        query.setParameter(1, animalId);
-        query.setParameter(2, foodType);
-        query.setParameter(3, notes);
+        log.debug("Executing SQL: {}", sql);
+        log.debug("Parameters: animalId={}, foodType={}, notes={}", animalId, foodType, notes);
         
-        query.executeUpdate();
-        log.debug("Feeding schedule inserted successfully for animal ID: {}", animalId);
+        try {
+            Query query = entityManager.createNativeQuery(sql);
+            query.setParameter(1, animalId);
+            query.setParameter(2, foodType);
+            query.setParameter(3, notes);
+            
+            int result = query.executeUpdate();
+            log.info("Feeding schedule inserted successfully for animal ID: {}, rows affected: {}", animalId, result);
+        } catch (Exception e) {
+            log.error("Error inserting feeding schedule for animal ID {}: {}", animalId, e.getMessage(), e);
+            throw new RuntimeException("Failed to insert feeding schedule: " + e.getMessage(), e);
+        }
     }
     
     private String normalizeTimeFormat(String timeStr) {

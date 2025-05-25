@@ -23,15 +23,12 @@ document.addEventListener("DOMContentLoaded", function () {
 
   updateDeleteButtons();
   
-  // Initialize all event listeners
   initializeEventListeners();
 
-  // Set up photo input handler
   const photoInput = document.getElementById("photo");
   if (photoInput) {
     photoInput.addEventListener("change", function () {
       if (this.files && this.files[0]) {
-        // Optimize image preview to prevent layout shifts
         const reader = new FileReader();
         reader.onload = function (e) {
           const img = document.createElement('img');
@@ -532,21 +529,33 @@ async function submitPublishForm(event) {
     // Step 2: Add feeding schedule if present
     const feedingSchedule = [];
     const feedingEntries = document.querySelectorAll(".feeding-schedule-entry");
+    
+    console.log(`Found ${feedingEntries.length} feeding schedule entries`);
 
-    feedingEntries.forEach((entry) => {
+    feedingEntries.forEach((entry, index) => {
       const timeInput = entry.querySelector('[name="feedingTime"]');
       const foodTypeInput = entry.querySelector('[name="foodType"]');
+      
+      console.log(`Entry ${index}:`, {
+        timeInput: timeInput ? timeInput.value : 'not found',
+        foodTypeInput: foodTypeInput ? foodTypeInput.value : 'not found'
+      });
 
       if (timeInput && timeInput.value) {
-        feedingSchedule.push({
+        const feedingData = {
           feedingTime: timeInput.value,
           foodType: sanitizeInput(foodTypeInput ? foodTypeInput.value : ""),
           feedingTimes: [timeInput.value], // Backend expects feedingTimes array
           notes: "" // Add empty notes field
-        });
+        };
+        console.log(`Adding feeding schedule entry ${index}:`, feedingData);
+        feedingSchedule.push(feedingData);
+      } else {
+        console.log(`Skipping entry ${index} - no time value`);
       }
     });
 
+    console.log(`Total feeding schedule entries to send: ${feedingSchedule.length}`);
     if (feedingSchedule.length > 0) {
       console.log("Step 2: Adding feeding schedule:", feedingSchedule);
       await makeAnimalDataRequest(
@@ -554,6 +563,8 @@ async function submitPublishForm(event) {
         feedingSchedule,
         "feeding schedule"
       );
+    } else {
+      console.log("No feeding schedule entries to send");
     }
 
     // Step 3: Add medical history if present

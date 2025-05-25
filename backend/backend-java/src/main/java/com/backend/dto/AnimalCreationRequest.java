@@ -23,8 +23,12 @@ public class AnimalCreationRequest {
         private String feedingTime;
         private String foodType;
         private String notes;
+        private List<String> feedingTimes;
         
         public List<String> getFeedingTimes() {
+            if (feedingTimes != null && !feedingTimes.isEmpty()) {
+                return feedingTimes;
+            }
             if (feedingTime != null && !feedingTime.trim().isEmpty()) {
                 return List.of(feedingTime);
             }
