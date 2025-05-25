@@ -361,6 +361,93 @@ function deleteFeedingScheduleEntry(button) {
   updateDeleteButtons();
 }
 
+// Function to verify animal exists by checking animal details endpoint
+async function verifyAnimalExists(animalId, maxRetryTimeMs = 60000) {
+  console.log(`Verifying animal ${animalId} exists in database...`);
+  const startTime = Date.now();
+  const retryInterval = 2000; // Check every 2 seconds
+  
+  while (Date.now() - startTime < maxRetryTimeMs) {
+    try {
+      console.log(`Checking if animal ${animalId} exists... (${Math.round((Date.now() - startTime) / 1000)}s elapsed)`);
+      
+      const response = await fetch(`${API_URL}/animals/details`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
+          'X-CSRF-Token': getCsrfToken()
+        },
+        body: JSON.stringify({ animalId: animalId })
+      });
+
+      if (response.ok) {
+        console.log(`✅ Animal ${animalId} verified to exist in database`);
+        return true;
+      } else if (response.status === 404) {
+        // Animal not found, continue retrying
+        console.log(`Animal ${animalId} not found yet, retrying in ${retryInterval/1000}s...`);
+      } else {
+        // Other error, log but continue retrying
+        console.log(`Error checking animal ${animalId} (status ${response.status}), retrying...`);
+      }
+    } catch (error) {
+      console.log(`Network error checking animal ${animalId}: ${error.message}, retrying...`);
+    }
+    
+    // Wait before next retry
+    await new Promise(resolve => setTimeout(resolve, retryInterval));
+  }
+  
+  console.error(`❌ Failed to verify animal ${animalId} exists after ${maxRetryTimeMs/1000} seconds`);
+  return false;
+}
+
+// Helper function to make requests with better error handling
+async function makeAnimalDataRequest(url, data, dataType) {
+  try {
+    const response = await fetch(url, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${token}`,
+        "X-CSRF-Token": getCsrfToken()
+      },
+      body: JSON.stringify(data)
+    });
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      let errorMessage = `Failed to add ${dataType}`;
+      
+      try {
+        const errorData = JSON.parse(errorText);
+        errorMessage = errorData.error || errorMessage;
+      } catch (e) {
+        errorMessage = errorText || errorMessage;
+      }
+      
+      // Check if it's an "Animal not found" error
+      if (errorMessage.includes("Animal not found")) {
+        console.error(`❌ CRITICAL: ${errorMessage} - This should not happen after verification!`);
+        throw new Error(`${dataType} failed: ${errorMessage}`);
+      } else {
+        console.error(`Failed to add ${dataType}:`, errorMessage);
+        return false;
+      }
+    } else {
+      console.log(`${dataType} added successfully`);
+      return true;
+    }
+  } catch (error) {
+    if (error.message.includes("Animal not found")) {
+      throw error; // Re-throw critical errors
+    }
+    console.error(`Error adding ${dataType}:`, error);
+    return false;
+  }
+}
+
 // Form submission handling
 async function submitPublishForm(event) {
   if (event) event.preventDefault();
@@ -376,7 +463,73 @@ async function submitPublishForm(event) {
     const age = parseInt(document.getElementById("age").value, 10);
     const gender = document.getElementById("gender").value;
 
-    // Collect feeding schedule entries
+    // Step 1: Create basic animal first
+    const basicAnimalPayload = {
+      name,
+      breed,
+      species,
+      age,
+      gender
+    };
+
+    console.log("Step 1: Creating basic animal with payload:", basicAnimalPayload);
+    
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 15000); // 15 second timeout
+    
+    let animalResponse;
+    try {
+      console.log(`Connecting to ${API_URL}/animals/create`);
+      const response = await fetch(`${API_URL}/animals/create`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${token}`,
+          "X-CSRF-Token": getCsrfToken()
+        },
+        body: JSON.stringify(basicAnimalPayload),
+        signal: controller.signal
+      });
+      
+      clearTimeout(timeoutId);
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        let errorMessage;
+        try {
+          const errorData = JSON.parse(errorText);
+          errorMessage = errorData.error || `Server error: ${response.status}`;
+        } catch (e) {
+          errorMessage = `Server error: ${response.status}`;
+        }
+        throw new Error(errorMessage);
+      }
+
+      animalResponse = await response.json();
+      console.log("Basic animal created successfully:", animalResponse);
+      
+    } catch (fetchError) {
+      clearTimeout(timeoutId);
+      
+      if (fetchError.name === 'AbortError') {
+        throw new Error("Request timed out. Please check your server connection.");
+      } else {
+        throw fetchError;
+      }
+    }
+
+    const animalId = animalResponse.ANIMALID;
+    console.log(`Animal created with ID: ${animalId}, now verifying it exists before adding additional data...`);
+
+    // Step 1.5: Verify animal exists in database before proceeding
+    const animalExists = await verifyAnimalExists(animalId);
+    if (!animalExists) {
+      throw new Error(`Animal with ID ${animalId} could not be verified in database after 60 seconds. Please try again.`);
+    }
+
+    console.log(`Animal ${animalId} verified, proceeding with additional data...`);
+
+    // Step 2: Add feeding schedule if present
     const feedingSchedule = [];
     const feedingEntries = document.querySelectorAll(".feeding-schedule-entry");
 
@@ -388,11 +541,22 @@ async function submitPublishForm(event) {
         feedingSchedule.push({
           feedingTime: timeInput.value,
           foodType: sanitizeInput(foodTypeInput ? foodTypeInput.value : ""),
+          feedingTimes: [timeInput.value], // Backend expects feedingTimes array
+          notes: "" // Add empty notes field
         });
       }
     });
 
-    // Medical History
+    if (feedingSchedule.length > 0) {
+      console.log("Step 2: Adding feeding schedule:", feedingSchedule);
+      await makeAnimalDataRequest(
+        `${API_URL}/animals/${animalId}/feeding-schedule`,
+        feedingSchedule,
+        "feeding schedule"
+      );
+    }
+
+    // Step 3: Add medical history if present
     const medicalHistoryEntries = document.querySelectorAll(".medical-history-entry");
     const medicalHistory = [];
 
@@ -410,7 +574,16 @@ async function submitPublishForm(event) {
       }
     });
 
-    // Upload all files first
+    if (medicalHistory.length > 0) {
+      console.log("Step 3: Adding medical history:", medicalHistory);
+      await makeAnimalDataRequest(
+        `${API_URL}/animals/${animalId}/medical-history`,
+        medicalHistory,
+        "medical history"
+      );
+    }
+
+    // Step 4: Upload and add multimedia if present
     const multimedia = [];
     
     // Main photo
@@ -428,7 +601,7 @@ async function submitPublishForm(event) {
         });
       } catch (uploadError) {
         console.error("Error uploading main photo:", uploadError);
-        throw new Error("Failed to upload main photo. Please check your connection.");
+        // Continue with other operations instead of failing completely
       }
     }
 
@@ -458,95 +631,52 @@ async function submitPublishForm(event) {
       }
     }
 
-    // Relations
+    if (multimedia.length > 0) {
+      console.log("Step 4: Adding multimedia:", multimedia);
+      await makeAnimalDataRequest(
+        `${API_URL}/animals/${animalId}/multimedia`,
+        multimedia,
+        "multimedia"
+      );
+    }
+
+    // Step 5: Add relations if present
     const relationsInput = document.getElementById("relations");
-    const relations = relationsInput && relationsInput.value
-      ? {
-          friendWith: sanitizeInput(relationsInput.value)
-            .split(",")
-            .map((name) => name.trim())
-            .filter((name) => name)
-            .join(","),
-        }
-      : null;
+    if (relationsInput && relationsInput.value) {
+      const relations = {
+        friendWith: sanitizeInput(relationsInput.value)
+          .split(",")
+          .map((name) => name.trim())
+          .filter((name) => name)
+          .join(","),
+      };
 
-    // Prepare final payload
-    const payload = {
-      userID,
-      name,
-      breed,
-      species,
-      age,
-      gender,
-      feedingSchedule,
-      medicalHistory,
-      multimedia,
-      relations: relations && relations.friendWith ? relations : null,
-    };
-
-    console.log("Sending payload:", payload);
-    
-    const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 15000); // 15 second timeout
-    
-    try {
-      console.log(`Connecting to ${API_URL}/animals/create`);
-      const response = await fetch(`${API_URL}/animals/create`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "Authorization": `Bearer ${token}`,
-          "X-CSRF-Token": getCsrfToken()
-        },
-        body: JSON.stringify(payload),
-        signal: controller.signal
-      });
-      
-      clearTimeout(timeoutId);
-
-      if (!response.ok) {
-        const errorText = await response.text();
-        let errorMessage;
-        try {
-          const errorData = JSON.parse(errorText);
-          errorMessage = errorData.error || `Server error: ${response.status}`;
-        } catch (e) {
-          errorMessage = `Server error: ${response.status}`;
-        }
-        throw new Error(errorMessage);
-      }
-
-      // Success path
-      const responseData = await response.json();
-      console.log("Server response complete:", responseData);
-      
-      // Add a deliberate delay to ensure backend processing completes
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
-      // Hide loading spinner
-      hideLoading();
-
-      // Set a redirect flag in case direct redirection fails
-      sessionStorage.setItem("redirect_after_publish", "true");
-      
-      // Now redirect only after complete server response and delay
-      console.log("Server processing complete, redirecting...");
-      window.location.href = "../Home/Home.html";
-      
-    } catch (fetchError) {
-      clearTimeout(timeoutId);
-      
-      if (fetchError.name === 'AbortError') {
-        throw new Error("Request timed out. Please check your server connection.");
-      } else {
-        throw fetchError;
+      if (relations.friendWith) {
+        console.log("Step 5: Adding relations:", relations);
+        await makeAnimalDataRequest(
+          `${API_URL}/animals/${animalId}/relations`,
+          relations,
+          "relations"
+        );
       }
     }
+
+    console.log("All steps completed successfully!");
+    
+    // Hide loading spinner
+    hideLoading();
+
+    // Set a redirect flag in case direct redirection fails
+    sessionStorage.setItem("redirect_after_publish", "true");
+    
+    // Redirect to home page
+    console.log("Animal creation process complete, redirecting...");
+    window.location.href = "../Home/Home.html";
     
   } catch (error) {
     console.error("Error during publication:", error);
     hideLoading();
-    //alert(`Error: ${error.message || "Failed to publish animal"}`);
+    alert(`Error: ${error.message || "Failed to publish animal"}`);
   }
 }
 

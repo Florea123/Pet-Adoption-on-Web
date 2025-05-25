@@ -15,8 +15,7 @@ import lombok.AllArgsConstructor;
 public class Address {
     
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "seq_address")
-    @SequenceGenerator(name = "seq_address", sequenceName = "seq_address", allocationSize = 1)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "ADDRESSID")
     private Long addressId;
     
@@ -38,8 +37,7 @@ public class Address {
     @Size(max = 100, message = "Country must not exceed 100 characters")
     @Column(name = "COUNTRY", length = 100)
     private String country;
-    
-    // Relationships
+
     @OneToOne
     @JoinColumn(name = "USERID", referencedColumnName = "USERID", unique = true)
     @NotNull

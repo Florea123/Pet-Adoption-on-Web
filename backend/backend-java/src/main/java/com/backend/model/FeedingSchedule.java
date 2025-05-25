@@ -19,8 +19,7 @@ import java.util.stream.Collectors;
 public class FeedingSchedule {
     
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "seq_feeding")
-    @SequenceGenerator(name = "seq_feeding", sequenceName = "seq_feeding", allocationSize = 1)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "ID")
     private Long id;
     
@@ -28,7 +27,6 @@ public class FeedingSchedule {
     @JoinColumn(name = "ANIMALID", referencedColumnName = "ANIMALID")
     private Animal animal;
     
-    // Map as String and convert the Oracle VARRAY in a custom way
     @Column(name = "FEEDING_TIME", length = 1000)
     private String feedingTime;
     

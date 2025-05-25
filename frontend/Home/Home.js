@@ -435,7 +435,12 @@ function observeImage(img) {
 
 async function openAnimalDetailsPopup(animalId) {
   try {
+    console.log('Opening details for animal ID:', animalId, 'Type:', typeof animalId);
     showLoading('Loading animal details...');
+    
+    const requestBody = { animalId: animalId };
+    console.log('Request body:', requestBody);
+    console.log('Request body JSON:', JSON.stringify(requestBody));
     
     const response = await fetch(`${API_URL}/animals/details`, {
       method: 'POST',
@@ -443,18 +448,51 @@ async function openAnimalDetailsPopup(animalId) {
         'Content-Type': 'application/json',
         'Authorization': `Bearer ${token}`
       },
-      body: JSON.stringify({ animalId }),
+      body: JSON.stringify(requestBody),
     });
 
+    console.log('Response status:', response.status);
+    console.log('Response ok:', response.ok);
+    console.log('Response headers:', Object.fromEntries(response.headers.entries()));
+
     if (!response.ok) {
-      throw new Error('Failed to fetch animal details');
+      const errorText = await response.text();
+      console.error('Error response body:', errorText);
+      
+      let errorMessage = `Server error: ${response.status}`;
+      try {
+        const errorData = JSON.parse(errorText);
+        errorMessage = errorData.error || errorMessage;
+        console.error('Parsed error data:', errorData);
+      } catch (e) {
+        // If response is not JSON, use the text as is
+        errorMessage = errorText || errorMessage;
+        console.error('Error response is not JSON:', errorText);
+      }
+      
+      throw new Error(errorMessage);
     }
 
     const animalDetails = await response.json();
+    console.log('Animal details received:', animalDetails);
+    console.log('Animal details structure:', {
+      hasAnimal: !!animalDetails.animal,
+      hasMultimedia: !!animalDetails.multimedia,
+      hasFeedingSchedule: !!animalDetails.feedingSchedule,
+      hasMedicalHistory: !!animalDetails.medicalHistory,
+      hasOwner: !!animalDetails.owner,
+      hasAddress: !!animalDetails.address,
+      hasRelations: !!animalDetails.relations
+    });
+    
+    if (animalDetails.animal) {
+      console.log('Animal object:', animalDetails.animal);
+    }
     
     showAnimalDetailsPopup(animalDetails);
   } catch (error) {
     console.error('Error fetching animal details:', error);
+    alert(`Error loading animal details: ${error.message}`);
   } finally {
     hideLoading();
   }

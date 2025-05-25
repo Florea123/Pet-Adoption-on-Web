@@ -38,7 +38,7 @@ public class JwtService {
     public String generateUserToken(Long userId, String email, String firstName, String lastName, String phone, String createdAt) {
         Map<String, Object> claims = new HashMap<>();
         claims.put("userId", userId);
-        claims.put("id", userId); // Frontend expects 'id' field
+        claims.put("id", userId); 
         claims.put("email", email != null ? email : "");
         claims.put("firstName", firstName != null ? firstName : "");
         claims.put("lastName", lastName != null ? lastName : "");

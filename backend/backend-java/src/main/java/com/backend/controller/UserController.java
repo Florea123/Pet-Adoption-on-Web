@@ -85,7 +85,6 @@ public class UserController {
         }
     }
     
-    // Node.js: GET /users/all/details -> with admin auth
     @GetMapping("/users/all/details")
     public ResponseEntity<?> getAllUsersWithDetails(HttpServletRequest httpRequest) {
         try {
@@ -113,8 +112,7 @@ public class UserController {
             return ResponseEntity.status(500).body(error);
         }
     }
-    
-    // Node.js: DELETE /users/delete -> with admin auth
+
     @DeleteMapping("/users/delete")
     public ResponseEntity<?> deleteUser(@RequestBody Map<String, Object> request, HttpServletRequest httpRequest) {
         try {

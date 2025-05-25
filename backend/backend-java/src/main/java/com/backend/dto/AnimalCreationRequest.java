@@ -22,6 +22,14 @@ public class AnimalCreationRequest {
     public static class FeedingScheduleCreationRequest {
         private String feedingTime;
         private String foodType;
+        private String notes;
+        
+        public List<String> getFeedingTimes() {
+            if (feedingTime != null && !feedingTime.trim().isEmpty()) {
+                return List.of(feedingTime);
+            }
+            return List.of();
+        }
     }
 
     @Data

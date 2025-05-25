@@ -20,8 +20,7 @@ import java.util.List;
 public class User {
     
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "seq_users")
-    @SequenceGenerator(name = "seq_users", sequenceName = "seq_users", allocationSize = 1)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "USERID")
     private Long userId;
     
@@ -53,7 +52,6 @@ public class User {
     @Column(name = "CREATEDAT")
     private LocalDateTime createdAt;
     
-    // Relationships
     @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private Address address;
     

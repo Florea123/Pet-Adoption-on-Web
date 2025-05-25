@@ -20,8 +20,7 @@ import java.util.List;
 public class Animal {
     
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "seq_animal")
-    @SequenceGenerator(name = "seq_animal", sequenceName = "seq_animal", allocationSize = 1)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "ANIMALID")
     private Long animalId;
     
@@ -51,8 +50,7 @@ public class Animal {
     @CreationTimestamp
     @Column(name = "CREATEDAT")
     private LocalDateTime createdAt;
-    
-    // Relationships
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "USERID", referencedColumnName = "USERID")
     @NotNull

@@ -13,8 +13,7 @@ import lombok.AllArgsConstructor;
 public class Relations {
     
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "seq_relations")
-    @SequenceGenerator(name = "seq_relations", sequenceName = "seq_relations", allocationSize = 1)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "ID")
     private Long id;
     

@@ -65,14 +65,13 @@ public class MessageService {
     }
     
     public List<Map<String, Object>> getConversations(Long userId) {
-        // Get conversations where user is sender
+    
         List<Object[]> senderResults = messageRepository.findConversationsAsSender(userId);
-        // Get conversations where user is receiver  
+
         List<Object[]> receiverResults = messageRepository.findConversationsAsReceiver(userId);
-        
+    
         Map<Long, Map<String, Object>> conversationMap = new HashMap<>();
         
-        // Process sender conversations
         for (Object[] result : senderResults) {
             User otherUser = (User) result[0];
             LocalDateTime lastMessageTime = (LocalDateTime) result[1];
@@ -88,7 +87,6 @@ public class MessageService {
             conversationMap.put(otherUser.getUserId(), conversation);
         }
         
-        // Process receiver conversations, updating timestamp if newer
         for (Object[] result : receiverResults) {
             User otherUser = (User) result[0];
             LocalDateTime lastMessageTime = (LocalDateTime) result[1];
@@ -111,8 +109,7 @@ public class MessageService {
                 conversationMap.put(otherUser.getUserId(), conversation);
             }
         }
-        
-        // Sort by last message time descending
+        //sort the conversations
         return conversationMap.values().stream()
                 .sorted((a, b) -> ((LocalDateTime) b.get("LASTMESSAGETIME"))
                         .compareTo((LocalDateTime) a.get("LASTMESSAGETIME")))

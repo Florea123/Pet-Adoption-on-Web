@@ -20,8 +20,7 @@ import java.time.LocalDateTime;
 public class Newsletter {
     
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "seq_newsletter")
-    @SequenceGenerator(name = "seq_newsletter", sequenceName = "seq_newsletter", allocationSize = 1)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "ID")
     private Long id;
     
@@ -37,7 +36,6 @@ public class Newsletter {
     @Column(name = "SUBSCRIBEDAT")
     private LocalDateTime subscribedAt;
     
-    // Relationships
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "USERID", referencedColumnName = "USERID")
     @NotNull

@@ -19,8 +19,7 @@ import java.time.LocalDateTime;
 public class Admin {
     
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "seq_admins")
-    @SequenceGenerator(name = "seq_admins", sequenceName = "seq_admins", allocationSize = 1)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "ADMINDATA_ADMINID")
     private Long adminId;
     

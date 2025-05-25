@@ -39,7 +39,6 @@ public class FileStorageService {
         
         String uniqueFilename = UUID.randomUUID().toString() + fileExtension;
         
-        // Save file
         Path filePath = uploadPath.resolve(uniqueFilename);
         Files.copy(file.getInputStream(), filePath, StandardCopyOption.REPLACE_EXISTING);
         

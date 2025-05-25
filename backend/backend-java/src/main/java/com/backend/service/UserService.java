@@ -26,7 +26,6 @@ public class UserService {
     private final JwtService jwtService;
     
     public UserResponse createUser(UserSignupRequest request) {
-        // Check for missing required fields
         if (request.getFirstName() == null || request.getLastName() == null || 
             request.getEmail() == null || request.getPassword() == null || 
             request.getPhone() == null || request.getAddress() == null) {
@@ -41,12 +40,11 @@ public class UserService {
         user.setFirstName(request.getFirstName());
         user.setLastName(request.getLastName());
         user.setEmail(request.getEmail());
-        user.setPassword(request.getPassword()); // Store plain text password
+        user.setPassword(request.getPassword()); 
         user.setPhone(request.getPhone());
         
         User savedUser = userRepository.save(user);
         
-        // Create address
         if (request.getAddress() != null) {
             Address address = new Address();
             address.setUser(savedUser);
@@ -54,13 +52,11 @@ public class UserService {
             address.setCity(request.getAddress().getCity());
             address.setState(request.getAddress().getState());
             
-            // Convert zipCode from String to Integer
             try {
                 if (request.getAddress().getZipCode() != null && !request.getAddress().getZipCode().trim().isEmpty()) {
                     address.setZipCode(Integer.valueOf(request.getAddress().getZipCode()));
                 }
             } catch (NumberFormatException e) {
-                // Handle invalid zipCode gracefully
                 address.setZipCode(null);
             }
             
@@ -80,12 +76,10 @@ public class UserService {
         }
         
         User user = userOpt.get();
-        // Plain text password comparison
         if (!request.getPassword().equals(user.getPassword())) {
             throw new RuntimeException("Invalid credentials");
         }
         
-        // Safe string conversion for createdAt
         String createdAtString = "";
         try {
             if (user.getCreatedAt() != null) {

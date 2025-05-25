@@ -17,8 +17,7 @@ import java.time.LocalDate;
 public class MultiMedia {
     
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "seq_multimedia")
-    @SequenceGenerator(name = "seq_multimedia", sequenceName = "seq_multimedia", allocationSize = 1)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "ID")
     private Long id;
     
@@ -37,7 +36,6 @@ public class MultiMedia {
     @Column(name = "UPLOAD_DATE")
     private LocalDate uploadDate;
     
-    // Relationships
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "ANIMALID", referencedColumnName = "ANIMALID")
     @NotNull

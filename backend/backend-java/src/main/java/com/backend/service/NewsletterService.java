@@ -44,7 +44,6 @@ public class NewsletterService {
         
         User user = userOpt.get();
         
-        // Remove existing subscriptions not in the new list
         List<Newsletter> existingSubscriptions = newsletterRepository.findByUserUserId(userId);
         for (Newsletter existing : existingSubscriptions) {
             if (!speciesList.contains(existing.getSpecies())) {
@@ -52,7 +51,6 @@ public class NewsletterService {
             }
         }
         
-        // Add new subscriptions
         for (String species : speciesList) {
             if (!newsletterRepository.existsByUserUserIdAndSpecies(userId, species)) {
                 Newsletter newsletter = new Newsletter();

@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Animal Creation</title>
+</head>
+<body>
+    <h1>Test Animal Creation</h1>
+    
+    <form id="testForm">
+        <h2>Basic Animal Info</h2>
+        <label>Name: <input type="text" id="name" value="Test Dog" required></label><br><br>
+        <label>Species: <input type="text" id="species" value="Dog" required></label><br><br>
+        <label>Breed: <input type="text" id="breed" value="Golden Retriever" required></label><br><br>
+        <label>Age: <input type="number" id="age" value="3" required></label><br><br>
+        <label>Gender: 
+            <select id="gender" required>
+                <option value="male">Male</option>
+                <option value="female">Female</option>
+            </select>
+        </label><br><br>
+        
+        <h2>Feeding Schedule</h2>
+        <label>Feeding Time: <input type="time" id="feedingTime" value="08:00"></label><br><br>
+        <label>Food Type: <input type="text" id="foodType" value="Dry kibble"></label><br><br>
+        
+        <h2>Medical History</h2>
+        <label>Record Date: <input type="date" id="recordDate" value="2024-01-15"></label><br><br>
+        <label>Description: <input type="text" id="description" value="Annual checkup"></label><br><br>
+        <label>Vet Number: <input type="text" id="vetNumber" value="VET123"></label><br><br>
+        <label>First Aid Noted: <input type="text" id="firstAidNoted" value="None"></label><br><br>
+        
+        <h2>Relations</h2>
+        <label>Friend With: <input type="text" id="relations" value="Buddy, Max"></label><br><br>
+        
+        <button type="submit">Create Animal</button>
+    </form>
+    
+    <div id="result"></div>
+    
+    <script>
+        const API_URL = "http://localhost:3000";
+        // Mock token for testing - replace with real token
+        const token = "eyJhbGciOiJIUzI1NiJ9.eyJmaXJzdE5hbWUiOiJBbmRyZWkiLCJsYXN0TmFtZSI6IlBvcGVzY3UiLCJjcmVhdGVkQXQiOiIyMDI1LTA0LTI1VDEwOjEzOjAzIiwicGhvbmUiOiIwNzU1MTIzNDU2IiwiaWQiOjIxLCJpc0FkbWluIjpmYWxzZSwidXNlcklkIjoyMSwiZW1haWwiOiJhbmRyZWkucG9wZXNjdUBleGFtcGxlLmNvbSIsInN1YiI6ImFuZHJlaS5wb3Blc2N1QGV4YW1wbGUuY29tIiwiaWF0IjoxNzQ4MTY4MTkxLCJleHAiOjE3NDgyNTQ1OTF9.EeIi4dsjHG20Gex5GBU7Itx8EZvA_Eu1U_oxS42uXzc";
+        
+        document.getElementById('testForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const resultDiv = document.getElementById('result');
+            resultDiv.innerHTML = '<p>Creating animal...</p>';
+            
+            try {
+                // Step 1: Create basic animal
+                const basicAnimalPayload = {
+                    name: document.getElementById('name').value,
+                    breed: document.getElementById('breed').value,
+                    species: document.getElementById('species').value,
+                    age: parseInt(document.getElementById('age').value),
+                    gender: document.getElementById('gender').value
+                };
+                
+                console.log("Step 1: Creating basic animal:", basicAnimalPayload);
+                
+                const response = await fetch(`${API_URL}/animals/create`, {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                        "Authorization": `Bearer ${token}`
+                    },
+                    body: JSON.stringify(basicAnimalPayload)
+                });
+                
+                if (!response.ok) {
+                    const errorText = await response.text();
+                    throw new Error(`Failed to create basic animal: ${errorText}`);
+                }
+                
+                const animalResponse = await response.json();
+                console.log("Basic animal created:", animalResponse);
+                resultDiv.innerHTML += `<p>✅ Basic animal created with ID: ${animalResponse.ANIMALID}</p>`;
+                
+                const animalId = animalResponse.ANIMALID;
+                
+                // Step 2: Add feeding schedule
+                const feedingTime = document.getElementById('feedingTime').value;
+                const foodType = document.getElementById('foodType').value;
+                
+                if (feedingTime && foodType) {
+                    const feedingSchedule = [{
+                        feedingTime: feedingTime,
+                        foodType: foodType,
+                        feedingTimes: [feedingTime],
+                        notes: ""
+                    }];
+                    
+                    console.log("Step 2: Adding feeding schedule:", feedingSchedule);
+                    
+                    const feedingResponse = await fetch(`${API_URL}/animals/${animalId}/feeding-schedule`, {
+                        method: "POST",
+                        headers: {
+                            "Content-Type": "application/json",
+                            "Authorization": `Bearer ${token}`
+                        },
+                        body: JSON.stringify(feedingSchedule)
+                    });
+                    
+                    if (feedingResponse.ok) {
+                        console.log("Feeding schedule added successfully");
+                        resultDiv.innerHTML += `<p>✅ Feeding schedule added</p>`;
+                    } else {
+                        const errorText = await feedingResponse.text();
+                        console.error("Failed to add feeding schedule:", errorText);
+                        resultDiv.innerHTML += `<p>❌ Failed to add feeding schedule: ${errorText}</p>`;
+                    }
+                }
+                
+                // Step 3: Add medical history
+                const recordDate = document.getElementById('recordDate').value;
+                const description = document.getElementById('description').value;
+                const vetNumber = document.getElementById('vetNumber').value;
+                const firstAidNoted = document.getElementById('firstAidNoted').value;
+                
+                if (recordDate && description) {
+                    const medicalHistory = [{
+                        recordDate: recordDate,
+                        description: description,
+                        vetNumber: vetNumber,
+                        first_aid_noted: firstAidNoted
+                    }];
+                    
+                    console.log("Step 3: Adding medical history:", medicalHistory);
+                    
+                    const medicalResponse = await fetch(`${API_URL}/animals/${animalId}/medical-history`, {
+                        method: "POST",
+                        headers: {
+                            "Content-Type": "application/json",
+                            "Authorization": `Bearer ${token}`
+                        },
+                        body: JSON.stringify(medicalHistory)
+                    });
+                    
+                    if (medicalResponse.ok) {
+                        console.log("Medical history added successfully");
+                        resultDiv.innerHTML += `<p>✅ Medical history added</p>`;
+                    } else {
+                        const errorText = await medicalResponse.text();
+                        console.error("Failed to add medical history:", errorText);
+                        resultDiv.innerHTML += `<p>❌ Failed to add medical history: ${errorText}</p>`;
+                    }
+                }
+                
+                // Step 4: Add relations
+                const relationsValue = document.getElementById('relations').value;
+                
+                if (relationsValue) {
+                    const relations = {
+                        friendWith: relationsValue
+                    };
+                    
+                    console.log("Step 4: Adding relations:", relations);
+                    
+                    const relationsResponse = await fetch(`${API_URL}/animals/${animalId}/relations`, {
+                        method: "POST",
+                        headers: {
+                            "Content-Type": "application/json",
+                            "Authorization": `Bearer ${token}`
+                        },
+                        body: JSON.stringify(relations)
+                    });
+                    
+                    if (relationsResponse.ok) {
+                        console.log("Relations added successfully");
+                        resultDiv.innerHTML += `<p>✅ Relations added</p>`;
+                    } else {
+                        const errorText = await relationsResponse.text();
+                        console.error("Failed to add relations:", errorText);
+                        resultDiv.innerHTML += `<p>❌ Failed to add relations: ${errorText}</p>`;
+                    }
+                }
+                
+                resultDiv.innerHTML += `<p><strong>🎉 Animal creation process completed!</strong></p>`;
+                
+            } catch (error) {
+                console.error("Error:", error);
+                resultDiv.innerHTML += `<p>❌ Error: ${error.message}</p>`;
+            }
+        });
+    </script>
+</body>
+</html> 
