@@ -123,6 +123,37 @@ body {
     color: #fb8500; 
   }
 
+/* Error message styling */
+.error-message {
+  background-color: #fef2f2;
+  border: 1px solid #fca5a5;
+  color: #dc2626;
+  padding: 10px;
+  border-radius: 6px;
+  margin-bottom: 15px;
+  font-size: 14px;
+  text-align: center;
+}
+
+/* Loading state for button */
+.btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none !important;
+}
+
+.btn-loader {
+  display: none;
+}
+
+.btn:disabled .btn-text {
+  display: none;
+}
+
+.btn:disabled .btn-loader {
+  display: inline;
+}
+
   /* Two-column grid layout for the form */
 .form-grid {
   display: grid;
@@ -138,4 +169,131 @@ body {
 
 .form-group.full-width {
   grid-column: span 2;
+}
+
+/* Mobile Responsive Styles */
+@media (max-width: 768px) {
+  body {
+    height: auto;
+    min-height: 100vh;
+    padding: 20px 0;
+  }
+  
+  .container {
+    height: auto;
+    min-height: calc(100vh - 40px);
+    padding: 20px;
+    width: 100%;
+    box-sizing: border-box;
+  }
+  
+  .card {
+    max-width: 100%;
+    padding: 25px;
+    margin: 0;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+  }
+  
+  .card h1,
+  .title {
+    font-size: 28px;
+    margin-bottom: 25px;
+  }
+  
+  /* Single column layout on mobile */
+  .form-grid {
+    display: block;
+    padding: 0;
+    gap: 0;
+  }
+  
+  .form-group {
+    margin-bottom: 20px;
+    display: flex;
+    flex-direction: column;
+  }
+  
+  .form-group.full-width {
+    grid-column: unset;
+  }
+  
+  label {
+    font-size: 14px;
+    margin-bottom: 8px;
+    font-weight: 600;
+    color: #333;
+  }
+  
+  input {
+    padding: 12px;
+    font-size: 16px; 
+    border-radius: 8px;
+    border: 2px solid #e5e7eb;
+    transition: border-color 0.3s;
+  }
+  
+  input:focus {
+    border-color: #fca311;
+    box-shadow: 0 0 0 3px rgba(252, 163, 17, 0.2);
+  }
+  
+  .btn {
+    padding: 14px;
+    font-size: 18px;
+    border-radius: 10px;
+    margin-top: 10px;
+    box-shadow: 0 4px 15px rgba(252, 163, 17, 0.3);
+  }
+  
+  .btn:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 6px 20px rgba(252, 163, 17, 0.4);
+  }
+  
+  .footer-text {
+    font-size: 16px;
+    margin-top: 20px;
+  }
+}
+
+@media (max-width: 480px) {
+  .container {
+    padding: 15px;
+  }
+  
+  .card {
+    padding: 20px;
+  }
+  
+  .card h1,
+  .title {
+    font-size: 24px;
+    margin-bottom: 20px;
+  }
+  
+  .form-group {
+    margin-bottom: 18px;
+  }
+  
+  input {
+    padding: 14px;
+    font-size: 16px;
+  }
+  
+  .btn {
+    padding: 16px;
+    font-size: 16px;
+  }
+}
+
+/* Tablet styles */
+@media (min-width: 769px) and (max-width: 1024px) {
+  .card {
+    max-width: 500px;
+  }
+  
+  .form-grid {
+    gap: 1.5rem;
+    padding: 1.5rem;
+  }
 }

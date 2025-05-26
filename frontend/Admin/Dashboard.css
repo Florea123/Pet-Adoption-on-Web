@@ -203,32 +203,164 @@ body {
     to { opacity: 1; }
 }
 
+/* Mobile Navigation */
+.mobile-nav {
+    display: none;
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background-color: #2c3e50;
+    z-index: 1000;
+    padding: 10px 0;
+    box-shadow: 0 -2px 10px rgba(0,0,0,0.1);
+}
+
+.mobile-nav-items {
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+}
+
+.mobile-nav-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    color: #ecf0f1;
+    text-decoration: none;
+    padding: 8px;
+    border-radius: 8px;
+    transition: background-color 0.3s;
+    cursor: pointer;
+}
+
+.mobile-nav-item:hover,
+.mobile-nav-item.active {
+    background-color: #3498db;
+    color: white;
+}
+
+.mobile-nav-item span {
+    font-size: 12px;
+    margin-top: 4px;
+}
+
+/* Mobile Admin Header */
+.mobile-admin-header {
+    display: none;
+    position: sticky;
+    top: 0;
+    background-color: #2c3e50;
+    color: white;
+    padding: 15px;
+    z-index: 100;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}
+
+.mobile-admin-header h1 {
+    margin: 0;
+    font-size: 1.5rem;
+}
+
+.mobile-admin-header .admin-profile {
+    margin-top: 5px;
+    font-size: 0.9rem;
+    opacity: 0.8;
+}
+
 /* Responsive design */
 @media (max-width: 768px) {
-    .sidebar {
-        width: 70px;
-        overflow: hidden;
+    body, html {
+        overflow-x: hidden;
+        width: 100%;
+        position: relative;
     }
     
-    .logo h2, .logo p {
+    .dashboard-container {
+        flex-direction: column;
+        width: 100%;
+        margin: 0;
+        padding: 0;
+    }
+    
+    .sidebar {
         display: none;
     }
     
-    .nav-menu a {
-        text-align: center;
-        padding: 15px 0;
+    .mobile-nav {
+        display: block;
     }
     
-    .sidebar-footer {
-        padding: 10px;
+    .mobile-admin-header {
+        display: block;
     }
     
     .main-content {
-        margin-left: 70px;
+        margin-left: 0 !important;
+        margin-right: 0 !important;
+        padding: 15px;
+        width: 100% !important;
+        max-width: 100% !important;
+        box-sizing: border-box;
+        padding-bottom: 80px; 
+    }
+    
+    .dashboard-header {
+        display: none; 
     }
     
     .stats-container {
-        grid-template-columns: repeat(2, 1fr);
+        grid-template-columns: 1fr;
+        gap: 15px;
+        margin-bottom: 20px;
+    }
+    
+    .stat-card {
+        padding: 15px;
+    }
+    
+    .stat-card h3 {
+        font-size: 14px;
+    }
+    
+    .stat-value {
+        font-size: 24px;
+    }
+    
+    .table-container {
+        padding: 15px;
+        overflow-x: auto;
+    }
+    
+    .refresh-btn {
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        z-index: 101;
+        border-radius: 50%;
+        width: 50px;
+        height: 50px;
+        padding: 0;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+    }
+    
+    .refresh-btn span {
+        display: none;
+    }
+    
+    /* Make charts stack vertically on mobile */
+    .charts-container {
+        grid-template-columns: 1fr;
+        gap: 15px;
+    }
+    
+    .chart-box {
+        min-height: 250px;
+    }
+    
+    /* Content sections take full height on mobile */
+    .content-section {
+        min-height: calc(100vh - 140px);
     }
 }
 

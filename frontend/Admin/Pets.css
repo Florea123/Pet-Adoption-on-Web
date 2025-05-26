@@ -171,3 +171,104 @@
 .medical-list li {
     border-left-color: #ef4444;
 }
+
+/* Mobile Responsive Styles */
+@media (max-width: 768px) {
+    .pets-table {
+        font-size: 14px;
+    }
+    
+    .pets-table th,
+    .pets-table td {
+        padding: 8px 4px;
+        font-size: 12px;
+    }
+    
+    /* Hide less important columns on mobile */
+    .pets-table th:nth-child(3),
+    .pets-table td:nth-child(3),
+    .pets-table th:nth-child(4),
+    .pets-table td:nth-child(4) {
+        display: none;
+    }
+    
+    .view-pet-btn,
+    .delete-pet-btn {
+        padding: 6px 8px;
+        font-size: 11px;
+        margin: 2px;
+    }
+    
+    .modal-backdrop {
+        padding: 10px;
+    }
+    
+    .modal-content {
+        max-height: 95vh;
+    }
+    
+    .modal-header {
+        padding: 12px 15px;
+    }
+    
+    .modal-header h2 {
+        font-size: 18px;
+    }
+    
+    .modal-body {
+        padding: 15px;
+    }
+    
+    .pet-details-grid {
+        grid-template-columns: 1fr;
+        gap: 15px;
+    }
+    
+    .pet-image-container {
+        order: -1;
+    }
+    
+    .pet-image {
+        max-height: 200px;
+    }
+    
+    .no-image {
+        height: 150px;
+        font-size: 14px;
+    }
+    
+    .pet-info h3 {
+        font-size: 16px;
+        margin-top: 15px;
+        margin-bottom: 8px;
+    }
+    
+    .pet-info p {
+        font-size: 14px;
+        margin: 6px 0;
+    }
+    
+    .feeding-list li,
+    .medical-list li {
+        padding: 10px;
+        font-size: 13px;
+        margin-bottom: 6px;
+    }
+    
+    /* Search and filter controls for mobile */
+    .section-controls {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+        margin-bottom: 15px;
+    }
+    
+    .search-input,
+    .filter-select {
+        width: 100%;
+        padding: 10px;
+        border: 1px solid #e2e8f0;
+        border-radius: 4px;
+        font-size: 14px;
+    }
+}

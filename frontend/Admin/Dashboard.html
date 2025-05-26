@@ -99,6 +99,15 @@
 </head>
 <body>
     <div class="dashboard-container">
+        <!-- Mobile Header -->
+        <header class="mobile-admin-header">
+            <h1>Admin Dashboard</h1>
+            <div class="admin-profile">
+                <span id="mobileAdminEmail">admin@example.com</span>
+            </div>
+        </header>
+        
+        <!-- Desktop Sidebar -->
         <aside class="sidebar">
             <div class="logo">
                 <h2>Pet Adoption</h2>
@@ -115,6 +124,28 @@
                 <button id="logoutBtn" class="logout-btn">Logout</button>
             </div>
         </aside>
+        
+        <!-- Mobile Bottom Navigation -->
+        <nav class="mobile-nav">
+            <div class="mobile-nav-items">
+                <div class="mobile-nav-item active" data-section="overview">
+                    <div>📊</div>
+                    <span>Overview</span>
+                </div>
+                <div class="mobile-nav-item" data-section="users">
+                    <div>👥</div>
+                    <span>Users</span>
+                </div>
+                <div class="mobile-nav-item" data-section="pets">
+                    <div>🐾</div>
+                    <span>Pets</span>
+                </div>
+                <div class="mobile-nav-item" id="mobileLogoutBtn">
+                    <div>🚪</div>
+                    <span>Logout</span>
+                </div>
+            </div>
+        </nav>
         
         <main class="main-content">
             <header class="dashboard-header">

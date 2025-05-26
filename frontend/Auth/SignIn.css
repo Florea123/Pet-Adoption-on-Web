@@ -146,3 +146,176 @@ body {
   .footer-text a:hover {
     color: #fb8500; 
   }
+
+/* Error message styling */
+.error-message {
+  background-color: #fef2f2;
+  border: 1px solid #fca5a5;
+  color: #dc2626;
+  padding: 10px;
+  border-radius: 6px;
+  margin-bottom: 15px;
+  font-size: 14px;
+  text-align: center;
+}
+
+/* Loading state for button */
+.btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none !important;
+}
+
+.btn-loader {
+  display: none;
+}
+
+.btn:disabled .btn-text {
+  display: none;
+}
+
+.btn:disabled .btn-loader {
+  display: inline;
+}
+
+/* Mobile Responsive Styles */
+@media (max-width: 768px) {
+  .container {
+    flex-direction: column;
+    height: 100vh;
+  }
+  
+  .photo-section {
+    flex: 1;
+    height: 40vh;
+    min-height: 200px;
+    margin: 0;
+    order: 1;
+  }
+  
+  .photo-section .welcome-text {
+    font-size: 24px;
+    padding: 20px 30px;
+    top: 50%;
+    background: rgba(255, 255, 255, 0.9);
+    border-radius: 15px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+  }
+  
+  .signin-section {
+    flex: 1;
+    order: 2;
+    padding: 20px;
+    background-color: rgba(255, 255, 255, 0.8);
+    min-height: 60vh;
+  }
+  
+  .card {
+    max-width: 100%;
+    padding: 25px;
+    margin: 0;
+    box-shadow: 0 2px 15px rgba(0, 0, 0, 0.1);
+  }
+  
+  .card h1 {
+    font-size: 28px;
+    margin-bottom: 25px;
+  }
+  
+  .form-group {
+    margin-bottom: 20px;
+  }
+  
+  .form-group label {
+    font-size: 14px;
+    margin-bottom: 8px;
+    font-weight: 600;
+    color: #333;
+  }
+  
+  .form-group input {
+    padding: 12px;
+    font-size: 16px; 
+    border-radius: 8px;
+    border: 2px solid #e5e7eb;
+    transition: border-color 0.3s;
+  }
+  
+  .form-group input:focus {
+    outline: none;
+    border-color: #fca311;
+    box-shadow: 0 0 0 3px rgba(252, 163, 17, 0.2);
+  }
+  
+  .btn {
+    padding: 14px;
+    font-size: 18px;
+    border-radius: 10px;
+    margin-top: 10px;
+    box-shadow: 0 4px 15px rgba(252, 163, 17, 0.3);
+  }
+  
+  .btn:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 6px 20px rgba(252, 163, 17, 0.4);
+  }
+  
+  .footer-text {
+    font-size: 16px;
+    margin-top: 20px;
+  }
+}
+
+@media (max-width: 480px) {
+  .signin-section {
+    padding: 15px;
+  }
+  
+  .card {
+    padding: 20px;
+  }
+  
+  .card h1 {
+    font-size: 24px;
+  }
+  
+  .photo-section .welcome-text {
+    font-size: 20px;
+    padding: 15px 20px;
+  }
+  
+  .form-group input {
+    padding: 14px;
+    font-size: 16px;
+  }
+  
+  .btn {
+    padding: 16px;
+    font-size: 16px;
+  }
+}
+
+/* Landscape orientation for mobile */
+@media (max-width: 768px) and (orientation: landscape) {
+  .container {
+    flex-direction: row;
+  }
+  
+  .photo-section {
+    flex: 1;
+    height: 100vh;
+    order: 1;
+  }
+  
+  .signin-section {
+    flex: 1;
+    order: 2;
+    height: 100vh;
+    overflow-y: auto;
+  }
+  
+  .photo-section .welcome-text {
+    font-size: 20px;
+    padding: 15px 25px;
+  }
+}
