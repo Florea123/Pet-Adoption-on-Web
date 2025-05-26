@@ -97,3 +97,59 @@
 .pets-mini-table tr:hover {
     background-color: #f8f9fa;
 }
+
+/* Mobile Responsive Styles */
+@media (max-width: 768px) {
+    .users-table {
+        font-size: 14px;
+    }
+    
+    .users-table th,
+    .users-table td {
+        padding: 8px 4px;
+        font-size: 12px;
+    }
+    
+    /* Hide less important columns on mobile */
+    .users-table th:nth-child(3),
+    .users-table td:nth-child(3) {
+        display: none;
+    }
+    
+    .delete-btn,
+    .view-btn {
+        padding: 6px 10px;
+        font-size: 12px;
+        margin: 2px;
+    }
+    
+    .modal-content {
+        margin: 10px;
+        padding: 15px;
+        max-height: 90vh;
+        overflow-y: auto;
+    }
+    
+    .user-details-grid {
+        display: block;
+    }
+    
+    .user-info h3 {
+        font-size: 16px;
+        margin-bottom: 10px;
+    }
+    
+    .user-info p {
+        font-size: 14px;
+        margin-bottom: 8px;
+    }
+    
+    .pets-mini-table {
+        font-size: 12px;
+    }
+    
+    .pets-mini-table th,
+    .pets-mini-table td {
+        padding: 6px 4px;
+    }
+}

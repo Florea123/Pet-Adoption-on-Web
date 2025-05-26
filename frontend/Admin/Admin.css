@@ -65,3 +65,72 @@
   font-size: 14px;
   text-align: center;
 }
+
+/* Mobile Responsive Styles */
+@media (max-width: 768px) {
+    .admin-container {
+        padding: 15px;
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    
+    .admin-card {
+        padding: 25px;
+        margin: 0;
+        width: 100%;
+        max-width: 400px;
+        box-sizing: border-box;
+    }
+    
+    .admin-title {
+        font-size: 24px;
+        margin-bottom: 25px;
+    }
+    
+    .form-group {
+        margin-bottom: 20px;
+    }
+    
+    .form-group label {
+        font-size: 14px;
+        margin-bottom: 6px;
+    }
+    
+    .form-group input {
+        padding: 12px;
+        font-size: 16px; 
+        border-radius: 6px;
+    }
+    
+    .admin-btn {
+        padding: 12px;
+        font-size: 16px;
+        border-radius: 6px;
+        margin-top: 15px;
+    }
+    
+    .error-message {
+        font-size: 13px;
+        text-align: center;
+        padding: 10px;
+        background-color: #fdf2f2;
+        border: 1px solid #fca5a5;
+        border-radius: 4px;
+    }
+}
+
+@media (max-width: 480px) {
+    .admin-container {
+        padding: 10px;
+    }
+    
+    .admin-card {
+        padding: 20px;
+    }
+    
+    .admin-title {
+        font-size: 22px;
+    }
+}

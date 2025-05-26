@@ -25,7 +25,13 @@ document.addEventListener('DOMContentLoaded', function() {
         
         document.getElementById('adminEmail').textContent = decodedToken.email || 'Admin';
         
-        // Navigation between sections
+        // Update mobile admin email if element exists
+        const mobileAdminEmail = document.getElementById('mobileAdminEmail');
+        if (mobileAdminEmail) {
+            mobileAdminEmail.textContent = decodedToken.email || 'Admin';
+        }
+        
+        // Navigation between sections - Desktop
         const navLinks = document.querySelectorAll('.nav-menu a');
         const sections = document.querySelectorAll('.content-section');
         
@@ -43,15 +49,45 @@ document.addEventListener('DOMContentLoaded', function() {
                 if (targetSection) {
                     targetSection.classList.add('active');
                 }
+                
+                // Update mobile nav active state
+                updateMobileNavActive(this.dataset.section);
+            });
+        });
+        
+        // Mobile Navigation
+        const mobileNavItems = document.querySelectorAll('.mobile-nav-item[data-section]');
+        mobileNavItems.forEach(item => {
+            item.addEventListener('click', function(e) {
+                e.preventDefault();
+                
+                const section = this.dataset.section;
+                
+                mobileNavItems.forEach(i => i.classList.remove('active'));
+                sections.forEach(s => s.classList.remove('active'));
+                
+                // Add active class to current mobile nav item and section
+                this.classList.add('active');
+                const targetSection = document.getElementById(section);
+                if (targetSection) {
+                    targetSection.classList.add('active');
+                }
+                
+                // Update desktop nav active state
+                updateDesktopNavActive(section);
             });
         });
         
         document.getElementById('logoutBtn').addEventListener('click', function() {
-            localStorage.removeItem('adminToken');
-            localStorage.removeItem('adminDashboardData');
-            localStorage.removeItem('adminDashboardLastFetch');
-            window.location.href = 'Admin.html';
+            performLogout();
         });
+        
+        const mobileLogoutBtn = document.getElementById('mobileLogoutBtn');
+        if (mobileLogoutBtn) {
+            mobileLogoutBtn.addEventListener('click', function() {
+                performLogout();
+            });
+        }
         
         
         loadDashboardDataWithCache();
@@ -193,6 +229,36 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 });
+
+// Helper functions for navigation sync
+function updateMobileNavActive(section) {
+    const mobileNavItems = document.querySelectorAll('.mobile-nav-item[data-section]');
+    mobileNavItems.forEach(item => {
+        if (item.dataset.section === section) {
+            item.classList.add('active');
+        } else {
+            item.classList.remove('active');
+        }
+    });
+}
+
+function updateDesktopNavActive(section) {
+    const navLinks = document.querySelectorAll('.nav-menu a');
+    navLinks.forEach(link => {
+        if (link.dataset.section === section) {
+            link.parentElement.classList.add('active');
+        } else {
+            link.parentElement.classList.remove('active');
+        }
+    });
+}
+
+function performLogout() {
+    localStorage.removeItem('adminToken');
+    localStorage.removeItem('adminDashboardData');
+    localStorage.removeItem('adminDashboardLastFetch');
+    window.location.href = 'Admin.html';
+}
 
 // Make functions available for module scripts
 window.updateDashboardUI = updateDashboardUI;
