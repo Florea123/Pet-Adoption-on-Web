@@ -1,5 +1,6 @@
 import userModel from '../models/User.js';
 import { requireAuth } from '../utils/authUtils.js';
+import config from '../config.js';
 
 export default class Sidebar {
   constructor(activePage) {
@@ -261,7 +262,7 @@ export default class Sidebar {
       const token = localStorage.getItem('Token');
       if (!token) return;
       
-      const response = await fetch('http://localhost:3000/messages/unread-count', {
+      const response = await fetch(`${config.API_URL}/messages/unread-count`, {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',

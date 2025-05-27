@@ -2,15 +2,16 @@ import { requireAuth } from '../utils/authUtils.js';
 import Sidebar from '../SideBar/Sidebar.js';
 import { showLoading, hideLoading } from '../utils/loadingUtils.js';
 import { setupLazyLoading, addPreconnect, addDnsPrefetch } from '../utils/performanceUtils.js';
+import config from '../config.js';
 
-const API_URL = 'http://localhost:3000';
+const API_URL = config.API_URL;
 const token = localStorage.getItem('Token');
 
 let user;
 let userAnimals = [];
 
 async function initialize() {
-    addDnsPrefetch('http://localhost:3000');
+    addDnsPrefetch(config.API_URL);
     
     user = requireAuth();
     if (!user) return; 

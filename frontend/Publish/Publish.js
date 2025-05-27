@@ -2,8 +2,9 @@ import userModel from "../models/User.js";
 import { requireAuth } from "../utils/authUtils.js";
 import { showLoading, hideLoading } from "../utils/loadingUtils.js";
 import { createElement, sanitizeInput, getCsrfToken } from "../utils/securityUtils.js";
+import config from '../config.js';
 
-const API_URL = "http://localhost:3000";
+const API_URL = config.API_URL;
 const token = localStorage.getItem("Token");
 let user;
 

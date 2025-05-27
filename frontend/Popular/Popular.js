@@ -8,8 +8,9 @@ import {
   generatePlaceholder 
 } from '../utils/imageOptimizer.js';
 import { addPreconnect } from '../utils/performanceUtils.js';
+import config from '../config.js';
 
-const API_URL = 'http://localhost:3000';
+const API_URL = config.API_URL;
 const token = localStorage.getItem('Token');
 let isMobile = window.innerWidth < 768;
 
@@ -20,7 +21,7 @@ window.addEventListener('resize', () => {
 });
 
 async function initialize() {
-  addPreconnect('http://localhost:3000');
+  addPreconnect(config.API_URL);
   
   // Render sidebar
   document.getElementById('sidebar-container').innerHTML = Sidebar.render('popular');

@@ -1,4 +1,6 @@
-const API_URL = 'http://localhost:3000'; 
+import config from '../config.js';
+
+const API_URL = config.API_URL;
 
 // Generate responsive image sizes based on device and viewport
 export function getResponsiveImageUrl(originalUrl, options = {}) {

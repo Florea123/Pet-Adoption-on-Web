@@ -1,7 +1,8 @@
 import { redirectIfLoggedIn } from '../utils/authUtils.js';
 import { sanitizeInput, validateEmail, getCsrfToken } from '../utils/securityUtils.js';
+import config from '../config.js';
 
-const API_URL = 'http://localhost:3000';
+const API_URL = config.API_URL;
 
 document.addEventListener('DOMContentLoaded', function() {
   // If user is already logged in, redirect to home page

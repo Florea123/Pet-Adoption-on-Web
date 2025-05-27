@@ -1,4 +1,5 @@
 import { showLoading, hideLoading } from '../utils/loadingUtils.js';
+import config from '../config.js';
 
 document.addEventListener('DOMContentLoaded', function() {
     // loading spinner
@@ -123,7 +124,7 @@ async function loadDashboardDataWithCache(forceRefresh = false) {
             throw new Error('No authentication token');
         }
         
-        const response = await fetch('http://localhost:3000/users/all/details', {
+        const response = await fetch(`${config.API_URL}/users/all/details`, {
             method: 'GET',
             headers: {
                 'Content-Type': 'application/json',

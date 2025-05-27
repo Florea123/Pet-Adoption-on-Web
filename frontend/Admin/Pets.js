@@ -1,4 +1,4 @@
-
+import config from '../config.js';
 
 function initPetsView(animals) {
     const petsSection = document.getElementById('pets');
@@ -137,7 +137,7 @@ function showPetDetails(pet) {
         let imageUrl;
         
         if (mediaItem.pipeUrl) {
-            imageUrl = `http://localhost:3000${mediaItem.pipeUrl}`;
+            imageUrl = `${config.API_URL}${mediaItem.pipeUrl}`;
         } else if (mediaItem.URL) {
             imageUrl = mediaItem.URL;
         }
@@ -255,7 +255,7 @@ async function handleDeleteAnimal(event) {
             return;
         }
         
-        const response = await fetch('http://localhost:3000/animals/delete', {
+        const response = await fetch(`${config.API_URL}/animals/delete`, {
             method: 'DELETE',
             headers: { 
                 'Content-Type': 'application/json',

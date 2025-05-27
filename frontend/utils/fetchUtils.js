@@ -1,8 +1,9 @@
 import { getCsrfToken } from './securityUtils.js';
+import config from '../config.js';
 
 export async function fetchCsrfToken() {
   try {
-    const response = await fetch('http://localhost:3000/csrf-token');
+    const response = await fetch(`${config.API_URL}/csrf-token`);
     if (!response.ok) {
       throw new Error('Failed to fetch CSRF token');
     }

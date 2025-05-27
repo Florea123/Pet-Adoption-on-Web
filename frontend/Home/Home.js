@@ -9,8 +9,9 @@ import {
   getResponsiveImageUrl, 
   generatePlaceholder 
 } from '../utils/imageOptimizer.js';
+import config from '../config.js';
 
-const API_URL = 'http://localhost:3000';
+const API_URL = config.API_URL;
 const token = localStorage.getItem('Token');
 let animals = [];
 const uniqueSpecies = [];
@@ -29,7 +30,7 @@ window.addEventListener('resize', () => {
 });
 
 async function initialize() {
-  addPreconnect('http://localhost:3000');
+  addPreconnect(config.API_URL);
   
   user = requireAuth();
   if (!user) return;

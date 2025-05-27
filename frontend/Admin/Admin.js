@@ -1,7 +1,10 @@
+import config from '../config.js';
+
+const API_URL = config.API_URL;
+
 document.addEventListener('DOMContentLoaded', function() {
   const adminLoginForm = document.getElementById('adminLoginForm');
   const errorMessage = document.getElementById('error-message');
-  const API_URL = 'http://localhost:3000';
   
  
   const existingToken = localStorage.getItem('adminToken');

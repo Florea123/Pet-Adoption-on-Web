@@ -1,3 +1,5 @@
+import config from '../config.js';
+
 function initUsersView(users) {
     const usersSection = document.getElementById('users');
     if (usersSection && users) {
@@ -79,7 +81,7 @@ async function handleDeleteUser(userId, users) {
             return;
         }
         
-        const response = await fetch('http://localhost:3000/users/delete', {
+        const response = await fetch(`${config.API_URL}/users/delete`, {
             method: 'DELETE',
             headers: { 
                 'Content-Type': 'application/json',
