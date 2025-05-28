@@ -1,5 +1,3 @@
-
-
 import { getCsrfToken, generateCsrfToken } from './securityUtils.js';
 import { fetchCsrfToken } from './fetchUtils.js';
 
@@ -78,7 +76,8 @@ function applySafelyPreloadedStylesheets() {
 
 
 function ensureSecurityHeaders() {
-
+  // CSP-related code commented out for testing
+  /*
   if (!document.querySelector('meta[http-equiv="Content-Security-Policy"]')) {
     const cspMeta = document.createElement('meta');
     cspMeta.httpEquiv = 'Content-Security-Policy';
@@ -112,6 +111,7 @@ function ensureSecurityHeaders() {
       }
     }
   }
+  */
   
   // Add XSS protection header
   if (!document.querySelector('meta[http-equiv="X-XSS-Protection"]')) {
