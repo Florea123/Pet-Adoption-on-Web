@@ -34,14 +34,13 @@ require('dotenv').config();
 const port = 3000;
 const fs = require('fs');
 const path = require('path');
+const { getConnection } = require('./db');
 
 const OpenAPIRequestValidator = require('openapi-request-validator').default;
 const jsYaml = require('js-yaml');
 
-// Load the OpenAPI specification
 const openApiDocument = jsYaml.load(fs.readFileSync('./openapi.yaml', 'utf8'));
 
-// Create validators for your paths
 const validators = {};
 Object.keys(openApiDocument.paths).forEach(path => {
   const pathObj = openApiDocument.paths[path];
@@ -403,16 +402,100 @@ const server = http.createServer(async (req, res) => {
   }
 });
 
-// Apply middleware to all requests
-async function startServer() {
+async function checkDatabaseConnection() {
+  try {
+    console.log('🔍 Checking database connection...');
+    const connection = await getConnection();
+    
+    const result = await connection.execute('SELECT 1 FROM DUAL');
+    await connection.close();
+    
+    if (result.rows && result.rows.length > 0) {
+      console.log('✅ Database connection successful');
+      return true;
+    } else {
+      console.error('❌ Database connection test failed');
+      return false;
+    }
+  } catch (error) {
+    console.error('❌ Database connection failed:', error.message);
+    console.error('Error details:', error);
+    return false;
+  }
+}
 
-  emailConfigValid = await validateEmailConfig();
-
-  global.emailConfigValid = emailConfigValid;
+async function connectWithRetry(maxRetries = 5, retryDelay = 5000) {
+  for (let i = 0; i < maxRetries; i++) {
+    console.log(`📡 Connection attempt ${i + 1}/${maxRetries}`);
+    
+    const isConnected = await checkDatabaseConnection();
+    if (isConnected) {
+      return true;
+    }
+    
+    if (i < maxRetries - 1) {
+      console.log(`⏳ Retrying in ${retryDelay/1000} seconds...`);
+      await new Promise(resolve => setTimeout(resolve, retryDelay));
+    }
+  }
   
-  server.listen(port, () => {
-    console.log(`Server is running on http://localhost:${port}`);
-  });
+  console.error('❌ Failed to connect to database after all retries');
+  return false;
+}
+
+async function startServer() {
+  try {
+    console.log('🚀 Starting server initialization...');
+    
+    const dbConnected = await connectWithRetry();
+    if (!dbConnected) {
+      console.error('❌ Cannot start server without database connection');
+      console.error('Please check your database configuration in .env file:');
+      console.error('- USER_DATABASE');
+      console.error('- PASSWORD_DATABASE'); 
+      console.error('- SERVICE_NAME');
+      process.exit(1);
+    }
+
+    emailConfigValid = await validateEmailConfig();
+    global.emailConfigValid = emailConfigValid;
+    
+    process.on('SIGINT', async () => {
+      console.log('\n⏹️  Shutting down server gracefully...');
+      try {
+        const connection = await getConnection();
+        await connection.close();
+        console.log('📡 Database connections closed');
+      } catch (error) {
+        console.log('⚠️  Database already disconnected');
+      }
+      process.exit(0);
+    });
+
+    process.on('SIGTERM', async () => {
+      console.log('\n⏹️  Received SIGTERM, shutting down gracefully...');
+      try {
+        const connection = await getConnection();
+        await connection.close();
+        console.log('📡 Database connections closed');
+      } catch (error) {
+        console.log('⚠️  Database already disconnected');
+      }
+      process.exit(0);
+    });
+    
+    server.listen(port, () => {
+      console.log('✅ Server started successfully!');
+      console.log(`🌐 Server running on http://localhost:${port}`);
+      console.log(`📚 API Documentation: http://localhost:${port}/api-docs`);
+      console.log(`📡 Database: Connected`);
+      console.log(`📧 Email: ${emailConfigValid ? 'Configured' : 'Not configured'}`);
+    });
+
+  } catch (error) {
+    console.error('❌ Failed to start server:', error);
+    process.exit(1);
+  }
 }
 
 startServer();

@@ -6,6 +6,7 @@ const dbConfig = {
   password: process.env.PASSWORD_DATABASE, 
   connectString: `localhost:1521/${process.env.SERVICE_NAME}`,
 };
+
 async function getConnection() {
   try {
     return await oracledb.getConnection(dbConfig);
@@ -15,4 +16,23 @@ async function getConnection() {
   }
 }
 
-module.exports = { getConnection };
+async function testConnection() {
+  let connection;
+  try {
+    connection = await getConnection();
+    const result = await connection.execute('SELECT 1 FROM DUAL');
+    return { success: true, result };
+  } catch (error) {
+    return { success: false, error: error.message };
+  } finally {
+    if (connection) {
+      try {
+        await connection.close();
+      } catch (closeErr) {
+        console.error('Error closing test connection:', closeErr);
+      }
+    }
+  }
+}
+
+module.exports = { getConnection, testConnection };
