@@ -2,8 +2,8 @@ module.exports = {
   apps: [
     {
       name: 'pet-adoption-backend',
-      script: './backend/server.js',
-      cwd: '/home/Theo/Pet-Adoption-on-Web',
+      script: 'server.js',
+      cwd: '/home/Theo/Pet-Adoption-on-Web/backend',
       instances: 1,
       autorestart: true,
       watch: false,
