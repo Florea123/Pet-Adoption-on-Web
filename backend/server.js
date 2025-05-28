@@ -147,7 +147,7 @@ function addSecurityHeaders(res) {
   res.setHeader('X-Content-Type-Options', 'nosniff');
   res.setHeader('X-Frame-Options', 'DENY');
   res.setHeader('X-XSS-Protection', '1; mode=block');
-  res.setHeader('Content-Security-Policy', "default-src 'self'; img-src 'self' data: http://localhost:3000 https://maps.gstatic.com https://maps.googleapis.com; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://maps.googleapis.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; connect-src 'self' http://localhost:3000 https://maps.googleapis.com; font-src 'self' https://fonts.gstatic.com");
+  // res.setHeader('Content-Security-Policy', "default-src 'self'; img-src 'self' data: http://localhost:3000 https://maps.gstatic.com https://maps.googleapis.com; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://maps.googleapis.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; connect-src 'self' http://localhost:3000 https://maps.googleapis.com; font-src 'self' https://fonts.gstatic.com");
   res.setHeader('Referrer-Policy', 'same-origin');
 }
 
