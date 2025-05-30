@@ -74,10 +74,12 @@ function initializeEventListeners() {
   }
   
   // Species selection for breed options
+  /*
   const speciesSelect = document.getElementById('species');
   if (speciesSelect) {
     speciesSelect.addEventListener('change', updateBreedOptions);
   }
+    */
   
   // Add event listeners for add/delete buttons
   const addFeedingBtn = document.getElementById('addFeedingScheduleBtn');
@@ -277,6 +279,7 @@ function redirectToHome() {
 }
 
 // Breed selection options
+/*
 function updateBreedOptions() {
   const species = document.getElementById("species").value;
   const breedSelect = document.getElementById("breed");
@@ -308,7 +311,7 @@ function updateBreedOptions() {
     });
   }
 }
-
+*/
 // Add feeding schedule entry
 function addFeedingScheduleEntry() {
   const container = document.getElementById("feeding-schedule-container");
@@ -372,8 +375,12 @@ async function submitPublishForm(event) {
     
     const userID = user.id;
     const name = sanitizeInput(document.getElementById("name").value.trim());
-    const species = sanitizeInput(document.getElementById("species").value);
-    const breed = sanitizeInput(document.getElementById("breed").value);
+    const speciesInput = sanitizeInput(document.getElementById("species").value);
+    const breedInput = sanitizeInput(document.getElementById("breed").value);
+
+    const species = await normalizeTextWithAI(speciesInput, "specie");
+    const breed = await normalizeTextWithAI(breedInput, "rasă");
+
     const age = parseInt(document.getElementById("age").value, 10);
     const gender = document.getElementById("gender").value;
 
@@ -594,5 +601,21 @@ async function uploadFileToServer(file, mediaType) {
       throw new Error("Upload timed out. Please try again with a smaller file or check your connection.");
     }
     throw error;
+  }
+}
+
+async function normalizeTextWithAI(text, type) {
+  try {
+    const response = await fetch(`${API_URL}/ai/normalize`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ text, type })
+    });
+    if (!response.ok) throw new Error("AI normalization failed");
+    const data = await response.json();
+    return data.normalized || text;
+  } catch (e) {
+    console.warn("AI normalization fallback:", e);
+    return text;
   }
 }

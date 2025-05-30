@@ -35,6 +35,7 @@ const port = 3000;
 const fs = require('fs');
 const path = require('path');
 const { getConnection } = require('./db');
+const { normalizeWithAI } = require('./aiNormalize.js');
 
 const OpenAPIRequestValidator = require('openapi-request-validator').default;
 const jsYaml = require('js-yaml');
@@ -387,6 +388,24 @@ const server = http.createServer(async (req, res) => {
     // RSS feed route
     if (req.method === 'GET' && req.url === '/rss') {
       return rssHandler(req, res);
+    }
+
+    // AI normalization route
+    if (req.method === 'POST' && req.url === '/ai/normalize') {
+      let body = '';
+      req.on('data', chunk => { body += chunk; });
+      req.on('end', async () => {
+        try {
+          const { text, type } = JSON.parse(body);
+          const result = await normalizeWithAI(text, type);
+          res.writeHead(200, { 'Content-Type': 'application/json' });
+          res.end(JSON.stringify({ normalized: result }));
+        } catch (err) {
+          res.writeHead(500, { 'Content-Type': 'application/json' });
+          res.end(JSON.stringify({ error: 'AI normalization failed' }));
+        }
+      });
+      return;
     }
 
     // Route not found
