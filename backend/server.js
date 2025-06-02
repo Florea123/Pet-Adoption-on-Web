@@ -397,12 +397,35 @@ const server = http.createServer(async (req, res) => {
       req.on('end', async () => {
         try {
           const { text, type } = JSON.parse(body);
-          const result = await normalizeWithAI(text, type);
-          res.writeHead(200, { 'Content-Type': 'application/json' });
-          res.end(JSON.stringify({ normalized: result }));
-        } catch (err) {
-          res.writeHead(500, { 'Content-Type': 'application/json' });
-          res.end(JSON.stringify({ error: 'AI normalization failed' }));
+          
+          // Validate input
+          if (!text || typeof text !== 'string') {
+            res.writeHead(400, { 'Content-Type': 'application/json' });
+            res.end(JSON.stringify({ error: 'Invalid text parameter' }));
+            return;
+          }
+          
+          console.log(`AI normalization request: "${text}" (type: ${type})`);
+          
+          try {
+            const result = await normalizeWithAI(text, type);
+            console.log(`AI normalization result: "${result}"`);
+            
+            res.writeHead(200, { 'Content-Type': 'application/json' });
+            res.end(JSON.stringify({ normalized: result }));
+          } catch (aiError) {
+            console.error('AI normalization error:', aiError);
+            res.writeHead(500, { 'Content-Type': 'application/json' });
+            res.end(JSON.stringify({ 
+              error: 'AI normalization failed', 
+              details: aiError.message 
+            }));
+          }
+          
+        } catch (parseError) {
+          console.error('JSON parse error:', parseError);
+          res.writeHead(400, { 'Content-Type': 'application/json' });
+          res.end(JSON.stringify({ error: 'Invalid JSON in request body' }));
         }
       });
       return;
