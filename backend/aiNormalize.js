@@ -1,50 +1,43 @@
-const OpenAI = require("openai");
+const { GoogleGenerativeAI } = require("@google/generative-ai");
 
-// Check if API key exists
-if (!process.env.OPENAI_API_KEY) {
-  console.error('❌ OPENAI_API_KEY not found in environment variables');
-  throw new Error('OpenAI API key is required');
+if (!process.env.GEMINI_API_KEY) {
+  console.error('❌ GEMINI_API_KEY not found in environment variables');
+  throw new Error('Gemini API key is required');
 }
 
-console.log('✅ OpenAI API key loaded:', process.env.OPENAI_API_KEY.substring(0, 10) + '...');
+console.log('✅ Gemini API key loaded:', process.env.GEMINI_API_KEY.substring(0, 10) + '...');
 
-const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY,
-});
+const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
 
 async function normalizeWithAI(text, type = "specie") {
   try {
+    const model = genAI.getGenerativeModel({ 
+      model: "gemini-1.5-flash",  
+      generationConfig: {
+        temperature: 0,
+        maxOutputTokens: 10,
+      }
+    });
+
     const prompt = `Normalizează acest ${type} de animal la forma de bază, nearticulată, un singur cuvânt, fără explicații. Prima literă să fie mare și cu diacritice corecte: ${text}`;
     
-    const response = await openai.chat.completions.create({
-      model: "gpt-3.5-turbo",  // Updated model
-      messages: [
-        {
-          role: "user",
-          content: prompt
-        }
-      ],
-      max_tokens: 10,
-      temperature: 0,
-      n: 1
-    });
+    const result = await model.generateContent(prompt);
+    const response = await result.response;
+    const normalizedText = response.text().trim();
     
-    return response.choices[0].message.content.trim();
+    return normalizedText;
   } catch (error) {
-    console.error('OpenAI API Error:', error);
+    console.error('Gemini API Error:', error);
     
-    // Check for specific error types
-    if (error.code === 'invalid_api_key') {
-      throw new Error('Invalid OpenAI API key');
-    } else if (error.code === 'insufficient_quota') {
-      throw new Error('OpenAI quota exceeded');
-    } else if (error.code === 'rate_limit_exceeded') {
-      throw new Error('OpenAI rate limit exceeded');
+    if (error.message && error.message.includes('API_KEY_INVALID')) {
+      throw new Error('Invalid Gemini API key');
+    } else if (error.message && error.message.includes('QUOTA_EXCEEDED')) {
+      throw new Error('Gemini quota exceeded');
+    } else if (error.message && error.message.includes('RATE_LIMIT_EXCEEDED')) {
+      throw new Error('Gemini rate limit exceeded');
     }
     
-    // Fallback: return original text if AI fails
-    console.warn('AI normalization failed, returning original text:', text);
-    return text;
+    throw error;
   }
 }
 

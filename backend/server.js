@@ -398,7 +398,6 @@ const server = http.createServer(async (req, res) => {
         try {
           const { text, type } = JSON.parse(body);
           
-          // Validate input
           if (!text || typeof text !== 'string') {
             res.writeHead(400, { 'Content-Type': 'application/json' });
             res.end(JSON.stringify({ error: 'Invalid text parameter' }));
