@@ -48,29 +48,50 @@ Platforma de Adopție a Animalelor de Companie este o aplicație web care permit
 ### :camera: Capturi de Ecran
 
 <div align="center"> 
-  <img src="documentation/Photos/Pagina_De_Start.png" alt="screenshot" width="600px" />
-  <p>Pagina de start a aplicației</p>
+  <img src="documentation/Photos/SignIn.png" alt="screenshot" width="600px" />
+  <p>Autentificare utilizator</p>
 
-  <img src="documentation/Photos/Pagina_De_Inregistrare.png" alt="screenshot" width="600px" />
-  <p>Pagina de înregistrare utilizatori</p>
+  <img src="documentation/Photos/SignUp.png" alt="screenshot" width="600px" />
+  <p>Înregistrare cont nou</p>
 
-  <img src="documentation/Photos/Profil_Animal_Disponibil.png" alt="screenshot" width="600px" />
-  <p>Profil animal disponibil pentru adopție</p>
+  <img src="documentation/Photos/Home.png" alt="screenshot" width="600px" />
+  <p>Pagina principală cu animale disponibile pentru adopție</p>
   
-  <img src="documentation/Photos/Pagina_De_Publish.png" alt="screenshot" width="600px" />
-  <p>Formular pentru publicarea animalelor</p>
+  <img src="documentation/Photos/Publish.png" alt="screenshot" width="600px" />
+  <p>Formular pentru publicarea unui animal spre adopție</p>
   
-  <img src="documentation/Photos/Pagina_De_Mesaje.png" alt="screenshot" width="600px" />
-  <p>Sistem de mesagerie între utilizatori</p>
+  <img src="documentation/Photos/Messages.png" alt="screenshot" width="600px" />
+  <p>Mesagerie între utilizatori pentru detalii despre adopție</p>
   
-  <img src="documentation/Photos/Cele_Mai_Populare_Animale.png" alt="screenshot" width="600px" />
-  <p>Afișare animale populare</p>
+  <img src="documentation/Photos/Popular.png" alt="screenshot" width="600px" />
+  <p>Secțiune cu cele mai populare animale</p>
   
-  <img src="documentation/Photos/Newsletter.png" alt="screenshot" width="600px" />
-  <p>Sistem de newsletter și notificări</p>
-  
-  <img src="documentation/Photos/Vizualizarea_Animalelor_Tale.png" alt="screenshot" width="600px" />
+  <img src="documentation/Photos/MyAnimals.png" alt="screenshot" width="600px" />
   <p>Gestionarea animalelor publicate de utilizator</p>
+
+  <img src="documentation/Photos/RSS.png" alt="screenshot" width="600px" />
+  <p>Flux RSS cu ultimele anunțuri</p>
+
+  <img src="documentation/Photos/ViewAnimals.png" alt="screenshot" width="600px" />
+  <p>Vizualizarea detaliată a unui animal</p>
+
+  <img src="documentation/Photos/AdminLogin.png" alt="screenshot" width="600px" />
+  <p>Autentificare administrator</p>
+
+  <img src="documentation/Photos/Overview.png" alt="screenshot" width="600px" />
+  <p>Panou de administrare: statistici utilizatori și animale</p>
+
+  <img src="documentation/Photos/ListaUseri.png" alt="screenshot" width="600px" />
+  <p>Listă utilizatori existenți</p>
+
+  <img src="documentation/Photos/ListaAnimale.png" alt="screenshot" width="600px" />
+  <p>Listă animale existente</p>
+
+  <img src="documentation/Photos/ReviewUseri.png" alt="screenshot" width="600px" />
+  <p>Vizualizare detalii utilizator</p>
+
+  <img src="documentation/Photos/ReviewAnimale.png" alt="screenshot" width="600px" />
+  <p>Vizualizare detalii animal</p>
 </div>
 
 ### :movie_camera: Demo Video
@@ -146,6 +167,7 @@ SERVICE_NAME=
 JWT_SECRET=
 EMAIL_ADDRESS=
 EMAIL_PASSWORD=
+GEMINI_API_KEY=
 ```
 
 ---
@@ -176,6 +198,7 @@ Instalați dependențele backend:
 ```bash
 cd backend
 npm install
+npm install @google/generative-ai
 ```
 
 ---
