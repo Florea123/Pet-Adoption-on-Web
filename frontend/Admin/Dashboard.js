@@ -9,13 +9,26 @@ document.addEventListener('DOMContentLoaded', function() {
     document.head.appendChild(linkElement);
     
     const token = localStorage.getItem('adminToken');
+    console.log('Dashboard loading - Token exists:', !!token);
+    
     if (!token) {
+        console.log('No admin token found, redirecting to login');
         window.location.href = 'Admin.html';
         return;
     }
     
+    if (typeof jwt_decode === 'undefined') {
+        console.error('jwt_decode library not loaded, waiting and retrying...');
+        setTimeout(() => {
+            window.location.reload();
+        }, 100);
+        return;
+    }
+    
     try {
+        console.log('Attempting to decode token...');
         const decodedToken = jwt_decode(token);
+        console.log('Decoded token:', decodedToken);
         
         if (!decodedToken.isAdmin) {
             console.error('Token does not contain admin privileges');
@@ -24,9 +37,10 @@ document.addEventListener('DOMContentLoaded', function() {
             return;
         }
         
+        console.log('Admin token validated successfully');
+        
         document.getElementById('adminEmail').textContent = decodedToken.email || 'Admin';
         
-        // Update mobile admin email if element exists
         const mobileAdminEmail = document.getElementById('mobileAdminEmail');
         if (mobileAdminEmail) {
             mobileAdminEmail.textContent = decodedToken.email || 'Admin';
@@ -44,14 +58,12 @@ document.addEventListener('DOMContentLoaded', function() {
                 navLinks.forEach(l => l.parentElement.classList.remove('active'));
                 sections.forEach(s => s.classList.remove('active'));
                 
-                // Add active class to current link and section
                 this.parentElement.classList.add('active');
                 const targetSection = document.getElementById(this.dataset.section);
                 if (targetSection) {
                     targetSection.classList.add('active');
                 }
                 
-                // Update mobile nav active state
                 updateMobileNavActive(this.dataset.section);
             });
         });
@@ -74,7 +86,6 @@ document.addEventListener('DOMContentLoaded', function() {
                     targetSection.classList.add('active');
                 }
                 
-                // Update desktop nav active state
                 updateDesktopNavActive(section);
             });
         });

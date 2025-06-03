@@ -5,6 +5,7 @@ function initPetsView(animals) {
     if (petsSection && animals) {
         populatePetsTable(animals, petsSection);
         setupPetsSearchAndFilter(animals);
+        setupDownloadButton(animals);
     }
 }
 
@@ -112,6 +113,8 @@ function setupPetsSearchAndFilter(animals) {
         
         const petsSection = document.getElementById('pets');
         populatePetsTable(filteredAnimals, petsSection);
+        
+        updateDownloadButton(filteredAnimals);
     }
     
     searchInput.addEventListener('input', filterPets);
@@ -317,6 +320,82 @@ function formatDate(dateString) {
         month: 'short',
         day: 'numeric'
     });
+}
+
+function downloadAnimalsAsJSON(animals) {
+    try {
+
+        const animalsForExport = animals.map(animal => ({
+            ANIMALID: animal.ANIMALID,
+            NAME: animal.NAME,
+            SPECIES: animal.SPECIES,
+            BREED: animal.BREED,
+            AGE: animal.AGE,
+            GENDER: animal.GENDER,
+            owner: animal.owner ? {
+                name: animal.owner.name,
+                email: animal.owner.email,
+                id: animal.owner.id
+            } : null,
+            feedingSchedule: animal.feedingSchedule || [],
+            medicalHistory: animal.medicalHistory || [],
+            multimedia: animal.multimedia ? animal.multimedia.map(media => ({
+                URL: media.URL,
+                pipeUrl: media.pipeUrl,
+                type: media.type
+            })) : []
+        }));
+
+        const jsonString = JSON.stringify(animalsForExport, null, 2);
+        
+        const blob = new Blob([jsonString], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = `pet_adoption_animals_${new Date().toISOString().split('T')[0]}.json`;
+        
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        
+        URL.revokeObjectURL(url);
+        
+    } catch (error) {
+        console.error('Error downloading animals JSON:', error);
+        alert('Failed to download animals data. Please try again.');
+    }
+}
+
+function setupDownloadButton(animals) {
+    const downloadButton = document.getElementById('downloadAnimalsJSON');
+    if (downloadButton) {
+        // Store initial animals data on the button
+        downloadButton.dataset.animals = JSON.stringify(animals);
+        downloadButton.dataset.originalAnimals = JSON.stringify(animals);
+        downloadButton.addEventListener('click', () => {
+            const currentAnimals = JSON.parse(downloadButton.dataset.animals);
+            downloadAnimalsAsJSON(currentAnimals);
+        });
+    }
+}
+
+function updateDownloadButton(filteredAnimals) {
+    const downloadButton = document.getElementById('downloadAnimalsJSON');
+    if (downloadButton) {
+        // Update the stored animals data
+        downloadButton.dataset.animals = JSON.stringify(filteredAnimals);
+        
+        // Update button text to show if filtering is active
+        const isFiltered = filteredAnimals.length < JSON.parse(downloadButton.dataset.originalAnimals || '[]').length;
+        if (isFiltered) {
+            downloadButton.innerHTML = `📄 Download JSON (${filteredAnimals.length} filtered)`;
+            downloadButton.title = `Download ${filteredAnimals.length} filtered animals as JSON`;
+        } else {
+            downloadButton.innerHTML = '📄 Download JSON';
+            downloadButton.title = 'Download all animals as JSON';
+        }
+    }
 }
 
 window.petsModule = {

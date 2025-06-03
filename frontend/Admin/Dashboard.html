@@ -94,7 +94,7 @@
     </script>
     
     <link rel="preload" href="https://cdn.jsdelivr.net/npm/jwt-decode@3.1.2/build/jwt-decode.min.js" as="script">
-    <script src="https://cdn.jsdelivr.net/npm/jwt-decode@3.1.2/build/jwt-decode.min.js" defer></script>
+    <script src="https://cdn.jsdelivr.net/npm/jwt-decode@3.1.2/build/jwt-decode.min.js"></script>
   <link rel="stylesheet" href="../utils/mobileStyles.css">
 </head>
 <body>
@@ -202,6 +202,11 @@
                             <select id="petSpeciesFilter" class="filter-select">
                                 <option value="">All Species</option>
                             </select>
+                        </div>
+                        <div class="action-buttons">
+                            <button id="downloadAnimalsJSON" class="download-json-btn" title="Download all animals as JSON">
+                                📄 Download JSON
+                            </button>
                         </div>
                     </div>
                     <div class="table-container">
