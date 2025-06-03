@@ -264,8 +264,14 @@ export function showAnimalDetailsPopup(details) {
       // Determine media type based on URL or mime type
       let mediaType = detectMediaType(mediaItem);
       
-     
+      const slideshowContainer = mediaDisplay.closest('.slideshow-container');
+      
       if (mediaType === 'video') {
+        // Clear background for videos
+        if (slideshowContainer) {
+          slideshowContainer.style.setProperty('--bg-image', 'none');
+        }
+        
         const videoElement = document.createElement('video');
         videoElement.className = 'popup-animal-video';
         videoElement.src = mediaSource;
@@ -274,6 +280,10 @@ export function showAnimalDetailsPopup(details) {
         videoElement.preload = 'metadata';
         mediaDisplay.appendChild(videoElement);
       } else if (mediaType === 'audio') {
+        // Clear background for audio
+        if (slideshowContainer) {
+          slideshowContainer.style.setProperty('--bg-image', 'none');
+        }
         
         const audioContainer = document.createElement('div');
         audioContainer.className = 'audio-container';
@@ -296,7 +306,11 @@ export function showAnimalDetailsPopup(details) {
         if (prevButton) prevButton.style.zIndex = '20';
         if (nextButton) nextButton.style.zIndex = '20';
       } else {
-        // Default to image display
+        // Default to image display - set background image for blurred effect
+        if (slideshowContainer) {
+          slideshowContainer.style.setProperty('--bg-image', `url("${mediaSource}")`);
+        }
+        
         const imgElement = document.createElement('img');
         imgElement.className = 'popup-animal-image';
         imgElement.src = mediaSource;

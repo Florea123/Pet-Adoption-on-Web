@@ -135,9 +135,10 @@ function showPetDetails(pet) {
     
     // Media display
     let mediaDisplay = '<div class="no-image">No images available</div>';
+    let imageUrl = null;
+    
     if (pet.multimedia && pet.multimedia.length > 0) {
         const mediaItem = pet.multimedia[0];
-        let imageUrl;
         
         if (mediaItem.pipeUrl) {
             imageUrl = `${config.API_URL}${mediaItem.pipeUrl}`;
@@ -223,7 +224,13 @@ function showPetDetails(pet) {
     modalBackdrop.innerHTML = modalContent;
     document.body.appendChild(modalBackdrop);
     
-  
+    if (imageUrl) {
+        const petImageContainer = modalBackdrop.querySelector('.pet-image-container');
+        if (petImageContainer) {
+            petImageContainer.style.setProperty('--bg-image', `url("${imageUrl}")`);
+        }
+    }
+    
     const closeButton = modalBackdrop.querySelector('.close-modal');
     closeButton.addEventListener('click', () => modalBackdrop.remove());
     
