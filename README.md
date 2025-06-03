@@ -96,7 +96,7 @@ Platforma de Adopție a Animalelor de Companie este o aplicație web care permit
 
 ### :movie_camera: Demo Video
 <div align="center">
-  <a href="https://youtu.be/c3CDLODhjsk" target="_blank">
+  <a href="https://drive.google.com/file/d/1PwcPwuwRa76AviiGLUvXayimUbXXTlK9/view?usp=sharing" target="_blank">
     <br/>
     <strong>Urmărește demo-ul aplicației pe YouTube</strong>
   </a>
