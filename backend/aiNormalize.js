@@ -19,7 +19,7 @@ async function normalizeWithAI(text, type = "specie") {
       }
     });
 
-    const prompt = `Normalizează acest ${type} de animal la forma de bază, nearticulată, un singur cuvânt, fără explicații. Prima literă să fie mare și cu diacritice corecte: ${text}`;
+    const prompt = `Normalizează acest ${type} de cuvant la forma de bază, nearticulată, un singur cuvânt, fără explicații. Prima literă să fie mare și cu diacritice corecte: ${text}`;
     
     const result = await model.generateContent(prompt);
     const response = await result.response;
