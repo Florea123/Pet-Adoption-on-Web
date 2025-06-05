@@ -13,6 +13,9 @@ class User {
         { autoCommit: true }
       );
       return result;
+    } catch (error) {
+      console.error('Error in create method:', error);
+      throw new Error('A apărut o eroare la crearea utilizatorului. Vă rugăm să încercați din nou.');
     } finally {
       await connection.close();
     }
@@ -26,7 +29,10 @@ class User {
         { userID },
         { outFormat: oracledb.OUT_FORMAT_OBJECT } 
       );
-      return result.rows[0]; 
+      return result.rows[0];
+    } catch (error) {
+      console.error('Error in findById method:', error);
+      throw new Error('A apărut o eroare la căutarea utilizatorului. Vă rugăm să încercați din nou.');
     } finally {
       await connection.close();
     }
@@ -40,7 +46,10 @@ class User {
         { email, password },
         { outFormat: oracledb.OUT_FORMAT_OBJECT }
       );
-      return result.rows[0]; 
+      return result.rows[0];
+    } catch (error) {
+      console.error('Error in findByEmailAndPassword method:', error);
+      throw new Error('A apărut o eroare la autentificare. Vă rugăm să verificați datele introduse și să încercați din nou.');
     } finally {
       await connection.close();
     }
@@ -55,6 +64,9 @@ class User {
         { outFormat: oracledb.OUT_FORMAT_OBJECT }
       );
       return result.rows[0];
+    } catch (error) {
+      console.error('Error in findByEmail method:', error);
+      throw new Error('A apărut o eroare la căutarea utilizatorului. Vă rugăm să încercați din nou.');
     } finally {
       await connection.close();
     }
@@ -102,8 +114,10 @@ class User {
           };
         }
       });
-      
       return Object.values(users);
+    } catch (error) {
+      console.error('Error in getAllUsersWithDetails method:', error);
+      throw new Error('A apărut o eroare la obținerea detaliilor utilizatorilor. Vă rugăm să încercați din nou.');
     } finally {
       await connection.close();
     }
@@ -139,8 +153,7 @@ class User {
       } catch (err) {
         console.error('Error deleting address:', err);
       }
-      
-      // delete messages data
+
       try {
         await connection.execute(
           `DELETE FROM Messages WHERE senderId = :userID OR receiverId = :userID`,
@@ -151,8 +164,7 @@ class User {
       } catch (err) {
         console.error('Error deleting messages:', err);
       }
-      
-      // delete the user
+
       const userResult = await connection.execute(
         `DELETE FROM Users WHERE userID = :userID`,
         { userID },
@@ -161,8 +173,8 @@ class User {
       
       return userResult.rowsAffected > 0;
     } catch (error) {
-      console.error('Error in deleteUserWithRelatedData:', error);
-      throw error;
+      console.error('Error in deleteUserWithRelatedData method:', error);
+      throw new Error('A apărut o eroare la ștergerea utilizatorului. Vă rugăm să încercați din nou.');
     } finally {
       if (connection) {
         try {

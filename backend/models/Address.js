@@ -12,6 +12,9 @@ class Address {
         { autoCommit: true }
       );
       return result;
+    } catch (error) {
+      console.error('Error in create method:', error);
+      throw new Error('A apărut o eroare la crearea adresei. Vă rugăm să încercați din nou.');
     } finally {
       await connection.close(); 
     }
@@ -26,6 +29,9 @@ class Address {
         { outFormat: oracledb.OUT_FORMAT_OBJECT } 
       );
       return result.rows;
+    } catch (error) {
+      console.error('Error in findByUserId method:', error);
+      throw new Error('A apărut o eroare la căutarea adresei. Vă rugăm să încercați din nou.');
     } finally {
       await connection.close();
     }

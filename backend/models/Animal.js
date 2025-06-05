@@ -23,6 +23,9 @@ class Animal {
       
       
       return result.outBinds.animalID[0];
+    } catch (error) {
+      console.error('Error in create method:', error);
+      throw new Error('A apărut o eroare la crearea animalului. Vă rugăm să încercați din nou.');
     } finally {
       await connection.close();
     }
@@ -37,6 +40,9 @@ class Animal {
         { outFormat: oracledb.OUT_FORMAT_OBJECT }
       );
       return result.rows;
+    } catch (error) {
+      console.error('Error in getAll method:', error);
+      throw new Error('A apărut o eroare la obținerea listei de animale. Vă rugăm să încercați din nou.');
     } finally {
       await connection.close();
     }
@@ -51,6 +57,9 @@ class Animal {
         { outFormat: oracledb.OUT_FORMAT_OBJECT }
       );
       return result.rows[0];
+    } catch (error) {
+      console.error('Error in findById method:', error);
+      throw new Error('A apărut o eroare la căutarea animalului. Vă rugăm să încercați din nou.');
     } finally {
       await connection.close();
     }
@@ -65,6 +74,9 @@ class Animal {
         { outFormat: oracledb.OUT_FORMAT_OBJECT }
       );
       return result.rows;
+    } catch (error) {
+      console.error('Error in findByUserId method:', error);
+      throw new Error('A apărut o eroare la căutarea animalelor utilizatorului. Vă rugăm să încercați din nou.');
     } finally {
       await connection.close();
     }
@@ -79,6 +91,9 @@ class Animal {
         { outFormat: oracledb.OUT_FORMAT_OBJECT }
       );
       return result.rows;
+    } catch (error) {
+      console.error('Error in findBySpecies method:', error);
+      throw new Error('A apărut o eroare la căutarea animalelor după specie. Vă rugăm să încercați din nou.');
     } finally {
       await connection.close();
     }
@@ -157,6 +172,9 @@ class Animal {
         { animalID },
         { autoCommit: true }
       );
+    } catch (error) {
+      console.error('Error in incrementViews method:', error);
+      throw new Error('A apărut o eroare la incrementarea vizualizărilor. Vă rugăm să încercați din nou.');
     } finally {
       await connection.close();
     }
@@ -200,6 +218,9 @@ class Animal {
       );
       
       return animalsWithMedia;
+    } catch (error) {
+      console.error('Error in getTopAnimalsByCity method:', error);
+      throw new Error('A apărut o eroare la obținerea animalelor populare din oraș. Vă rugăm să încercați din nou.');
     } finally {
       await connection.close();
     }
@@ -241,6 +262,9 @@ class Animal {
       }));
       
       return detailedAnimals;
+    } catch (error) {
+      console.error('Error in getAnimalDetailsForUser method:', error);
+      throw new Error('A apărut o eroare la obținerea detaliilor animalelor utilizatorului. Vă rugăm să încercați din nou.');
     } finally {
       await connection.close();
     }
@@ -290,8 +314,8 @@ class Animal {
       );
       return result.rows;
     } catch (error) {
-      console.error('Error getting popular breeds:', error);
-      return [];
+      console.error('Error in getPopularBreedsBySpecies method:', error);
+      throw new Error('A apărut o eroare la obținerea raselor populare. Vă rugăm să încercați din nou.');
     } finally {
       await connection.close();
     }

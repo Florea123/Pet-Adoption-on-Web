@@ -20,6 +20,9 @@ class Admin {
         return result.rows[0]; 
       }
       return null;
+    } catch (error) {
+      console.error('Database error:', error);
+      throw new Error('A apărut o eroare în baza de date. Vă rugăm să verificați datele introduse și să încercați din nou.');
     } finally {
       await connection.close();
     }
@@ -43,6 +46,9 @@ class Admin {
         return result.rows[0]; // Returnăm obiectul complet
       }
       return null;
+    } catch (error) {
+      console.error('Database error:', error);
+      throw new Error('A apărut o eroare în baza de date. Vă rugăm să încercați din nou.');
     } finally {
       await connection.close();
     }

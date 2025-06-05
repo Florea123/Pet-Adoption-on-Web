@@ -26,7 +26,6 @@ BEGIN
         v_idx PLS_INTEGER;
         v_start_idx PLS_INTEGER := 1;
     BEGIN
-        -- Split the comma-separated values into arrays
         LOOP
             v_idx := INSTR(v_first_names, ',', v_start_idx);
             EXIT WHEN v_idx = 0;
